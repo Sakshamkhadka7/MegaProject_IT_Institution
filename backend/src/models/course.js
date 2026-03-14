@@ -16,7 +16,7 @@ const courseSchema = mongoose.Schema({
     },
   ],
   duration: {
-    type: Text,
+    type: String,
     required: true,
   },
   fee: {

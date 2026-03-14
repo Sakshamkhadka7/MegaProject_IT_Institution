@@ -131,7 +131,7 @@ export const logout = asyncHandler(async (req, res) => {
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, "User logout successfully", {}));
-});
+}); 
 
 export const getUserById = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -195,7 +195,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
       )
     );
   }
-
+ 
   if (role == "Admin") {
     const user = await Student.find().select("-password");
     if (!user) {
@@ -241,7 +241,10 @@ export const updateUser = asyncHandler(async (req, res) => {
   if(!userUpdate){
     throw new ApiError(401,"Failed to update User");
   }
-
-
-
 });
+
+
+
+
+
+
