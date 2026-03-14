@@ -7,6 +7,7 @@ const app = express();
 dotenv.config();
 
 const PORT = process.env.PORT;
+app.use(express.json());
 
 connectDb()
   .then(() => {
@@ -18,6 +19,4 @@ connectDb()
     console.log("Mongo db connection error", err);
   });
 
-app.use("/api/v1/student",studentRoute);  
-
-
+app.use("/api/v1/student", studentRoute);

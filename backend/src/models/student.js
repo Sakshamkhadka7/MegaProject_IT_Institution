@@ -39,6 +39,28 @@ const studentSchema = new mongoose.Schema(
       },
     ],
 
+    progress: [
+      {
+        course: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Course",
+        },
+        percentage: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
+    certificate: [
+      {
+        course: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Course",
+        },
+        certificateUrl: String,
+      },
+    ],
+
     isActive: {
       type: Boolean,
       default: true,
@@ -52,21 +74,19 @@ const studentSchema = new mongoose.Schema(
   },
 );
 
-studentSchema.pre("save", async function (next) {
+studentSchema.pre("save", async function () {
   if (!this.isModified("password")) {
-    next();
+    return;
   }
-
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 studentSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-studentSchema.methods.generateAccessToken = () => {
-  jwt.sign(
+studentSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
     {
       _id: this._id,
     },
@@ -77,8 +97,8 @@ studentSchema.methods.generateAccessToken = () => {
   );
 };
 
-studentSchema.methods.generateRefreshToken = () => {
-  jwt.sign(
+studentSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
     {
       _id: this._id,
     },
