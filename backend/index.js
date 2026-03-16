@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import connectDb from "./src/config/db.js";
 import studentRoute from "./src/routes/studentRoute.js";
 import cookieParser from "cookie-parser";
+import courseRoute from "./src/routes/courseRoute.js";
 
 const app = express();
 dotenv.config();
@@ -22,3 +23,4 @@ connectDb()
   });
 
 app.use("/api/v1/student", studentRoute);
+app.use("/api/v1/course",courseRoute);
