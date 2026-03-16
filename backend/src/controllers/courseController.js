@@ -1,4 +1,5 @@
 import Course from "../models/course.js";
+import Student from "../models/student.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -99,3 +100,36 @@ export const updateCourse = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, "Course updated successfully", updateCourse));
 });
+
+export const deleteCourse = asyncHandler(async (req, res) => {
+  const role = req.user?.role;
+  if (role !== "Instructor") {
+    throw new ApiError(401, "Unauthorized to access");
+  }
+  const id = req.params.id;
+  if (!id) {
+    throw new ApiError(401, "Id couldnot found");
+  }
+
+  const deleteCourseId = await Course.findByIdAndDelete({ _id: id });
+
+  return res.status.json(
+    new ApiResponse(200, "Course is deleted successfully", deleteCourse),
+  );
+});
+
+// export const studentProgress = asyncHandler(async (req, res) => {
+//   const role = req.user?.role;
+//   if (role !== "Instructor") {
+//     throw new ApiError(401, "Unauthorized to access");
+//   }
+ 
+//   const instructorId=req.user?._id;
+
+//   const courseCreated=await Course.find({instructor:instructorId});
+
+
+  
+
+
+// });
