@@ -4,16 +4,15 @@ import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
-
   const instructor = req.user.role;
-  const instructorId=req.user._id;
+  const instructorId = req.user._id;
   console.log(req.user);
 
-  if(instructor !== "Instructor"){
-    throw new ApiError(401,"Unauthorized to access");
+  if (instructor !== "Instructor") {
+    throw new ApiError(401, "Unauthorized to access");
   }
 
-    const {
+  const {
     title,
     descriptions,
     syllabus,
@@ -33,7 +32,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     !enrollmentDeadline ||
     !instructor
   ) {
-     throw new ApiError(401,"All fields are mandatory")
+    throw new ApiError(401, "All fields are mandatory");
   }
 
   const course = await Course.create({
@@ -51,4 +50,52 @@ export const createCourse = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, "Course created succesfullt", course));
+});
+
+export const updateCourse = asyncHandler(async (req, res) => {
+  const role = req.user?.role;
+  if (role !== "Instructor") {
+    throw new ApiError(401, "Unauthorized to access");
+  }
+  const id = req.params.id;
+  const {
+    title,
+    descriptions,
+    syllabus,
+    duration,
+    fee,
+    level,
+    enrollmentDeadline,
+    prerequisities,
+  } = req.body;
+
+  if (!id) {
+    throw new ApiError(401, "Id couldnot found");
+  }
+
+  const courseExist = await Course.find({ _id: id });
+  if (!courseExist) {
+    throw new ApiError(401, "Course doesnot exists");
+  }
+
+  const updateCourse = await Course.findByIdAndUpdate(
+    id,
+    {
+      title,
+      descriptions,
+      syllabus,
+      duration,
+      fee,
+      level,
+      enrollmentDeadline,
+      prerequisities,
+    },
+    {
+      new: true,
+    },
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Course updated successfully", updateCourse));
 });
