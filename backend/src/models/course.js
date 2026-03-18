@@ -37,6 +37,10 @@ const courseSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  courseImage: {
+    type: String,
+    required: true,
+  },
   prerequisities: {
     type: String,
     default: "Everyone can learn all courses",

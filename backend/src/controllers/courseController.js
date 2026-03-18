@@ -7,6 +7,12 @@ import asyncHandler from "../utils/asyncHandler.js";
 export const createCourse = asyncHandler(async (req, res) => {
   const instructor = req.user.role;
   const instructorId = req.user._id;
+   if (!req.file) {
+    throw new ApiError(400, "Course image is required");
+  }
+  const courseImage = req.file.filename;
+  console.log(courseImage);
+
   console.log(req.user);
 
   if (instructor !== "Instructor") {
@@ -31,6 +37,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     !duration ||
     !fee ||
     !enrollmentDeadline ||
+    !courseImage ||
     !instructor
   ) {
     throw new ApiError(401, "All fields are mandatory");
@@ -45,6 +52,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     instructor: instructorId,
     level,
     enrollmentDeadline,
+    courseImage: courseImage,
     prerequisities,
   });
 
@@ -59,6 +67,8 @@ export const updateCourse = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Unauthorized to access");
   }
   const id = req.params.id;
+  const courseImage = req.file.filename;
+
   const {
     title,
     descriptions,
@@ -67,6 +77,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
     fee,
     level,
     enrollmentDeadline,
+
     prerequisities,
   } = req.body;
 
@@ -89,6 +100,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
       fee,
       level,
       enrollmentDeadline,
+      courseImage: courseImage,
       prerequisities,
     },
     {
@@ -123,13 +135,9 @@ export const deleteCourse = asyncHandler(async (req, res) => {
 //   if (role !== "Instructor") {
 //     throw new ApiError(401, "Unauthorized to access");
 //   }
- 
+
 //   const instructorId=req.user?._id;
 
 //   const courseCreated=await Course.find({instructor:instructorId});
-
-
-  
-
 
 // });

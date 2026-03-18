@@ -159,6 +159,7 @@ export const getMe = asyncHandler(async (req, res) => {
 
 export const getAllUsers = asyncHandler(async (req, res) => {
   const role = req.user.role;
+  const instructorId=role._id ;
 
   if (!["Instructor", "Admin"].includes(role)) {
     throw new ApiError(
@@ -168,7 +169,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   }
 
   if (role === "Instructor") {
-    const courses = await Course.find({ instructor: role._id });
+    const courses = await Course.find({ instructor:instructorId });
 
     if (!courses.length) {
       throw new ApiError(
