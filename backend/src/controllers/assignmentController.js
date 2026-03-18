@@ -124,8 +124,29 @@ export const deleteAssignment = asyncHandler(async (req, res) => {
   if (!assignment) {
     throw new ApiError(401, "No assigmnet found");
   }
-
   return res.status.json(
     new ApiResponse(200, "Assignment deleted successfully"),
   );
 });
+
+export const SubmittedAssignmentForInstructor = asyncHandler(
+  async (req, res) => {
+    const instructorId = req.user._id;
+    if (!instructorId) {
+      throw new ApiError(401, "Id coulnot found");
+    }
+
+    const courses = await Course.find({ instructor: instructorId });
+    if (courses.length == 0) {
+      throw new ApiError(401, "No courses is found for this instructor");
+    }
+
+    const courseId = await courses.map((course) => course._id);
+
+    const submission = await AssignmentSubmission.find({
+      course: { $in: courseId },
+    });
+
+    return res.status(200).json(new ApiResponse(200,"Assigment For Instructor is fetched",submission))''
+  },
+);
