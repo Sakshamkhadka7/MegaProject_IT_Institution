@@ -113,3 +113,19 @@ export const getSubmittedAssignments = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, "Submitted assignment fetched", assignment));
 });
+
+export const deleteAssignment = asyncHandler(async (req, res) => {
+  const assignmentId = req.params.id;
+  if (!assignmentId) {
+    throw new ApiError(401, "Id ouldnot found");
+  }
+
+  const assignment = await Assignment.findByIdAndDelete(assignmentId);
+  if (!assignment) {
+    throw new ApiError(401, "No assigmnet found");
+  }
+
+  return res.status.json(
+    new ApiResponse(200, "Assignment deleted successfully"),
+  );
+});
