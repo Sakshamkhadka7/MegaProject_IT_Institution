@@ -147,6 +147,36 @@ export const SubmittedAssignmentForInstructor = asyncHandler(
       course: { $in: courseId },
     });
 
-    return res.status(200).json(new ApiResponse(200,"Assigment For Instructor is fetched",submission))''
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Assigment For Instructor is fetched", submission),
+      );
   },
 );
+
+export const instructorFeedBack = asyncHandler(async (req, res) => {
+  const submissionId = req.params.id;
+  const { feedback, score } = req.body;
+
+  const submission = await AssignmentSubmission.findById({ _id: id });
+  if (!submissionId) {
+    throw new ApiError(401, "No submission found");
+  }
+
+  submission.status = "Reviewed";
+
+  if (feedback) {
+    submission.instructorFeedBack = feedback;
+  }
+
+  if (typeof score === "number") {
+    submission.score = score;
+  }
+
+  await submission.save();
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Intstructor feedback has given", submission));
+});
