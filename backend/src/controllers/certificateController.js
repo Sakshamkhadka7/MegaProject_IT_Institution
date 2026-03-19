@@ -39,4 +39,16 @@ export const getMyCertificate=asyncHandler(async(req,res)=>{
 
 })
 
+export const getAllCertificate=asyncHandler(async(req,res)=>{
+ 
+  const certifcate=await Certificate.find().populate("student","name email").populate("course","title")
+ 
+  if(certifcate.length===0){
+    throw new ApiError(401,"No certificate found");
+  }
+
+  return res.status(200).json(new ApiResponse(200,"All certificate fetched ",certifcate));
+
+})
+
 
