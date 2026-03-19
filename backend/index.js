@@ -5,6 +5,7 @@ import studentRoute from "./src/routes/studentRoute.js";
 import cookieParser from "cookie-parser";
 import courseRoute from "./src/routes/courseRoute.js";
 import assigmentRouter from "./src/routes/assigmentRoute.js";
+import certifcateRoute from "./src/routes/certificateRoute.js";
 
 
 const app = express();
@@ -27,3 +28,4 @@ connectDb()
 app.use("/api/v1/student", studentRoute);
 app.use("/api/v1/course",courseRoute);
 app.use("/api/v1/assigment",assigmentRouter);
+app.use("/api/v1/certificate",certifcateRoute);

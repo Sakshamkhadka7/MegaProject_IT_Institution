@@ -25,30 +25,33 @@ export const createCertificate = asyncHandler(async (req, res) => {
     );
 });
 
-export const getMyCertificate=asyncHandler(async(req,res)=>{
-
-  const studentId=req.user._id;
-  if(!studentId){
-    throw new ApiError(401,"Id couldnot found");
+export const getMyCertificate = asyncHandler(async (req, res) => {
+  const studentId = req.user._id;
+  if (!studentId) {
+    throw new ApiError(401, "Id couldnot found");
   }
-  const certifcate=await Certificate.findById({_id:studentId}).populate("courses","title");
-  if(!certifcate){
-    throw new ApiError(401,"Couldnot found certificate");
+  const certifcate = await Certificate.findById({ _id: studentId }).populate(
+    "courses",
+    "title",
+  );
+  if (!certifcate) {
+    throw new ApiError(401, "Couldnot found certificate");
   }
-  return res.status(200).json(new ApiResponse(200,"Certificate fetched successfully",certifcate));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Certificate fetched successfully", certifcate));
+});
 
-})
+export const getAllCertificate = asyncHandler(async (req, res) => {
+  const certifcate = await Certificate.find()
+    .populate("student", "name email")
+    .populate("course", "title");
 
-export const getAllCertificate=asyncHandler(async(req,res)=>{
- 
-  const certifcate=await Certificate.find().populate("student","name email").populate("course","title")
- 
-  if(certifcate.length===0){
-    throw new ApiError(401,"No certificate found");
+  if (certifcate.length === 0) {
+    throw new ApiError(401, "No certificate found");
   }
 
-  return res.status(200).json(new ApiResponse(200,"All certificate fetched ",certifcate));
-
-})
-
-
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "All certificate fetched ", certifcate));
+});
