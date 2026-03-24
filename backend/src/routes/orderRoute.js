@@ -4,11 +4,12 @@ import {
   getAllOrders,
   getOrder,
 } from "../controllers/orderController.js";
+import userMiddleware from "../middleware/authMiddleware.js";
 
 const orderRoute = express.Router();
 
-orderRoute.post("/createOrder", createOrder);
-orderRoute.get("/getAllOrders", getAllOrders);
-orderRoute.get("/getOrderById/:id", getOrder);
+orderRoute.post("/createOrder", userMiddleware,createOrder);
+orderRoute.get("/getAllOrders",userMiddleware, getAllOrders);
+orderRoute.get("/getOrderById/:id",userMiddleware ,getOrder);
 
 export default orderRoute;
