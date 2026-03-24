@@ -8,6 +8,7 @@ import assigmentRouter from "./src/routes/assigmentRoute.js";
 import certifcateRoute from "./src/routes/certificateRoute.js";
 import orderRoute from "./src/routes/orderRoute.js";
 import progressRouter from "./src/routes/progressRoute.js";
+import jobRouter from "./src/routes/jobRoute.js";
 
 
 const app = express();
@@ -33,3 +34,4 @@ app.use("/api/v1/assigment",assigmentRouter);
 app.use("/api/v1/certificate",certifcateRoute);
 app.use("/api/v1/order",orderRoute);
 app.use("/api/v1/progress",progressRouter);
+app.use("/api/v1/job",jobRouter)

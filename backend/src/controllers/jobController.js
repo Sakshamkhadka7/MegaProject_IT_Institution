@@ -46,6 +46,9 @@ export const getAllJobs = asyncHandler(async (req, res) => {
 
 export const deleteJobs = asyncHandler(async (req, res) => {
   const { jobId } = req.params;
+   if (req.user.role !== "Admin") {
+    throw new ApiError(403, "Not authorized to upload a job");
+  }
   const job = await Job.findByIdAndDelete(jobId);
   if (!job) {
     throw new ApiError(404, "Job not found");
@@ -56,6 +59,9 @@ export const deleteJobs = asyncHandler(async (req, res) => {
 
 export const updateJob = asyncHandler(async (req, res) => {
   const { jobId } = req.params;
+   if (req.user.role !== "Admin") {
+    throw new ApiError(403, "Not authorized to upload a job");
+  }
   const { title, company, location, position, description } = req.body;
   const job = await Job.findById(jobId);
   if (!job) {
