@@ -35,5 +35,29 @@ export const bookDemo = asyncHandler(async (req, res) => {
     timeSlot,
   });
 
-  return res.status(200).json(new ApiResponse(200, "Demo booked successfully",booking));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Demo booked successfully", booking));
+});
+
+const ALL_SLOTS = ["10:00 AM", "2:00 PM", "4:00 PM"];
+
+export const getAvailableSlot = asyncHandler(async (req, res) => {
+  const courseId = req.params.id;
+  const date = req.query;
+  if (!date) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, "Date query paramater is required"));
+  }
+
+  const bookings = await Demo.find({ courses: courseId, date: date });
+  const bookingsSLots = bookings.map((b) => b.timeSlot);
+  const availableSLot = ALL_SLOTS.filter(
+    (slots) => !bookingsSLots.includes(slots),
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Available slots fetched", availableSLot));
 });
