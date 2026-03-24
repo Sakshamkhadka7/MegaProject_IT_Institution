@@ -25,3 +25,6 @@ const resourcesSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+const Resources=mongoose.model("Resources",resourcesSchema);
+export default Resources;
