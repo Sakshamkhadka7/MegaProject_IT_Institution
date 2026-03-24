@@ -7,7 +7,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 export const createCourse = asyncHandler(async (req, res) => {
   const instructor = req.user.role;
   const instructorId = req.user._id;
-   if (!req.file) {
+  if (!req.file) {
     throw new ApiError(400, "Course image is required");
   }
   const courseImage = req.file.filename;
@@ -126,18 +126,50 @@ export const deleteCourse = asyncHandler(async (req, res) => {
   const deleteCourseId = await Course.findByIdAndDelete({ _id: id });
 
   return res.status.json(
-    new ApiResponse(200, "Course is deleted successfully", deleteCourse),
+    new ApiResponse(200, "Course is deleted successfully", deleteCourseId),
   );
 });
 
-// export const studentProgress = asyncHandler(async (req, res) => {
-//   const role = req.user?.role;
-//   if (role !== "Instructor") {
-//     throw new ApiError(401, "Unauthorized to access");
-//   }
+export const getAllCourse = asyncHandler(async (req, res) => {
+  const course = await Course.find().populate("instructor", "fullName");
+  if (!course.length) {
+    throw new ApiError(401, "No courses found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "All courses fetched successfully", course));
+});
 
-//   const instructorId=req.user?._id;
+export const getCourse = asyncHandler(async (req, res) => {
+  const courseId = req.params;
+  const course = await Course.findById(courseId);
+  if (!course) {
+    throw new ApiError(401, "No course found");
+  }
+  return res.status.json(
+    new ApiResponse(200, "Course fetched successfully", course),
+  );
+});
 
-//   const courseCreated=await Course.find({instructor:instructorId});
+export const enrolledCourse = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const courseId = req.params;
 
-// });
+  const course = await Course.findById(courseId);
+  if (!course) {
+    throw new ApiError(401, "Course Id couldnot found");
+  }
+  const user = await user.findById(userId);
+  if (!user) {
+    throw new ApiError(401, "User couldnot found please register or login");
+  }
+  if (user.enrolledCourse.includes(courseId)) {
+    throw new ApiError(401, "You are already enrolled in this courses");
+  }
+
+  user.enrolledCourse.push(courseId);
+  await user.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User enrolled successfully"));
+});

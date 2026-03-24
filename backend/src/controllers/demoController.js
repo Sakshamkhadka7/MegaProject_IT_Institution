@@ -63,17 +63,14 @@ export const getAvailableSlot = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Available slots fetched", availableSLot));
 });
 
-export const getAllDemo=asyncHandler(async(req,res)=>{
- 
-    const adminId=req.user.role;
-    if(adminId!="Admin"){
-        throw new ApiError(401,"Unauthorized to access");
-    }
-    const allDemo=await Demo.find();
-    if(!allDemo){
-        throw new ApiError(401,"No demo founds");
-    }
-
-    return res.status(200).json(200,"All demo fetched",allDemo);
-
-})
+export const getAllDemo = asyncHandler(async (req, res) => {
+  const adminId = req.user.role;
+  if (adminId != "Admin") {
+    throw new ApiError(401, "Unauthorized to access");
+  }
+  const allDemo = await Demo.find();
+  if (!allDemo) {
+    throw new ApiError(401, "No demo founds");
+  }
+  return res.status(200).json(200, "All demo fetched", allDemo);
+});

@@ -1,4 +1,3 @@
-import { use } from "react";
 import Course from "../models/course.js";
 import Student from "../models/student.js";
 import ApiError from "../utils/apiError.js";
@@ -28,7 +27,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 };
 
 export const registerStudent = asyncHandler(async (req, res) => {
-  const { fullName, email, password, phone,role } = req.body;
+  const { fullName, email, password, phone, role } = req.body;
   const image = req.file.filename;
   if (!fullName || !email || !password || !phone) {
     throw new ApiError(400, "All fields are mandatory");
@@ -45,7 +44,7 @@ export const registerStudent = asyncHandler(async (req, res) => {
     email,
     phone,
     password,
-    role:role,
+    role: role,
     avatar: image,
   });
 
@@ -132,7 +131,7 @@ export const logout = asyncHandler(async (req, res) => {
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, "User logout successfully", {}));
-}); 
+});
 
 export const getUserById = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -159,7 +158,7 @@ export const getMe = asyncHandler(async (req, res) => {
 
 export const getAllUsers = asyncHandler(async (req, res) => {
   const role = req.user.role;
-  const instructorId=role._id ;
+  const instructorId = role._id;
 
   if (!["Instructor", "Admin"].includes(role)) {
     throw new ApiError(
@@ -169,7 +168,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   }
 
   if (role === "Instructor") {
-    const courses = await Course.find({ instructor:instructorId });
+    const courses = await Course.find({ instructor: instructorId });
 
     if (!courses.length) {
       throw new ApiError(
@@ -197,7 +196,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
       )
     );
   }
- 
+
   if (role == "Admin") {
     const user = await Student.find().select("-password");
     if (!user) {
@@ -221,32 +220,28 @@ export const updateUser = asyncHandler(async (req, res) => {
 
   const isAdmin = req.user.role === "Admin";
   const selfUpdate = req.user._id.toString() === id;
-  
-  if(!isAdmin && !selfUpdate){
-    throw new ApiError(401,"unauthorized to update profile");
+
+  if (!isAdmin && !selfUpdate) {
+    throw new ApiError(401, "unauthorized to update profile");
   }
 
-  const updateData={fullName, email, phone};
+  const updateData = { fullName, email, phone };
 
-  if(role){
-    if(!isAdmin){
-        throw new ApiError(401,"Only admin is allowed to update role");
+  if (role) {
+    if (!isAdmin) {
+      throw new ApiError(401, "Only admin is allowed to update role");
     }
-    
-    updateData.role=role;
+
+    updateData.role = role;
   }
 
-  const userUpdate=await Student.findByIdAndUpdate(id,updateData,{
-    new:true
+  const userUpdate = await Student.findByIdAndUpdate(id, updateData, {
+    new: true,
   });
 
-  if(!userUpdate){
-    throw new ApiError(401,"Failed to update User");
+  if (!userUpdate) {
+    throw new ApiError(401, "Failed to update User");
   }
 });
-
-
-
-
 
 
