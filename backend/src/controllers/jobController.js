@@ -6,11 +6,11 @@ import asyncHandler from "../utils/asyncHandler.js";
 export const createJob = asyncHandler(async (req, res) => {
   const adminId = req.user?._id;
   if (req.user.role !== "Admin") {
-    throw new ApiError(401, "Not authorized to upload a job");
+    throw new ApiError(403, "Not authorized to upload a job");
   }
   const { title, company, location, position, description } = req.body;
   if (!title || !company || !location || !position || !description) {
-    throw new ApiError(401, "All fields are mandatory");
+    throw new ApiError(400, "All fields are mandatory");
   }
 
   const jobExists = await Job.find({
@@ -20,7 +20,7 @@ export const createJob = asyncHandler(async (req, res) => {
   });
 
   if (jobExists) {
-    throw new ApiError(401, "Job already exists");
+    throw new ApiError(400, "Job already exists");
   }
 
   const job = await Job.create({
@@ -33,4 +33,13 @@ export const createJob = asyncHandler(async (req, res) => {
   });
 
   return res.status(200).json(new ApiResponse(200, "Job created successfully"));
+});
+
+export const getAllJobs = asyncHandler(async (req, res) => {
+  const jobs = await Job.find();
+  if (jobs.length === 0) {
+    throw new ApiError(404, "No job founds");
+  }
+
+  res.status(200).json(new ApiResponse(200, "All jobs fetched successfully"));
 });
