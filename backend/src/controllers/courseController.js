@@ -151,6 +151,27 @@ export const getCourse = asyncHandler(async (req, res) => {
   );
 });
 
+export const getMyCourse = asyncHandler(async (req, res) => {
+  const student = req.user.role;
+  const studentId = req.user._id;
+  if (student == "Student") {
+    const user = await Student.findById(studentId).populate("enrolledCourses");
+    if (!user) {
+      throw new ApiError(401, "No user found");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          "User Course fetched successfully",
+          user.enrolledCourses,
+        ),
+      );
+  }
+});
+
 export const enrolledCourse = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const courseId = req.params;

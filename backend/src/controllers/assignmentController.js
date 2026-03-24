@@ -178,5 +178,5 @@ export const instructorFeedBack = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, "Intstructor feedback has given", submission));
+    .json(new ApiResponse(200, "Instructor feedback has given", submission));
 });
