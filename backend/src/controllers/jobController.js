@@ -43,3 +43,13 @@ export const getAllJobs = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, "All jobs fetched successfully"));
 });
+
+const deleteJobs = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  const job = await Job.findByIdAndDelete(jobId);
+  if (!job) {
+    throw new ApiError(404, "Job not found");
+  }
+
+  return res.status(200).json(new ApiResponse(200, "Job deleted successfully"));
+});
