@@ -66,7 +66,7 @@ export const getMyProgress = asyncHandler(async (req, res) => {
   if (!course) {
     throw new ApiError(401, "Course not found");
   }
-  if (studentId.enrolledCourses.includes(courseId)) {
+  if (!studentId.enrolledCourses.includes(courseId)) {
     throw new ApiError(403, "Student is not enrolled in this course");
   }
 
