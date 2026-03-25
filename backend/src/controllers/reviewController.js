@@ -20,3 +20,15 @@ export const createReview = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, "Review made successfully", review));
 });
+
+export const getReviewByCourse=asyncHandler(async(req,res)=>{
+
+    const {courseId}=req.params;
+    const review=await Review.findOne({course:courseId});
+    if(!review){
+        throw new ApiError(404,"Review not found");
+    }
+
+    return res.status(201).json(new ApiResponse(201,"Review fetcehd successfully",review));
+
+})
