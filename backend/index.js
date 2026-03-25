@@ -10,6 +10,7 @@ import orderRoute from "./src/routes/orderRoute.js";
 import progressRouter from "./src/routes/progressRoute.js";
 import jobRouter from "./src/routes/jobRoute.js";
 import blogRouter from "./src/routes/blogRoute.js";
+import reviewRouter from "./src/routes/reviewRoute.js";
 
 
 const app = express();
@@ -37,4 +38,6 @@ app.use("/api/v1/order",orderRoute);
 app.use("/api/v1/progress",progressRouter);
 app.use("/api/v1/job",jobRouter)
 app.use("/api/v1/blog",blogRouter)
+app.use("/api/v1/review",reviewRouter)
+
 

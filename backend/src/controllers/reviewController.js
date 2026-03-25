@@ -4,7 +4,8 @@ import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 export const createReview = asyncHandler(async (req, res) => {
-  const { user, course, rating, comment } = req.body;
+  const user = req.user._id;
+  const { course, rating, comment } = req.body;
   if (!user || !course || !rating || !comment) {
     throw new ApiError(403, "All fields are madatory");
   }
@@ -21,14 +22,14 @@ export const createReview = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Review made successfully", review));
 });
 
-export const getReviewByCourse=asyncHandler(async(req,res)=>{
+export const getReviewByCourse = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const review = await Review.findOne({ course: courseId });
+  if (!review) {
+    throw new ApiError(404, "Review not found");
+  }
 
-    const {courseId}=req.params;
-    const review=await Review.findOne({course:courseId});
-    if(!review){
-        throw new ApiError(404,"Review not found");
-    }
-
-    return res.status(201).json(new ApiResponse(201,"Review fetcehd successfully",review));
-
-})
+  return res
+    .status(201)
+    .json(new ApiResponse(201, "Review fetcehd successfully", review));
+});
