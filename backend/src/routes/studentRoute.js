@@ -1,13 +1,13 @@
 import express from "express";
 import upload from "../middleware/upload.js";
 import {
-  enrolledCourse,
   getMe,
   login,
   logout,
   registerStudent,
 } from "../controllers/studentController.js";
 import userMiddleware from "../middleware/authMiddleware.js";
+import { enrolledCourse } from "../controllers/courseController.js";
 
 const studentRoute = express.Router();
 

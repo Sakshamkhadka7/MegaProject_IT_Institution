@@ -90,10 +90,10 @@ export const updateJob = asyncHandler(async (req, res) => {
 export const jobApply = asyncHandler(async (req, res) => {
   const { jobId } = req.params;
   const userId = req.user._id;
-  const coverLetter = req.body;
-  const alreadyApplied = await Application.find({
+  const {coverLetter} = req.body;
+  const alreadyApplied = await Application.findOne({
     applicant: userId,
-    job: jobId,
+    job: jobId, 
   });
   if (alreadyApplied) {
     throw new ApiError(403, "Already applied to this job by this user");
@@ -113,6 +113,18 @@ export const jobApply = asyncHandler(async (req, res) => {
   });
 
   return res
-    .status(200)
-    .json(new ApiResponse(200, "Job applied successfull"), application);
+    .status(201)
+    .json(new ApiResponse(201, "Job applied successfull"), application);
 });
+
+export const getMyApplication=asyncHandler(async(req,res)=>{
+
+  const userId=req.user._id;
+  const application=await Application.findOne({applicant:userId});
+  if(!application){
+    throw new ApiError(404,"No application founds");
+  }
+
+  return res.status(200).json(new ApiResponse(200,"Application fetched successfully"));
+
+})
