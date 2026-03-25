@@ -9,6 +9,7 @@ import certifcateRoute from "./src/routes/certificateRoute.js";
 import orderRoute from "./src/routes/orderRoute.js";
 import progressRouter from "./src/routes/progressRoute.js";
 import jobRouter from "./src/routes/jobRoute.js";
+import blogRouter from "./src/routes/blogRoute.js";
 
 
 const app = express();
@@ -35,3 +36,5 @@ app.use("/api/v1/certificate",certifcateRoute);
 app.use("/api/v1/order",orderRoute);
 app.use("/api/v1/progress",progressRouter);
 app.use("/api/v1/job",jobRouter)
+app.use("/api/v1/blog",blogRouter)
+
