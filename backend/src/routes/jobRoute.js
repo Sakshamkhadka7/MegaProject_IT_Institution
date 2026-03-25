@@ -6,13 +6,13 @@ const jobRouter=express.Router();
 
 jobRouter.post("/createJob",userMiddleware,createJob);
 jobRouter.get("/getJob",userMiddleware,getAllJobs);
-jobRouter.put("/deleteJob/:jobId",userMiddleware,deleteJobs)
+jobRouter.delete("/deleteJob/:jobId",userMiddleware,deleteJobs)
 jobRouter.put("/updateJobs/:jobId",userMiddleware,updateJob);
-jobRouter.post("/jobApply",userMiddleware,jobApply);
+jobRouter.post("/jobApply/:jobId",userMiddleware,jobApply);
 jobRouter.get("/getMyApplication",userMiddleware,getMyApplication);
 jobRouter.get("/getAllApplication",userMiddleware,getAllApplication);
-jobRouter.post("/acceptApplication",userMiddleware,acceptApplicaion);
-jobRouter.post("/rejectApplication",userMiddleware,rejectApplication);
+jobRouter.patch("/acceptApplication/:applicantId",userMiddleware,acceptApplicaion);
+jobRouter.patch("/rejectApplication/:applicantId",userMiddleware,rejectApplication);
 
 
 

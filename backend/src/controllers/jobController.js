@@ -45,7 +45,7 @@ export const getAllJobs = asyncHandler(async (req, res) => {
     throw new ApiError(404, "No job founds");
   }
 
-  res.status(200).json(new ApiResponse(200, "All jobs fetched successfully"));
+  res.status(200).json(new ApiResponse(200, "All jobs fetched successfully",jobs));
 });
 
 export const deleteJobs = asyncHandler(async (req, res) => {
@@ -128,7 +128,7 @@ export const getMyApplication=asyncHandler(async(req,res)=>{
     throw new ApiError(404,"No application founds");
   }
 
-  return res.status(200).json(new ApiResponse(200,"Application fetched successfully"));
+  return res.status(200).json(new ApiResponse(200,"Application fetched successfully",application));
 })
 
 export const getAllApplication=asyncHandler(async(req,res)=>{
@@ -137,12 +137,12 @@ export const getAllApplication=asyncHandler(async(req,res)=>{
   if(admin!="Instructor"){
     throw new ApiError(401,"Not authorized to access");
   }
-  const applicant=await Application.find();
-  if(applicant.length===0){
+  const applicantion=await Application.find();
+  if(applicantion.length===0){
     throw new ApiError(404,"No application found");
   }
 
-  return res.status(200).json(new ApiResponse(200,"All application fetched successfully"));
+  return res.status(200).json(new ApiResponse(200,"All application fetched successfully",applicantion));
 
 })
 
