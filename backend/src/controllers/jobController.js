@@ -37,6 +37,9 @@ export const createJob = asyncHandler(async (req, res) => {
 });
 
 export const getAllJobs = asyncHandler(async (req, res) => {
+   if (req.user.role !== "Admin") {
+    throw new ApiError(403, "Not authorized to upload a job");
+  }
   const jobs = await Job.find();
   if (jobs.length === 0) {
     throw new ApiError(404, "No job founds");
@@ -150,7 +153,7 @@ export const acceptApplicaion=asyncHandler(async(req,res)=>{
     throw new ApiError(401,"unauthorized request");
   }
   const {applicantId}=req.params;
-  const applicant=await Application.find({applicant:applicantId});
+  const applicant=await Application.findById(applicantId);
   if(!applicant){
     throw new ApiError(404,"Application not found");
   }
@@ -168,7 +171,7 @@ export const rejectApplication=asyncHandler(async(req,res)=>{
     throw new ApiError(401,"unauthorized request");
   }
   const {applicantId}=req.params;
-  const applicant=await Application.find({applicant:applicantId});
+  const applicant=await Application.findById(applicantId);
   if(!applicant){
     throw new ApiError(404,"Application not found");
   }

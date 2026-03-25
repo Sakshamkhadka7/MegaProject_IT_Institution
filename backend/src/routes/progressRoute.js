@@ -10,4 +10,5 @@ const progressRouter = express.Router();
 progressRouter.get("/:courseId/:studentId", getStudentProgress);
 progressRouter.get("/my/:courseId", userMiddleware, getMyProgress);
 
+
 export default progressRouter;
