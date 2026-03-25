@@ -142,3 +142,22 @@ export const getAllApplication=asyncHandler(async(req,res)=>{
   return res.status(200).json(new ApiResponse(200,"All application fetched successfully"));
 
 })
+
+export const acceptApplicaion=asyncHandler(async(req,res)=>{
+ 
+  const admin=req.user.role;
+  if(admin!="Admin"){
+    throw new ApiError(401,"unauthorized request");
+  }
+  const {applicantId}=req.params;
+  const applicant=await Application.find({applicant:applicantId});
+  if(!applicant){
+    throw new ApiError(404,"Application not found");
+  }
+
+  applicant.status="Accepted";
+  await applicant.save();
+
+  return res.status(200).json(new ApiResponse(200,"Application is accepted",applicant));
+
+})
