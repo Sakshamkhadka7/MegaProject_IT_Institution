@@ -126,5 +126,19 @@ export const getMyApplication=asyncHandler(async(req,res)=>{
   }
 
   return res.status(200).json(new ApiResponse(200,"Application fetched successfully"));
+})
+
+export const getAllApplication=asyncHandler(async(req,res)=>{
+ 
+  const admin=req.user.role;
+  if(admin!="Instructor"){
+    throw new ApiError(401,"Not authorized to access");
+  }
+  const applicant=await Application.find();
+  if(applicant.length===0){
+    throw new ApiError(404,"No application found");
+  }
+
+  return res.status(200).json(new ApiResponse(200,"All application fetched successfully"));
 
 })
