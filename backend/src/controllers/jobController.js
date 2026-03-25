@@ -73,7 +73,7 @@ export const updateJob = asyncHandler(async (req, res) => {
   }
 
   const updateJob = await Job.findByIdAndUpdate(
-    IdleDeadline,
+     jobId,
     {
       title,
       company,
@@ -117,7 +117,7 @@ export const jobApply = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(201, "Job applied successfull"), application);
+    .json(new ApiResponse(201, "Job applied successfull",application));
 });
 
 export const getMyApplication=asyncHandler(async(req,res)=>{
@@ -134,7 +134,7 @@ export const getMyApplication=asyncHandler(async(req,res)=>{
 export const getAllApplication=asyncHandler(async(req,res)=>{
  
   const admin=req.user.role;
-  if(admin!="Instructor"){
+  if(admin!="Admin"){
     throw new ApiError(401,"Not authorized to access");
   }
   const applicantion=await Application.find();
@@ -153,15 +153,15 @@ export const acceptApplicaion=asyncHandler(async(req,res)=>{
     throw new ApiError(401,"unauthorized request");
   }
   const {applicantId}=req.params;
-  const applicant=await Application.findById(applicantId);
-  if(!applicant){
+  const applicantion=await Application.findById(applicantId);
+  if(!applicantion){
     throw new ApiError(404,"Application not found");
   }
 
-  applicant.status="Accepted";
-  await applicant.save();
+  applicantion.status="Accepted";
+  await applicantion.save();
 
-  return res.status(200).json(new ApiResponse(200,"Application is accepted successfully",applicant));
+  return res.status(200).json(new ApiResponse(200,"Application is accepted successfully",applicantion));
 
 })
 
@@ -171,12 +171,12 @@ export const rejectApplication=asyncHandler(async(req,res)=>{
     throw new ApiError(401,"unauthorized request");
   }
   const {applicantId}=req.params;
-  const applicant=await Application.findById(applicantId);
-  if(!applicant){
+  const applicantion=await Application.findById(applicantId);
+  if(!applicantion){
     throw new ApiError(404,"Application not found");
   }
 
-  applicant.status="Rejected";
- await applicant.save();
- return res.status(200).json(new ApiResponse(200,"Application is rejected successfully",applicant));
+  applicantion.status="Rejected";
+ await applicantion.save();
+ return res.status(200).json(new ApiResponse(200,"Application is rejected successfully",applicantion));
 })
