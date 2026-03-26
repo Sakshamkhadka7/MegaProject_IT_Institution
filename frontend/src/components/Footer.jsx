@@ -9,7 +9,7 @@ import { SiGooglemaps } from "react-icons/si";
 
 const Footer = () => {
   return (
-    <footer className='flex justify-center items-start gap-20 bg-blue-900 text-white p-9 '>
+    <footer className='flex flex-col  lg:flex-row justify-center items-start gap-20 bg-blue-900 text-white p-9 '>
       <div className='space-y-2'>
        <h1 className='font-bold text-2xl'>SoftTraining</h1>
        <h2 className='font-mono text-yellow-300'>Empowering Careers through <br /> Technology Education</h2>
