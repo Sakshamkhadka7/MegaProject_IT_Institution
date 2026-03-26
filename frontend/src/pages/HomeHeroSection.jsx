@@ -4,7 +4,7 @@ import { FaArrowCircleRight } from "react-icons/fa";
 
 const HomeHeroSection = () => {
   return (
-   <section className="flex flex-col md:flex-row p-9 justify-between items-center gap-9">
+   <section className="flex flex-col md:flex-row p-17 justify-between items-center gap-9">
         <div className="space-y-5">
           <h1 className="text-blue-500 font-bold text-5xl">
             Building Digital Nepal{" "}
