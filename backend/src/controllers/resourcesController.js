@@ -6,6 +6,10 @@ import asyncHandler from "../utils/asyncHandler.js";
 export const createResources = asyncHandler(async (req, res) => {
   const instructorId = req.user._id;
   const fileUrl = req.file.filename;
+  const instructor=req.user.role;
+  if(instructor!="Instructor"){
+    throw new ApiError(403,"Not authorized for this request");
+  }
   const { title, link, coursesId } = req.body;
   if (!title || !coursesId) {
     throw new ApiError(401, "All fields are mandatory");
@@ -25,12 +29,12 @@ export const createResources = asyncHandler(async (req, res) => {
 });
 
 export const getResourcesByCourse = asyncHandler(async (req, res) => {
-  const courseId = req.params;
+  const {courseId} = req.params;
   if (!courseId) {
     throw new ApiError(401, "Id couldnot found");
   }
 
-  const resources = await Resources.findById({ courses: courseId });
+  const resources = await Resources.findOne({ courses: courseId });
   if (resources.length === 0) {
     throw new ApiError(401, "No resources found");
   }
@@ -41,7 +45,7 @@ export const getResourcesByCourse = asyncHandler(async (req, res) => {
 });
 
 export const deleteResources = asyncHandler(async (req, res) => {
-  const resourcesId = req.params.id;
+  const {resourcesId} = req.params;
   const user = req.user.role;
   const instructorId = req.user._id;
   const resources = await Resources.findById({ _id: resourcesId });

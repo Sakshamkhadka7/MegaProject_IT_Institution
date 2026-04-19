@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-
+import { FaRegUserCircle } from "react-icons/fa";
+import { useContext } from "react";
+import { UserContext } from "../context/UserProvider";
 const Header = () => {
   const [menu, setMenu] = useState(false);
+  const { user, setUser, error, loading } = useContext(UserContext);
 
   const handleClose = () => setMenu(false);
 
   return (
     <nav className="flex justify-between items-center p-6 shadow-2xl relative">
-
       {/* Logo */}
       <h1 className="text-2xl font-bold">IT Institution</h1>
 
@@ -23,9 +25,30 @@ const Header = () => {
       </div>
 
       {/* Desktop Right */}
-      <div className="hidden md:flex gap-1">
-        <NavLink to="/login" className="border px-4 py-1 rounded-xl bg-yellow-600 text-white font-serif shadow-amber-600">Login</NavLink>
-        <NavLink to="/register" className="border px-4 py-1 rounded-xl bg-blue-600 text-white font-serif shadow-amber-600">Register</NavLink>
+      <div className="hidden md:flex gap-1 justify-center items-center">
+        <NavLink
+          to="/login"
+          className="border px-4 py-1 rounded-xl bg-yellow-600 text-white font-serif shadow-amber-600"
+        >
+          Login
+        </NavLink>
+        <NavLink
+          to="/register"
+          className="border px-4 py-1 rounded-xl bg-blue-600 text-white font-serif shadow-amber-600"
+        >
+          Register
+        </NavLink>
+        <div>
+          {user ? (
+            <div >
+              <img className="rounded-full w-10 h-10" src={`http://localhost:3001/image/${user?.avatar}`} />
+            </div>
+          ) : (
+            <div>
+              <FaRegUserCircle size={32} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Hamburger Button */}
@@ -57,14 +80,30 @@ const Header = () => {
             : "opacity-0 -translate-y-5 pointer-events-none"
         } md:hidden`}
       >
-        <NavLink onClick={handleClose} to="/">Home</NavLink>
-        <NavLink onClick={handleClose} to="/aboutus">About</NavLink>
-        <NavLink onClick={handleClose} to="/blogs">Blogs</NavLink>
-        <NavLink onClick={handleClose} to="/courses">Courses</NavLink>
-        <NavLink onClick={handleClose} to="/job">Job</NavLink>
-        <NavLink onClick={handleClose} to="/contact">Contact</NavLink>
-        <NavLink onClick={handleClose} to="/login">Login</NavLink>
-        <NavLink onClick={handleClose} to="/register">Register</NavLink>
+        <NavLink onClick={handleClose} to="/">
+          Home
+        </NavLink>
+        <NavLink onClick={handleClose} to="/aboutus">
+          About
+        </NavLink>
+        <NavLink onClick={handleClose} to="/blogs">
+          Blogs
+        </NavLink>
+        <NavLink onClick={handleClose} to="/courses">
+          Courses
+        </NavLink>
+        <NavLink onClick={handleClose} to="/job">
+          Job
+        </NavLink>
+        <NavLink onClick={handleClose} to="/contact">
+          Contact
+        </NavLink>
+        <NavLink onClick={handleClose} to="/login">
+          Login
+        </NavLink>
+        <NavLink onClick={handleClose} to="/register">
+          Register
+        </NavLink>
       </div>
     </nav>
   );

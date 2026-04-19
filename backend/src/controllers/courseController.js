@@ -3,6 +3,7 @@ import Student from "../models/student.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { getStudentProgress } from "./progressController.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const instructor = req.user.role;
@@ -14,6 +15,7 @@ export const createCourse = asyncHandler(async (req, res) => {
   console.log(courseImage);
 
   console.log(req.user);
+  console.log(req.body);
 
   if (instructor !== "Instructor") {
     throw new ApiError(401, "Unauthorized to access");
@@ -29,6 +31,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     enrollmentDeadline,
     prerequisities,
   } = req.body;
+  console.log(instructorId);
 
   if (
     !title ||
@@ -77,7 +80,6 @@ export const updateCourse = asyncHandler(async (req, res) => {
     fee,
     level,
     enrollmentDeadline,
-
     prerequisities,
   } = req.body;
 
@@ -165,7 +167,7 @@ export const getMyCourse = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          "User Course fetched successfully",
+          "Student Course fetched successfully",
           user.enrolledCourses,
         ),
       );
@@ -174,21 +176,21 @@ export const getMyCourse = asyncHandler(async (req, res) => {
 
 export const enrolledCourse = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const courseId = req.params;
+  const courseId = req.params.courseId;
 
   const course = await Course.findById(courseId);
   if (!course) {
     throw new ApiError(401, "Course Id couldnot found");
   }
-  const user = await user.findById(userId);
+  const user = await Student.findById(userId);
   if (!user) {
     throw new ApiError(401, "User couldnot found please register or login");
   }
-  if (user.enrolledCourse.includes(courseId)) {
+  if (user.enrolledCourses.includes(courseId)) {
     throw new ApiError(401, "You are already enrolled in this courses");
   }
 
-  user.enrolledCourse.push(courseId);
+  user.enrolledCourses.push(courseId);
   await user.save();
   return res
     .status(200)

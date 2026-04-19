@@ -68,7 +68,7 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Id couldnot found");
   }
 
-  const { comment, status } = req.body;
+  const { comment } = req.body;
   const submittedFile = req.file;
   if (!submittedFile) {
     throw new ApiError(401, "File is required");
@@ -90,7 +90,6 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
     student: studentId,
     submittedFile: submittedFile,
     comment: comment,
-    status: status,
   });
 
   return res.status.json(
@@ -132,6 +131,10 @@ export const deleteAssignment = asyncHandler(async (req, res) => {
 export const SubmittedAssignmentForInstructor = asyncHandler(
   async (req, res) => {
     const instructorId = req.user._id;
+    const instructor=req.user.role;
+    if(instructor!=="Instructor"){
+      throw new ApiError(401,"Not authorized to check assignment");
+    }
     if (!instructorId) {
       throw new ApiError(401, "Id coulnot found");
     }

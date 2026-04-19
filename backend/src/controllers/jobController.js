@@ -33,7 +33,7 @@ export const createJob = asyncHandler(async (req, res) => {
     postedBy: adminId,
   });
 
-  return res.status(200).json(new ApiResponse(200, "Job created successfully"));
+  return res.status(200).json(new ApiResponse(200, "Job created successfully",job));
 });
 
 export const getAllJobs = asyncHandler(async (req, res) => {

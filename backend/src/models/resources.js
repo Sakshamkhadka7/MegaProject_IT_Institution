@@ -4,7 +4,7 @@ const resourcesSchema = new mongoose.Schema(
   {
     courses: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
+      ref: "Courses",
     },
     title: {
       type: String,

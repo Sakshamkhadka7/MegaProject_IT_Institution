@@ -7,7 +7,7 @@ import ApiResponse from "../utils/apiSuccess.js";
 
 export const createOrder = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const course = req.body;
+  const {course} = req.body;
   if (!userId || !course) {
     throw new ApiError(401, "All fields are mandatory");
   }
@@ -21,7 +21,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     course,
   });
 
-  return res.status.json(new ApiResponse(200, "Order created successfully"));
+  return res.status(200).json(new ApiResponse(200, "Order created successfully",order));
 });
 
 export const getAllOrders = asyncHandler(async (req, res) => {
@@ -32,7 +32,7 @@ export const getAllOrders = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "All orders fetched successfully"));
+    .json(new ApiResponse(200, "All orders fetched successfully",orders));
 });
 
 export const getOrder = asyncHandler(async (req, res) => {
@@ -46,5 +46,5 @@ export const getOrder = asyncHandler(async (req, res) => {
     throw new ApiError(401, "No orders found");
   }
 
-  return res.status(200).json(new ApiResponse(200, "Order has been fetched"));
+  return res.status(200).json(new ApiResponse(200, "Order has been fetched",order));
 });

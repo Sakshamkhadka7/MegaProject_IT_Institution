@@ -81,9 +81,12 @@ studentSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
+
+
 studentSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
+
 
 studentSchema.methods.generateAccessToken = function () {
   return jwt.sign(
@@ -96,6 +99,7 @@ studentSchema.methods.generateAccessToken = function () {
     },
   );
 };
+
 
 studentSchema.methods.generateRefreshToken = function () {
   return jwt.sign(

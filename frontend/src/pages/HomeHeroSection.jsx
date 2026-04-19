@@ -1,8 +1,10 @@
 import React from 'react'
 import software from "../assets/software.jpg";
 import { FaArrowCircleRight } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 
 const HomeHeroSection = () => {
+  const navigate=useNavigate();
   return (
    <section className="flex flex-col md:flex-row p-17 justify-between items-center gap-9">
         <div className="space-y-5">
@@ -22,8 +24,8 @@ const HomeHeroSection = () => {
             industry experts
           </p>
           <div className="flex items-center justify-center w-60 px-4 py-2 gap-2 border bg-blue-500 text-white rounded-2xl hover:cursor-pointer">
-            <button> Browse Our Course</button>
-            <FaArrowCircleRight />
+            <button onClick={()=> navigate("/courses")}> Browse Our Course</button>
+            <FaArrowCircleRight onClick={()=> navigate("/courses")} />
           </div>
         </div>
 

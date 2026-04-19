@@ -8,6 +8,7 @@ import Contact from "../pages/Contact";
 import Job from "../pages/Job";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import CourseDetails from "../pages/CourseDetails";
 
 const AppRoute = () => {
   return (
@@ -21,6 +22,7 @@ const AppRoute = () => {
         <Route path="/job" element={<Job />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/courseDetail" element={<CourseDetails/>} />
       </Routes>
     </div>
   );

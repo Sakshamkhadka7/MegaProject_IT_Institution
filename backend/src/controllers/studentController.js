@@ -27,7 +27,8 @@ const generateAccessAndRefreshToken = async (userId) => {
 };
 
 export const registerStudent = asyncHandler(async (req, res) => {
-  const { fullName, email, password, phone, role } = req.body;
+  console.log(req.body);
+  const { fullName, email, password, phone } = req.body;
   const image = req.file.filename;
   if (!fullName || !email || !password || !phone) {
     throw new ApiError(400, "All fields are mandatory");
@@ -44,7 +45,6 @@ export const registerStudent = asyncHandler(async (req, res) => {
     email,
     phone,
     password,
-    role: role,
     avatar: image,
   });
 
@@ -158,7 +158,7 @@ export const getMe = asyncHandler(async (req, res) => {
 
 export const getAllUsers = asyncHandler(async (req, res) => {
   const role = req.user.role;
-  const instructorId = role._id;
+  const instructorId = req.user._id;
 
   if (!["Instructor", "Admin"].includes(role)) {
     throw new ApiError(

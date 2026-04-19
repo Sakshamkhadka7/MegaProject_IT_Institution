@@ -6,7 +6,7 @@ import upload from "../middleware/upload.js";
 const courseRoute=express.Router();
 
 courseRoute.post("/createCourse",userMiddleware,upload.single("courseImage"),createCourse);
-courseRoute.post("/enrolledCourse/:id",userMiddleware,enrolledCourse);
+courseRoute.post("/enrolledCourse/:courseId",userMiddleware,enrolledCourse);
 courseRoute.get("/getAllCourses",getAllCourse);
 courseRoute.get("/getMyCourses",userMiddleware,getMyCourse);
 courseRoute.get("/getCourse",getCourse);

@@ -1,5 +1,5 @@
 import express from "express";
-import userMiddleware from "../middleware/authMiddleware";
+import userMiddleware from "../middleware/authMiddleware.js";
 import { createReview } from "../controllers/reviewController.js";
 
 const reviewRouter=express.Router();
