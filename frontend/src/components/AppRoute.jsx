@@ -9,6 +9,11 @@ import Job from "../pages/Job";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import CourseDetails from "../pages/CourseDetails";
+import Profile from "../pages/Profile";
+import ProtectedRoute from "../pages/ProtectedRoute";
+import Payment from "../pages/Payment";
+import SuccessPage from "../pages/SuccessPage";
+import Failure from "../pages/Failure";
 
 const AppRoute = () => {
   return (
@@ -23,6 +28,11 @@ const AppRoute = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/courseDetail" element={<CourseDetails/>} />
+        <Route path="/profile" element={<ProtectedRoute comp={<Profile/>}/>} />
+        <Route path="/payment" element={<Payment/>} />
+        <Route path="/success" element={<SuccessPage/>} />
+        <Route path="/failure" element={<Failure/>} />
+
       </Routes>
     </div>
   );

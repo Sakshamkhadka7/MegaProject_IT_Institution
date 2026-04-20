@@ -8,6 +8,16 @@ import ApiResponse from "../utils/apiSuccess.js";
 export const createOrder = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const {course} = req.body;
+  
+  const existingOrder=await Order.findOne({
+    user:userId,
+    paymentStatus:"PENDING"
+  })
+
+  if(existingOrder){
+    return res.status(400).json(new ApiResponse(400,"Order already existed",existingOrder));
+  }
+
   if (!userId || !course) {
     throw new ApiError(401, "All fields are mandatory");
   }
@@ -23,6 +33,25 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   return res.status(200).json(new ApiResponse(200, "Order created successfully",order));
 });
+
+export const updateOrder=asyncHandler(async(req,res)=>{
+ 
+  const {statusId}=req.params;
+  const {paymentStatus}=req.body;
+  const order=await Order.findById(statusId);
+  if(!order){
+    throw new ApiError(401,"Order Id not found");
+  }
+
+  const update=await Order.findByIdAndUpdate(
+    {_id:statusId},
+    {paymentStatus:paymentStatus},
+    {new:true}
+  )
+
+  return res.status(200).json(new ApiResponse(200,"Order status updated successfully",update));
+
+})
 
 export const getAllOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find();

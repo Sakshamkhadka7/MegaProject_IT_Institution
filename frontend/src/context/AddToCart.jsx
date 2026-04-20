@@ -20,25 +20,41 @@ const cardReducer = (state, action) => {
       console.log(action.payload);
 
       const isExists = state.cartItems.find((item) => {
-        return item.id == action.payload.id;
+        return item._id == action.payload._id;
       });
-    
+
       if (isExists) {
         alert("Product is already exists");
         return state;
       }
-    
-      console.log(state);
 
+      console.log(state);
+      
       const newObj = [...state.cartItems, action.payload];
-      alert("Product is added")
+      alert("Product is added");
       return {
+        ...state,
         cartItems: newObj,
       };
     }
-    case "default": {
-      return state;
+
+    case "delete": {
+      const newObject = state.cartItems.filter((item) => item._id !== action.payload._id);
+
+      return {
+        ...state,
+        cartItems:newObject
+      };
     }
+
+    case "clear":{
+      return {
+        cartItems:[]
+      }
+    }
+
+    default:
+      return state;
   }
 };
 
@@ -47,7 +63,7 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(state.cartItems));
-  });
+  },[state.cartItems]);
 
   return (
     <CartContext.Provider value={{ state, dispatch }}>
