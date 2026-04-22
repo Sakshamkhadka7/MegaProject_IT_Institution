@@ -11,6 +11,6 @@ courseRoute.get("/getAllCourses",getAllCourse);
 courseRoute.get("/getMyCourses",userMiddleware,getMyCourse);
 courseRoute.get("/getCourse",getCourse);
 courseRoute.put("/updateCourse/:id",userMiddleware,upload.single("courseImage"),updateCourse);
-courseRoute.delete("/deleteCourse/:id",deleteCourse);
+courseRoute.delete("/deleteCourse/:id",userMiddleware,deleteCourse);
 
 export default courseRoute;

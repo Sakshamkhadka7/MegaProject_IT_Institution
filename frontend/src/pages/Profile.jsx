@@ -58,7 +58,7 @@ const Profile = () => {
     } catch (error) {
       console.log("Error occured at create order", error);
     } finally {
-      setLoading(false); // always unlock
+      setLoading(false); 
     }
   };
 

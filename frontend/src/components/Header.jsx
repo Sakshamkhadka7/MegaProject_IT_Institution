@@ -117,7 +117,7 @@ const Header = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`absolute top-16 left-0 w-full bg-white shadow-md flex flex-col items-center gap-4 py-6 transform transition-all duration-300 ${
+        className={`absolute z-30 top-16 left-0 w-full bg-white shadow-md flex flex-col items-center gap-4 py-6 transform transition-all duration-300 ${
           menu
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-5 pointer-events-none"

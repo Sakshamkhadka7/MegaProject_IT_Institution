@@ -70,7 +70,14 @@ export const updateCourse = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Unauthorized to access");
   }
   const id = req.params.id;
-  const courseImage = req.file.filename;
+  //  const courseImage = req.file ? req.file.filename : undefined;
+  if (!id) {
+    throw new ApiError(401, "Id couldnot found");
+  }
+  const courseExist = await Course.findById(id);
+  if (!courseExist) {
+    throw new ApiError(401, "Course doesnot exists");
+  }
 
   const {
     title,
@@ -82,33 +89,35 @@ export const updateCourse = asyncHandler(async (req, res) => {
     enrollmentDeadline,
     prerequisities,
   } = req.body;
-
-  if (!id) {
-    throw new ApiError(401, "Id couldnot found");
+  let courseImage;
+  if (req.file) {
+    courseImage = req.file.filename;
   }
 
-  const courseExist = await Course.find({ _id: id });
-  if (!courseExist) {
-    throw new ApiError(401, "Course doesnot exists");
+  const updateData={
+       title,
+    descriptions,
+    syllabus,
+    duration,
+    fee,
+    level,
+    enrollmentDeadline,
+    prerequisities
   }
 
-  const updateCourse = await Course.findByIdAndUpdate(
+  if(courseImage){
+    updateData.courseImage=courseImage;
+  }
+
+  const updateCourse=await Course.findByIdAndUpdate(
     id,
+    updateData,
     {
-      title,
-      descriptions,
-      syllabus,
-      duration,
-      fee,
-      level,
-      enrollmentDeadline,
-      courseImage: courseImage,
-      prerequisities,
-    },
-    {
-      new: true,
-    },
-  );
+      new:true,
+      runValidators: true,
+    }
+  )
+
 
   return res
     .status(200)
@@ -117,6 +126,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
 
 export const deleteCourse = asyncHandler(async (req, res) => {
   const role = req.user?.role;
+  console.log(role);
   if (role !== "Instructor") {
     throw new ApiError(401, "Unauthorized to access");
   }
@@ -127,9 +137,11 @@ export const deleteCourse = asyncHandler(async (req, res) => {
 
   const deleteCourseId = await Course.findByIdAndDelete({ _id: id });
 
-  return res.status.json(
-    new ApiResponse(200, "Course is deleted successfully", deleteCourseId),
-  );
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Course is deleted successfully", deleteCourseId),
+    );
 });
 
 export const getAllCourse = asyncHandler(async (req, res) => {
@@ -156,6 +168,7 @@ export const getCourse = asyncHandler(async (req, res) => {
 export const getMyCourse = asyncHandler(async (req, res) => {
   const student = req.user.role;
   const studentId = req.user._id;
+  console.log(studentId);
   if (student == "Student") {
     const user = await Student.findById(studentId).populate("enrolledCourses");
     if (!user) {
