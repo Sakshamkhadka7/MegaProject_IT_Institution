@@ -35,7 +35,7 @@ const Header = () => {
       <h1 className="text-2xl font-bold">IT Institution</h1>
 
       {/* Desktop Menu */}
-      <div className="hidden md:flex gap-5 items-center">
+      <div className="hidden md:flex gap-5 items-center z-30">
         <NavLink to="/">Home</NavLink>
         <NavLink to="/aboutus">About</NavLink>
         <NavLink to="/blogs">Blogs</NavLink>
@@ -45,7 +45,7 @@ const Header = () => {
       </div>
 
       {/* Desktop Right (Hover dropdown) */}
-      <div className="hidden md:flex gap-1 justify-center items-center ">
+      <div className="hidden md:flex gap-1 justify-center items-center z-30">
         <div className="relative group">
           {user ? (
             <div>

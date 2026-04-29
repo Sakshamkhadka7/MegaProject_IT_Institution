@@ -176,25 +176,36 @@ export const getAllUsers = asyncHandler(async (req, res) => {
         "There is no courses assigned to this instructor",
       );
     }
+    console.log(courses);
 
-    const courseId = courses.map((course) => course._id);
+    const courseId = courses.map((course) => course._id.toString());
     const students = await Student.find({
       role: "Student",
       enrolledCourses: { $in: courseId },
-    }).select("fullName email phone avatar enrolledCourses");
+    }).populate("enrolledCourses", "title");
 
-    return (
-      res.status(200),
-      json(
-        ApiResponse(
+    const filteredStudents = students.map((student) => {
+      const filteredCourses = student.enrolledCourses.filter((courses) => 
+        courseId.includes(courses._id.toString())
+      );
+
+      return {
+        ...student.toObject(),
+        enrolledCourses: filteredCourses,
+      };
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
           200,
           students.length
             ? "Student fetched successfully"
             : "No students enrolled in your courses",
-          students,
+          filteredStudents,
         ),
-      )
-    );
+      );
   }
 
   if (role == "Admin") {
@@ -205,7 +216,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, "Admin fethed successfully", user));
+      .json(new ApiResponse(200, "Admin fetched successfully", user));
   }
 });
 
@@ -243,5 +254,3 @@ export const updateUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Failed to update User");
   }
 });
-
-

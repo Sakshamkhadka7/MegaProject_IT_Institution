@@ -1,38 +1,41 @@
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsFillCartFill } from "react-icons/bs";
+import { FaArrowRightLong } from "react-icons/fa6";
 import { useContext } from "react";
 import { CartContext } from "../context/AddToCart";
-import { FaArrowRightLong } from "react-icons/fa6";
 import { UserContext } from "../context/UserProvider";
 
 const Courses = () => {
-  const [course, setCourse] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [search, setSearch] = useState("");
+  const [level, setLevel] = useState("All");
+  const [sort, setSort] = useState("newest"); 
+
   const navigate = useNavigate();
-  const { state, dispatch } = useContext(CartContext);
+  const { dispatch } = useContext(CartContext);
   const { user } = useContext(UserContext);
 
   const addToCart = (course) => {
     dispatch({ type: "addToCart", payload: course });
   };
 
-  
-
   const getCourses = async () => {
-    let res = await fetch("http://localhost:3001/api/v1/course/getAllCourses", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
+    try {
+      let res = await fetch(
+        "http://localhost:3001/api/v1/course/getAllCourses",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
 
-    if (res.ok) {
-      res = await res.json();
-      setCourse(res.data);
-      console.log(res.data);
+      if (res.ok) {
+        res = await res.json();
+        setCourses(res.data);
+      }
+    } catch (error) {
+      console.log("Error fetching courses", error);
     }
   };
 
@@ -40,84 +43,139 @@ const Courses = () => {
     getCourses();
   }, []);
 
+  // 🔥 FILTER + SORT TOGETHER
+  const filteredCourses = useMemo(() => {
+    let result = courses.filter((item) => {
+      const matchSearch = item.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+      const matchLevel = level === "All" || item.level === level;
+
+      return matchSearch && matchLevel;
+    });
+
+    //  SORTING LOGIC
+    if (sort === "priceLow") {
+      result.sort((a, b) => a.fee - b.fee);
+    } else if (sort === "priceHigh") {
+      result.sort((a, b) => b.fee - a.fee);
+    } else if (sort === "newest") {
+      result.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+    } else if (sort === "popular") {
+      result.sort((a, b) => (b.students || 0) - (a.students || 0));
+    }
+
+    return result;
+  }, [courses, search, level, sort]);
+
   return (
-    <div className="flex flex-wrap justify-center gap-8 p-2 mt-3">
-      {course.length > 0 ? (
-        course?.map((item) => (
-          <div
-            key={item._id}
-            className="w-72 bg-white rounded-2xl shadow-md hover:shadow-xl hover:cursor-pointer transition duration-300 overflow-hidden"
-          >
-            {/* Image */}
-            <img
-              src={`http://localhost:3001/image/${item.courseImage}`}
-              alt={item.title}
-              className="w-full h-44 object-cover"
-            />
+    <div className="min-h-screen bg-gray-50">
+    
+      <div className="flex flex-wrap justify-center items-center gap-4 p-6 bg-white shadow-sm sticky top-0 z-10">
+        
+        
+        <input
+          type="text"
+          placeholder="Search courses..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-4 py-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
 
-            {/* Content */}
-            <div className="p-4 flex flex-col gap-2">
-              <h2 className="text-lg font-semibold text-gray-800">
-                {item.title}
-              </h2>
+       
+        <select
+          value={level}
+          onChange={(e) => setLevel(e.target.value)}
+          className="border px-4 py-2 rounded-lg"
+        >
+          <option value="All">All Levels</option>
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+          <option value="Advanced">Advanced</option>
+        </select>
 
-              {/* <p className="text-sm text-gray-600 line-clamp-2">
-          {item.descriptions}
-        </p> */}
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="border px-4 py-2 rounded-lg"
+        >
+          <option value="newest">Newest First</option>
+          <option value="popular">Popularity</option>
+          <option value="priceLow">Price: Low → High</option>
+          <option value="priceHigh">Price: High → Low</option>
+        </select>
+      </div>
 
-              {/* Info Row */}
-              <div className="flex justify-between text-sm text-gray-500 mt-2">
-                <span>{item.duration}</span>
-                <span className="font-medium text-blue-600">
-                  Rs. {item.fee}
+    
+      <div className="flex flex-wrap justify-center gap-8 p-6">
+        {filteredCourses.length > 0 ? (
+          filteredCourses.map((item) => (
+            <div
+              key={item._id}
+              className="w-72 bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
+            >
+              <img
+                src={`http://localhost:3001/image/${item.courseImage}`}
+                alt={item.title}
+                className="w-full h-44 object-cover"
+              />
+
+              <div className="p-4 flex flex-col gap-2">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  {item.title}
+                </h2>
+
+                <span className="text-xs w-fit px-2 py-1 bg-gray-100 text-gray-600 rounded">
+                  {item.level}
                 </span>
-              </div>
 
-              {/* Extra Info */}
-              {/* <div className="text-xs text-gray-500 mt-1">
-          <p><span className="font-medium">Level:</span> {item.level}</p>
-          <p className="truncate">
-            <span className="font-medium">Prerequisites:</span> {item.prerequisities}
-          </p>
-        </div> */}
+                <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <span>{item.duration}</span>
+                  <span className="font-medium text-blue-600">
+                    Rs. {item.fee}
+                  </span>
+                </div>
 
-              {/* Button */}
-              <div className="flex justify-center items-center gap-5 bg-yellow-600 rounded-2xl px-9 py-3 ">
-                <button
-                  onClick={() => {
-                    user ? addToCart(item) : navigate("/login");
-                  }}
-                  className="text-white rounded-lg hover:cursor-pointer transition"
-                >
-                  Add To Cart
-                </button>
-                <div>
+                <div className="flex justify-center items-center gap-4 bg-blue-600 rounded-xl px-4 py-3 mt-3">
+                  <button
+                    onClick={() =>
+                      user ? addToCart(item) : navigate("/login")
+                    }
+                    className="text-white text-sm"
+                  >
+                    Add To Cart
+                  </button>
+
                   <BsFillCartFill
-                    onClick={() => {
-                      user ? addToCart(item) : navigate("/login");
-                    }}
-                    size={20}
-                    className="text-white "
+                    onClick={() =>
+                      user ? addToCart(item) : navigate("/login")
+                    }
+                    size={18}
+                    className="text-white cursor-pointer"
                   />
                 </div>
-              </div>
 
-              <div
-                onClick={() => navigate("/courseDetail", { state: item })}
-                className="flex justify-center items-center gap-4 mt-3 hover:cursor-pointer"
-              >
-                <button className="hover:cursor-pointer">More Details</button>
-                <FaArrowRightLong
-                  size={20}
-                  className="text-blue-500 hover:cursor-pointer"
-                />
+                <div
+                  onClick={() =>
+                    navigate("/courseDetail", { state: item })
+                  }
+                  className="flex justify-center items-center gap-2 mt-3 cursor-pointer"
+                >
+                  <button className="text-sm">More Details</button>
+                  <FaArrowRightLong size={16} className="text-blue-500" />
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="text-xl text-gray-500 mt-10">
+            No courses found 😔
           </div>
-        ))
-      ) : (
-        <div className="text-3xl p-8 font-bold "> Loading ......</div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

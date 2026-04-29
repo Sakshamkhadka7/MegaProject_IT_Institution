@@ -45,7 +45,8 @@ const ALL_SLOTS = ["10:00 AM", "2:00 PM", "4:00 PM"];
 
 export const getAvailableSlot = asyncHandler(async (req, res) => {
   const courseId = req.params.id;
-  const date = req.query;
+  console.log("CourseId",courseId);
+  const {date} = req.query;
   if (!date) {
     return res
       .status(400)

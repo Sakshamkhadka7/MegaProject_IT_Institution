@@ -66,7 +66,7 @@ export const createCourse = asyncHandler(async (req, res) => {
 
 export const updateCourse = asyncHandler(async (req, res) => {
   const role = req.user?.role;
-  if (role !== "Instructor") {
+  if (role !== "Instructor" && role !=="Admin") {
     throw new ApiError(401, "Unauthorized to access");
   }
   const id = req.params.id;
@@ -94,30 +94,25 @@ export const updateCourse = asyncHandler(async (req, res) => {
     courseImage = req.file.filename;
   }
 
-  const updateData={
-       title,
+  const updateData = {
+    title,
     descriptions,
     syllabus,
     duration,
     fee,
     level,
     enrollmentDeadline,
-    prerequisities
+    prerequisities,
+  };
+
+  if (courseImage) {
+    updateData.courseImage = courseImage;
   }
 
-  if(courseImage){
-    updateData.courseImage=courseImage;
-  }
-
-  const updateCourse=await Course.findByIdAndUpdate(
-    id,
-    updateData,
-    {
-      new:true,
-      runValidators: true,
-    }
-  )
-
+  const updateCourse = await Course.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
 
   return res
     .status(200)
@@ -152,6 +147,20 @@ export const getAllCourse = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, "All courses fetched successfully", course));
+});
+
+export const getInstructorCourse = asyncHandler(async (req, res) => {
+  const user = req.user._id;
+  if (!user) {
+    throw new ApiError(401, "No user Id is found");
+  }
+
+  const courses = await Course.find({ instructor: user });
+  if (!courses) {
+    return new ApiResponse(200, "No courses you have created");
+  }
+
+  return res.status(200).json(new ApiResponse(200,"Instructor courses has been fetced",courses));
 });
 
 export const getCourse = asyncHandler(async (req, res) => {
@@ -199,7 +208,7 @@ export const enrolledCourse = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(401, "User couldnot found please register or login");
   }
-  if (user.enrolledCourses.includes(courseId)) {
+  if (user.enrolledCourses.includes(courseId)) {  
     throw new ApiError(401, "You are already enrolled in this courses");
   }
 

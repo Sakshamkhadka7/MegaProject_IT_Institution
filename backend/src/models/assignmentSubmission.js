@@ -4,7 +4,7 @@ const assignmentSubmission = new mongoose.Schema(
   {
     assignment: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Assignment",
     },
     courses: {
       type: mongoose.Schema.Types.ObjectId,
@@ -20,6 +20,7 @@ const assignmentSubmission = new mongoose.Schema(
     },
     comment: {
       type: String,
+
     },
     status: {
       type: String,

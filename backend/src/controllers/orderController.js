@@ -58,6 +58,13 @@ export const updateOrder = asyncHandler(async (req, res) => {
 });
 
 export const getAllOrders = asyncHandler(async (req, res) => {
+ 
+  const role=req.user.role;
+  if(role !=="Instructor" && role!=="Admin"){
+    throw new ApiError(401,"Not authorized to take orders");
+  }
+
+
   const orders = await Order.find();
   if (orders.length == 0) {
     throw new ApiError(401, "No orders found");

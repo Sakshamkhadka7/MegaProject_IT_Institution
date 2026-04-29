@@ -27,7 +27,8 @@ const AppRouter = () => {
           <Route path="certificate" element={<Certificate />} />
           <Route path="progress" element={<Progress />} />
           <Route path="order" element={<Order />} />
-          <Route path="submission" element={<AssignmentSubmission/>} />
+          <Route path="submission/:id" element={<AssignmentSubmission/>} />
+      
         </Route>
 
         <Route path="/login" element={<Login />} />

@@ -13,6 +13,7 @@ import StudentManagement from "../pages/StudentManagement";
 import SubmittedAssignment from "../pages/SubmittedAssignment";
 import StudentProgress from "../pages/StudentProgress";
 import EditCourseManagement from "../pages/EditCourseManagement";
+import FeedBack from "../pages/FeedBack";
 
 const AppRouter = () => {
   return (
@@ -40,10 +41,10 @@ const AppRouter = () => {
           <Route path="resourcesManagement" element={<ResourcesManagement />} />
           <Route path="studentManagement" element={<StudentManagement />} />
           <Route path="submitted" element={<SubmittedAssignment />} />
-          <Route path="studentProgress" element={<StudentProgress/>} />
-            <Route path="editCourse/:id" element={<EditCourseManagement />} /> 
+          <Route path="studentProgress" element={<StudentProgress />} />
+          <Route path="editCourse/:id" element={<EditCourseManagement />} />
+          <Route path="feedback/:id" element={<FeedBack/>} />
         </Route>
-  
       </Routes>
     </div>
   );

@@ -9,19 +9,30 @@ import {
   instructorFeedBack,
   SubmittedAssignmentForInstructor,
 } from "../controllers/assignmentController.js";
+import upload from "../middleware/upload.js";
 
 const assigmentRouter = express.Router();
 
-assigmentRouter.post("/createAssignment", userMiddleware, createAssignment);
+assigmentRouter.post(
+  "/createAssignment/:id",
+  userMiddleware,
+  upload.single("fileUrl"),
+  createAssignment,
+);
 assigmentRouter.get("/getCourse/:id", getAssignmentByCourse);
 assigmentRouter.post(
-  "/assignmentSubmission",
+  "/assignmentSubmission/:id",
   userMiddleware,
+  upload.single("submittedFile"),
   assignmentSubmission,
 );
-assigmentRouter.get("/getAssigment", userMiddleware, getSubmittedAssignments);
-assigmentRouter.delete("/deleteAssignment", deleteAssignment);
-assigmentRouter.post(
+assigmentRouter.get("/getSubmittedAssigment", userMiddleware, getSubmittedAssignments);
+assigmentRouter.delete(
+  "/deleteAssignment/:id",
+  userMiddleware,
+  deleteAssignment,
+);
+assigmentRouter.get(
   "/submittedInstructor",
   userMiddleware,
   SubmittedAssignmentForInstructor,

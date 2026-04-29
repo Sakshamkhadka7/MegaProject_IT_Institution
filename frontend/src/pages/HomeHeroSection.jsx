@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 const HomeHeroSection = () => {
   const navigate = useNavigate();
 
+ 
+
+
   return (
     <section className="relative h-screen w-full overflow-hidden">
       
@@ -43,13 +46,17 @@ const HomeHeroSection = () => {
           professional IT training and education through industry experts.
         </p>
 
-        <div
+   <div className="flex justify-between items-center gap-5">
+
+         <div
           onClick={() => navigate("/courses")}
           className="flex items-center gap-2 px-6 py-3 bg-blue-500 rounded-xl cursor-pointer hover:bg-blue-700 transition"
         >
           <span>Browse Our Course</span>
           <FaArrowCircleRight />
         </div>
+        
+   </div>
 
       </div>
     </section>

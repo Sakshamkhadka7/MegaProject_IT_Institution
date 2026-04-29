@@ -13,6 +13,7 @@ export const createJob = asyncHandler(async (req, res) => {
   if (!title || !company || !location || !position || !description) {
     throw new ApiError(400, "All fields are mandatory");
   }
+  console.log(req.body);
 
   const jobExists = await Job.find({
     title: title,
@@ -20,7 +21,7 @@ export const createJob = asyncHandler(async (req, res) => {
     position: position,
   });
 
-  if (jobExists) {
+  if (jobExists.length > 0) {
     throw new ApiError(400, "Job already exists");
   }
 
@@ -37,9 +38,7 @@ export const createJob = asyncHandler(async (req, res) => {
 });
 
 export const getAllJobs = asyncHandler(async (req, res) => {
-   if (req.user.role !== "Admin") {
-    throw new ApiError(403, "Not authorized to upload a job");
-  }
+  
   const jobs = await Job.find();
   if (jobs.length === 0) {
     throw new ApiError(404, "No job founds");

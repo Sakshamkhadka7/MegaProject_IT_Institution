@@ -9,6 +9,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 export const getStudentProgress = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const { studentId } = req.params;
+  console.log(courseId,studentId);
   const course = await Course.findById(courseId);
   if (!course) {
     throw new ApiError(404, "Course not found");
@@ -61,25 +62,36 @@ export const getStudentProgress = asyncHandler(async (req, res) => {
 
 export const getMyProgress = asyncHandler(async (req, res) => {
   const studentId = req.user._id;
+  // console.log(studentId);
   const { courseId } = req.params;
+  // console.log(courseId);
   const course = await Course.findById(courseId);
   if (!course) {
     throw new ApiError(401, "Course not found");
   }
-  if (!studentId.enrolledCourses.includes(courseId)) {
+
+  const student = await Student.findById(studentId);
+  if (!student) {
+    throw new ApiError(404, "Student donot found");
+  }
+
+  if (!student.enrolledCourses.includes(courseId)) {
     throw new ApiError(403, "Student is not enrolled in this course");
   }
 
   const assignments = await Assignment.find({ course: courseId });
+  console.log("Assignemnts",assignments);
   const submission = await AssignmentSubmission.find({
     student: studentId,
     courses: courseId,
   });
+  console.log("Submission", submission);
 
   const progress = assignments.map((assign) => {
-    const submitted = submission.find(
-      (sub) => sub.assignment.toString() === assign._id.toString(),
-    );
+    const submitted = submission.find((sub) => {
+      return sub.assignment.toString() === assign._id.toString();
+    });
+    console.log("Submitted", submitted);
 
     return {
       assignmentTitle: assign.title,
@@ -95,11 +107,6 @@ export const getMyProgress = asyncHandler(async (req, res) => {
     new ApiResponse(
       200,
       "getMyProgess fetched successfully",
-      {
-        course: {
-          title: course.title,
-        },
-      },
       progress,
     ),
   );

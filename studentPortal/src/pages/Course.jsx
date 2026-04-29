@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { FaArrowAltCircleRight } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Course = () => {
   const [course, setCourse] = useState([]);
+  const navigate = useNavigate();
 
   const getMyCourse = async () => {
     try {
@@ -13,7 +16,7 @@ const Course = () => {
             "Content-Type": "application/json",
           },
           credentials: "include",
-        }
+        },
       );
 
       if (res.ok) {
@@ -32,9 +35,7 @@ const Course = () => {
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       {/* Heading */}
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">
-        My Courses
-      </h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">My Courses</h1>
 
       {/* Courses Grid */}
       {course.length > 0 ? (
@@ -69,7 +70,19 @@ const Course = () => {
                   <p>📊 Level: {cours.level}</p>
                 </div>
 
-              
+                <div className="flex justify-between items-center">
+                  <h1 className="text-xl font-bold text-green-600">
+                    Assignment
+                  </h1>
+                  <FaArrowAltCircleRight
+                    onClick={() =>
+                      navigate(`/access/submission/${cours._id}`, {
+                        state: cours,
+                      })
+                    }
+                    size={20}
+                  />
+                </div>
               </div>
             </div>
           ))}

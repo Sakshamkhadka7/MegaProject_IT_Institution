@@ -7,6 +7,7 @@ export const createResources = asyncHandler(async (req, res) => {
   const instructorId = req.user._id;
   const fileUrl = req.file.filename;
   const instructor=req.user.role;
+  console.log(req.body);
   if(instructor!="Instructor"){
     throw new ApiError(403,"Not authorized for this request");
   }
@@ -34,7 +35,7 @@ export const getResourcesByCourse = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Id couldnot found");
   }
 
-  const resources = await Resources.findOne({ courses: courseId });
+  const resources = await Resources.find({ courses: courseId });
   if (resources.length === 0) {
     throw new ApiError(401, "No resources found");
   }

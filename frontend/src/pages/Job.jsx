@@ -1,9 +1,108 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import { FaMapMarkerAlt, FaBriefcase, FaBuilding } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Job = () => {
-  return (
-    <div>Job</div>
-  )
-}
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate=useNavigate();
 
-export default Job
+  const getJobs = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/v1/job/getJob", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setJobs(data.data);
+      }
+    } catch (error) {
+      console.log("Error fetching jobs", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getJobs();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
+      <div className="max-w-6xl mx-auto mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Job Opportunities</h1>
+        <p className="text-gray-500 text-sm mt-1">
+          Explore latest job openings and apply instantly
+        </p>
+      </div>
+
+      {/* Loading */}
+      {loading && (
+        <div className="text-center text-gray-500 mt-10">
+          Loading jobs...
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && jobs.length === 0 && (
+        <div className="text-center text-gray-400 mt-10">
+          No jobs available right now
+        </div>
+      )}
+
+      {/* Job Grid */}
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {jobs.map((job) => (
+          <div
+            key={job._id}
+            className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition p-5 border border-gray-100"
+          >
+            {/* Company */}
+            <div className="flex items-center gap-2 text-gray-600 text-sm">
+              <FaBuilding />
+              <span className="font-medium">{job.company}</span>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-lg font-semibold text-gray-800 mt-2">
+              {job.title}
+            </h2>
+
+            {/* Position */}
+            <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+              <FaBriefcase />
+              <span>{job.position}</span>
+            </div>
+
+            {/* Location */}
+            <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+              <FaMapMarkerAlt />
+              <span>{job.location}</span>
+            </div>
+
+            {/* Description */}
+            <p className="text-sm text-gray-600 mt-3 line-clamp-3">
+              {job.description}
+            </p>
+
+            {/* Footer */}
+            <div className="mt-5 flex justify-between items-center">
+              <span className="text-xs text-gray-400">
+                Posted: {new Date(job.createdAt).toDateString()}
+              </span>
+
+              <button onClick={()=> navigate("/jobApply",{state:job}) } className="bg-blue-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-blue-700 transition">
+                Apply Now
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Job;

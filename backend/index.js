@@ -13,6 +13,7 @@ import blogRouter from "./src/routes/blogRoute.js";
 import reviewRouter from "./src/routes/reviewRoute.js";
 import resourcesRouter from "./src/routes/resourcesRoute.js";
 import cors from "cors";
+import DemoRouter from "./src/routes/demoRoute.js";
 
 const app = express();
 dotenv.config();
@@ -21,7 +22,7 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174","http://localhost:5175"],
+    origin: ["http://localhost:5173", "http://localhost:5174","http://localhost:5175","http://localhost:5176"],
     credentials: true,
   }),
 );
@@ -43,7 +44,8 @@ connectDb()
 
 app.use("/api/v1/student", studentRoute);
 app.use("/api/v1/course", courseRoute);
-app.use("/api/v1/assigment", assigmentRouter);
+app.use("/api/v1/assignment", assigmentRouter);
+app.use("/api/v1/demo",DemoRouter);
 app.use("/api/v1/certificate", certifcateRoute);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/progress", progressRouter);

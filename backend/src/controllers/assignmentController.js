@@ -14,7 +14,7 @@ export const createAssignment = asyncHandler(async (req, res) => {
   }
 
   const { title, description, deadline } = req.body;
-  const fileUrl = req.file;
+  const fileUrl = req.file.filename;
   if (!title || !description || !deadline || !fileUrl) {
     throw new ApiError(401, "All fields are mandatory");
   }
@@ -46,18 +46,19 @@ export const getAssignmentByCourse = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Couldnot found a assignment by course");
   }
 
-  return res.status.json(
+  return res.status(200).json(
     new ApiResponse(200, "AssignnmentByCourse fetched", assignmentCourse),
   );
 });
 
 export const assignmentSubmission = asyncHandler(async (req, res) => {
-  const assignmentId = req.body;
+  const assignmentId = req.params.id;
+   console.log(req.body);
   if (!assignmentId) {
     throw new ApiError(401, "Id couldnot found");
   }
 
-  const courseId = req.body;
+  const {courseId} = req.body;
   if (!courseId) {
     throw new ApiError(401, "Id couldnot found");
   }
@@ -69,7 +70,7 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
   }
 
   const { comment } = req.body;
-  const submittedFile = req.file;
+  const submittedFile = req.file.filename;
   if (!submittedFile) {
     throw new ApiError(401, "File is required");
   }
@@ -84,7 +85,7 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Student has already submitted assignment");
   }
 
-  const assignmentSubmission = await AssignmentSubmission({
+  const assignmentSubmission = await AssignmentSubmission.create({
     assignment: assignmentId,
     courses: courseId,
     student: studentId,
@@ -92,7 +93,7 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
     comment: comment,
   });
 
-  return res.status.json(
+  return res.status(200).json(
     new ApiResponse(
       200,
       "Assignment submitted successfully",
@@ -123,14 +124,16 @@ export const deleteAssignment = asyncHandler(async (req, res) => {
   if (!assignment) {
     throw new ApiError(401, "No assigmnet found");
   }
-  return res.status.json(
+  return res.status(200).json(
     new ApiResponse(200, "Assignment deleted successfully"),
   );
 });
 
 export const SubmittedAssignmentForInstructor = asyncHandler(
   async (req, res) => {
+  
     const instructorId = req.user._id;
+    console.log(instructorId);
     const instructor=req.user.role;
     if(instructor!=="Instructor"){
       throw new ApiError(401,"Not authorized to check assignment");
@@ -145,10 +148,13 @@ export const SubmittedAssignmentForInstructor = asyncHandler(
     }
 
     const courseId = await courses.map((course) => course._id);
+    console.log(courseId);
 
     const submission = await AssignmentSubmission.find({
-      course: { $in: courseId },
-    });
+      courses: { $in: courseId },
+    }).populate("courses").populate("student")
+
+    console.log(submission);
 
     return res
       .status(200)
@@ -161,8 +167,9 @@ export const SubmittedAssignmentForInstructor = asyncHandler(
 export const instructorFeedBack = asyncHandler(async (req, res) => {
   const submissionId = req.params.id;
   const { feedback, score } = req.body;
+  console.log(feedback,score);
 
-  const submission = await AssignmentSubmission.findById({ _id: id });
+  const submission = await AssignmentSubmission.findById(submissionId);
   if (!submissionId) {
     throw new ApiError(401, "No submission found");
   }
@@ -172,9 +179,10 @@ export const instructorFeedBack = asyncHandler(async (req, res) => {
   if (feedback) {
     submission.instructorFeedBack = feedback;
   }
+ 
 
-  if (typeof score === "number") {
-    submission.score = score;
+if (score !== undefined) {
+    submission.score = Number(score);
   }
 
   await submission.save();
