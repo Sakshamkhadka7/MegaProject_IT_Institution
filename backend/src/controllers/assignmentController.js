@@ -104,7 +104,7 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
 
 export const getSubmittedAssignments = asyncHandler(async (req, res) => {
   const studentId = req.user._id;
-  const assignment = await AssignmentSubmission.find({ student: studentId });
+  const assignment = await AssignmentSubmission.find({ student: studentId }).populate("assignment")
   if (assignment.length == 0) {
     throw new ApiError(401, "No assignment has been submitted");
   }

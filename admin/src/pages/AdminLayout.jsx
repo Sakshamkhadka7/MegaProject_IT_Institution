@@ -7,6 +7,7 @@ import { RxCross1 } from "react-icons/rx";
 import { NavLink, Outlet } from "react-router-dom";
 import { IoMenu } from "react-icons/io5";
 import { HiOfficeBuilding } from "react-icons/hi";
+import { FaCertificate } from "react-icons/fa6";
 
 const navItems = [
   {
@@ -43,6 +44,11 @@ const navItems = [
     to:"/access/manageJob",
     label:"Manage Job",
     icon:HiOfficeBuilding
+  }
+  ,{
+    to:"/access/certificate",
+    label:"Certificate Management",
+    icon:FaCertificate
   }
 ];
 

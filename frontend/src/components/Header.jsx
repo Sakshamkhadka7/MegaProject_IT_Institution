@@ -42,6 +42,12 @@ const Header = () => {
         <NavLink to="/courses">Courses</NavLink>
         <NavLink to="/job">Job</NavLink>
         <NavLink to="/contact">Contact</NavLink>
+          <NavLink
+              to="/cart"
+              
+            >
+              Cart
+            </NavLink>
       </div>
 
       {/* Desktop Right (Hover dropdown) */}
@@ -77,12 +83,9 @@ const Header = () => {
               Register
             </NavLink>
 
-            <NavLink
-              to="/profile"
-              className="border px-5 py-1 rounded-xl bg-green-600 text-white font-serif"
-            >
-              Profile
-            </NavLink>
+          <NavLink className="border px-5 py-1 rounded-xl bg-green-600 text-white font-serif" to="/profile">
+            Profile
+          </NavLink>
 
             <div
               onClick={logOut}

@@ -78,7 +78,7 @@ const JobApplication = () => {
 
               {/* Cover Letter */}
               <textarea
-                rows="5"
+                rows="5"x
                 placeholder="Write your cover letter..."
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}

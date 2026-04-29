@@ -3,7 +3,7 @@ import { CartContext } from "../context/AddToCart";
 import { useNavigate } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
 
-const Profile = () => {
+const Cart = () => {
   const { state, dispatch } = useContext(CartContext);
   const navigate = useNavigate();
 
@@ -146,4 +146,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Cart;

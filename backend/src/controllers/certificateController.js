@@ -27,19 +27,17 @@ export const createCertificate = asyncHandler(async (req, res) => {
 
 export const getMyCertificate = asyncHandler(async (req, res) => {
   const studentId = req.user._id;
-  if (!studentId) {
-    throw new ApiError(401, "Id couldnot found");
+
+  const certificates = await Certificate.find({ student: studentId })
+    .populate("courses", "title");
+
+  if (!certificates.length) {
+    throw new ApiError(404, "No certificates found");
   }
-  const certifcate = await Certificate.findById({ _id: studentId }).populate(
-    "courses",
-    "title",
+
+  return res.status(200).json(
+    new ApiResponse(200, "Certificates fetched successfully", certificates)
   );
-  if (!certifcate) {
-    throw new ApiError(401, "Couldnot found certificate");
-  }
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Certificate fetched successfully", certifcate));
 });
 
 export const getAllCertificate = asyncHandler(async (req, res) => {

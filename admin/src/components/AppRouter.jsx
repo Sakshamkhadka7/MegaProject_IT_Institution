@@ -13,6 +13,7 @@ import EditCourse from "../pages/EditCourse";
 import AddJob from "../pages/AddJob";
 import ManageJob from "../pages/ManageJob";
 import EditJob from "../pages/EditJob";
+import CertificateManagement from "../pages/CertificateManagement";
 
 const AppRouter = () => {
   return (
@@ -39,6 +40,7 @@ const AppRouter = () => {
           <Route path="job" element={<AddJob/>} />
           <Route path="manageJob" element={<ManageJob/>} />
           <Route path="editJob/:id" element={<EditJob/>} />
+          <Route path="certificate" element={<CertificateManagement/>} />
 
         </Route>
       </Routes>

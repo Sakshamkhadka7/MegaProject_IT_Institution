@@ -9,6 +9,7 @@ import Certificate from "../pages/Certificate";
 import Progress from "../pages/Progress";
 import Order from "../pages/Order";
 import AssignmentSubmission from "../pages/AssignmentSubmission";
+import GetSubmittedAssignment from "../pages/GetSubmittedAssignment";
 
 const AppRouter = () => {
   return (
@@ -28,7 +29,7 @@ const AppRouter = () => {
           <Route path="progress" element={<Progress />} />
           <Route path="order" element={<Order />} />
           <Route path="submission/:id" element={<AssignmentSubmission/>} />
-      
+          <Route path="getSubmitted" element={<GetSubmittedAssignment/>} />
         </Route>
 
         <Route path="/login" element={<Login />} />

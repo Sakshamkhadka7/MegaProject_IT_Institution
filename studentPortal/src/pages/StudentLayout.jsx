@@ -32,7 +32,7 @@ const StudentLayout = () => {
            <NavLink to="certificate" className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200">
             Certificate Earned
           </NavLink>
-            <NavLink to="submission" className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200">
+            <NavLink to="getSubmitted" className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200">
             Assignment Submission
           </NavLink>
 

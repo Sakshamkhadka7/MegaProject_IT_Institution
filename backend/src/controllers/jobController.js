@@ -122,7 +122,7 @@ export const jobApply = asyncHandler(async (req, res) => {
 export const getMyApplication=asyncHandler(async(req,res)=>{
 
   const userId=req.user._id;
-  const application=await Application.findOne({applicant:userId});
+  const application=await Application.find({applicant:userId}).populate("job")
   if(!application){
     throw new ApiError(404,"No application founds");
   }
