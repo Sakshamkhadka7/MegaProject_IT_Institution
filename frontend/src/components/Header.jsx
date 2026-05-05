@@ -3,16 +3,25 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { FaRegUserCircle } from "react-icons/fa";
 import { useContext } from "react";
 import { UserContext } from "../context/UserProvider";
+import { toast } from "react-toastify";
+import { FiShoppingCart } from "react-icons/fi";
+
+
+const navLinkClass =
+  "relative text-gray-600 hover:text-blue-600 transition font-medium";
+
+const activeClass =
+  "text-blue-600 after:absolute after:left-0 after:-bottom-1 after:w-full after:h-[2px] after:bg-blue-600"; 
 
 const Header = () => {
   const [menu, setMenu] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false); //  added
   const { user, setUser, error, loading } = useContext(UserContext);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const handleClose = () => {
     setMenu(false);
-    setProfileOpen(false); // ✅ reset on close
+    setProfileOpen(false); //  reset on close
   };
 
   const logOut = async () => {
@@ -23,9 +32,9 @@ const Header = () => {
     });
 
     if (res.ok) {
-      alert("User Logout");
+      toast.success("You are logout successfully");
       setUser(null);
-         navigate("/login");
+      navigate("/login");
     }
   };
 
@@ -35,20 +44,77 @@ const Header = () => {
       <h1 className="text-2xl font-bold">IT Institution</h1>
 
       {/* Desktop Menu */}
-      <div className="hidden md:flex gap-5 items-center z-30">
-        <NavLink to="/">Home</NavLink>
-        <NavLink to="/aboutus">About</NavLink>
-        <NavLink to="/blogs">Blogs</NavLink>
-        <NavLink to="/courses">Courses</NavLink>
-        <NavLink to="/job">Job</NavLink>
-        <NavLink to="/contact">Contact</NavLink>
-          <NavLink
-              to="/cart"
-              
-            >
-              Cart
-            </NavLink>
-      </div>
+      <div className="hidden md:flex items-center gap-8 z-30">
+      
+      <NavLink
+        to="/"
+        className={({ isActive }) =>
+          `${navLinkClass} ${isActive ? activeClass : ""}`
+        }
+      >
+        Home
+      </NavLink>
+
+      <NavLink
+        to="/aboutus"
+        className={({ isActive }) =>
+          `${navLinkClass} ${isActive ? activeClass : ""}`
+        }
+      >
+        About
+      </NavLink>
+
+      <NavLink
+        to="/blogs"
+        className={({ isActive }) =>
+          `${navLinkClass} ${isActive ? activeClass : ""}`
+        }
+      >
+        Blogs
+      </NavLink>
+
+      <NavLink
+        to="/courses"
+        className={({ isActive }) =>
+          `${navLinkClass} ${isActive ? activeClass : ""}`
+        }
+      >
+        Courses
+      </NavLink>
+
+      <NavLink
+        to="/job"
+        className={({ isActive }) =>
+          `${navLinkClass} ${isActive ? activeClass : ""}`
+        }
+      >
+        Jobs
+      </NavLink>
+
+      <NavLink
+        to="/contact"
+        className={({ isActive }) =>
+          `${navLinkClass} ${isActive ? activeClass : ""}`
+        }
+      >
+        Contact
+      </NavLink>
+
+      {/* Cart with icon + badge */}
+      <NavLink
+        to="/cart"
+        className={({ isActive }) =>
+          `relative flex items-center gap-1 ${navLinkClass} ${
+            isActive ? activeClass : ""
+          }`
+        }
+      >
+        <FiShoppingCart size={18} />
+        Cart
+
+      
+      </NavLink>
+    </div>
 
       {/* Desktop Right (Hover dropdown) */}
       <div className="hidden md:flex gap-1 justify-center items-center z-30">
@@ -83,9 +149,12 @@ const Header = () => {
               Register
             </NavLink>
 
-          <NavLink className="border px-5 py-1 rounded-xl bg-green-600 text-white font-serif" to="/profile">
-            Profile
-          </NavLink>
+            <NavLink
+              className="border px-5 py-1 rounded-xl bg-green-600 text-white font-serif"
+              to="/profile"
+            >
+              Profile
+            </NavLink>
 
             <div
               onClick={logOut}
@@ -147,18 +216,47 @@ const Header = () => {
 
         {/*  Mobile Profile Toggle */}
         <div className="flex flex-col items-center mt-2">
-          <div
-            onClick={() => setProfileOpen(!profileOpen)}
-            className="font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300"
-          >
-            <FaRegUserCircle /> Profile
-          </div>
+          {user ? (
+            <div
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="cursor-pointer"
+            >
+              <img
+                className="rounded-full w-10 h-10"
+                src={`http://localhost:3001/image/${user?.avatar}`}
+                alt="profile"
+              />
+            </div>
+          ) : (
+            <div>
+              <div
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300"
+              >
+                <FaRegUserCircle /> Profile
+              </div>
+            </div>
+          )}
 
           <div
             className={`flex flex-col items-center gap-2 mt-2  ${
               profileOpen ? "flex" : "hidden"
             }`}
           >
+            {user ? (
+              <div></div>
+            ) : (
+              <div>
+                <NavLink
+                  onClick={handleClose}
+                  to="/register"
+                  className="border px-4 py-1 rounded-xl bg-blue-600 text-white"
+                >
+                  Register
+                </NavLink>
+              </div>
+            )}
+
             <NavLink
               onClick={handleClose}
               to="/login"
@@ -167,13 +265,12 @@ const Header = () => {
               Login
             </NavLink>
 
-            <NavLink
-              onClick={handleClose}
-              to="/register"
-              className="border px-4 py-1 rounded-xl bg-blue-600 text-white"
+            <div
+              onClick={logOut}
+              className="border px-5 py-1 rounded-xl bg-red-600 text-white font-serif hover:cursor-pointer"
             >
-              Register
-            </NavLink>
+              logout
+            </div>
             <NavLink
               onClick={handleClose}
               to="/profile"

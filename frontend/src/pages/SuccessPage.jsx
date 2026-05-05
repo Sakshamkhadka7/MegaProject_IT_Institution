@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CartContext } from "../context/AddToCart";
+import { toast } from "react-toastify";
 
 const SuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -25,7 +26,7 @@ const SuccessPage = () => {
       );
 
       if (res.ok) {
-        alert("order status updated successfully");
+        toast.success("Order status updated successfully");
         dispatch({type:"clear"});
       }
     } catch (error) {

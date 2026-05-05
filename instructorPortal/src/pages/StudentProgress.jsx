@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const StudentProgress = () => {
   const [students, setStudents] = useState([]);
@@ -23,6 +24,7 @@ const StudentProgress = () => {
       }
     } catch (error) {
       console.log(error);
+      toast.error("Error occured at get students");
     } finally {
       setLoading(false);
     }
@@ -50,6 +52,7 @@ const StudentProgress = () => {
         }));
       }
     } catch (error) {
+      toast.error("Error occured ar getProgress");
       console.log(error);
     }
   };
@@ -129,7 +132,7 @@ const StudentProgress = () => {
                         </button>
                       </div>
 
-                      {/* ✅ FIXED PROGRESS UI */}
+                      {/*  FIXED PROGRESS UI */}
                       {active === key && (
                         <div className="mt-3">
                           {!progress ? (
@@ -168,7 +171,7 @@ const StudentProgress = () => {
                                   <p className="text-xs mt-1">
                                     Score:{" "}
                                     <span className="font-semibold text-blue-600">
-                                      {item.score ?? "N/A"}
+                                      {item.score ?? "Not score yet"}
                                     </span>
                                   </p>
 

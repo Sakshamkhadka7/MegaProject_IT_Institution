@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MdEditSquare } from "react-icons/md";
 import { RiDeleteBin7Fill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
@@ -23,18 +24,19 @@ const CourseManagement = () => {
 
       if (res.ok) {
         res = await res.json();
-        alert("Course has been deleted");
+        toast.error("Course has been deleted");
         getAllCourses();
       }
     } catch (error) {
       console.log("Error has been occured at deleteCourses", error);
+      toast.error("Error occured at a deleteCourses");
     }
   };
 
   const getAllCourses = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/course/getAllCourses",
+        "http://localhost:3001/api/v1/course/getInstructorCourse",
         {
           method: "GET",
           credentials: "include",
@@ -48,6 +50,7 @@ const CourseManagement = () => {
       }
     } catch (error) {
       console.log("Error occurred at getAllCourses", error);
+      toast.error("Error occured at getAllCourses")
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { InstructorContext } from "../context/IntructorProvider";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,8 +22,25 @@ const Login = () => {
     });
   };
 
+   const validateForm = () => {
+    const { email, password } = formData;
+
+    if (!email) {
+      toast.error("Email is required");
+      return false;
+    }
+
+    if (!password) {
+      toast.error("Password is required");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
     try {
       let res = await fetch("http://localhost:3001/api/v1/student/login", {

@@ -12,6 +12,9 @@ const reviewSchema = new mongoose.Schema(
       ref: "Courses",
       required: true,
     },
+    photo:{
+     type:String
+    },
     rating: {
       type: Number,
       min: 0,

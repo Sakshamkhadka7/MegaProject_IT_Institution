@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaFileAlt, FaCheckCircle, FaClock } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const GetSubmittedAssignment = () => {
   const [assignments, setAssignments] = useState([]);
@@ -22,6 +23,7 @@ const GetSubmittedAssignment = () => {
       }
     } catch (error) {
       console.log("Error fetching assignments", error);
+      toast.error("Error occured at fetching assignments");
     } finally {
       setLoading(false);
     }

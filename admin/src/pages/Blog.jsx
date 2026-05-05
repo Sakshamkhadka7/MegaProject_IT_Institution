@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 const CreateBlog = () => {
   const [formData, setFormData] = useState({
@@ -21,6 +22,27 @@ const CreateBlog = () => {
     });
   };
 
+  const validateForm = () => {
+    const { title, content, category } = formData;
+
+    if (!title) {
+      toast.warning("Title is required");
+      return false;
+    }
+
+    if (!content) {
+      toast.warning("Content is required");
+      return false;
+    }
+
+    if (!category) {
+      toast.warning("Category is required");
+      return false;
+    }
+
+    return true;
+  };
+
   // handle image
   const handleImage = (e) => {
     const file = e.target.files[0];
@@ -34,6 +56,12 @@ const CreateBlog = () => {
   // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+   
+    if(!image){
+      toast.error("Image is required");
+      return
+    }
 
     try {
       setLoading(true);
@@ -44,20 +72,18 @@ const CreateBlog = () => {
       data.append("category", formData.category);
       data.append("image", image);
 
-      const res = await fetch(
-        "http://localhost:3001/api/v1/blog/createBlog",
-        {
-          method: "POST",
-          credentials: "include", // for auth
-          body: data,
-        }
-      );
+      const res = await fetch("http://localhost:3001/api/v1/blog/createBlog", {
+        method: "POST",
+        credentials: "include", // for auth
+        body: data,
+      });
 
       if (res.ok) {
         setSuccess(true);
         setFormData({ title: "", content: "", category: "" });
         setImage(null);
         setPreview(null);
+        toast.success("Blog created successfully");
       }
     } catch (error) {
       console.log("Error creating blog", error);
@@ -69,19 +95,13 @@ const CreateBlog = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center items-center p-6">
       <div className="bg-white w-full max-w-2xl rounded-2xl shadow-md p-6">
-        
-        <h2 className="text-2xl font-semibold mb-6">
-          Create Blog
-        </h2>
+        <h2 className="text-2xl font-semibold mb-6">Create Blog</h2>
 
         {success && (
-          <p className="text-green-600 mb-4">
-            ✅ Blog created successfully
-          </p>
+          <p className="text-green-600 mb-4">✅ Blog created successfully</p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          
           {/* Title */}
           <input
             type="text"
@@ -106,8 +126,6 @@ const CreateBlog = () => {
             <option value="Design">Design</option>
             <option value="Marketing">Marketing</option>
             <option value="AI">Artificial Intelligence</option>
-
-
           </select>
 
           {/* Content */}
@@ -147,7 +165,6 @@ const CreateBlog = () => {
           >
             {loading ? "Creating..." : "Create Blog"}
           </button>
-
         </form>
       </div>
     </div>

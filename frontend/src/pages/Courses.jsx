@@ -144,7 +144,7 @@ const Courses = () => {
                     onClick={() =>
                       user ? addToCart(item) : navigate("/login")
                     }
-                    className="text-white text-sm"
+                    className="text-white text-sm cursor-pointer"
                   >
                     Add To Cart
                   </button>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaUserEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -21,7 +22,7 @@ const Blog = () => {
       });
 
       if (res.ok) {
-        alert("Blog deleted");
+        toast.error("Blog deleted");
         getBlogs();
       }
     } catch (error) {

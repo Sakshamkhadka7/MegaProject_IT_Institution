@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AssignmentSubmission = () => {
   const [assignments, setAssignments] = useState([]);
@@ -9,39 +10,47 @@ const AssignmentSubmission = () => {
   const [comment, setComment] = useState("");
   const [submittedFile, setSubmittedFile] = useState("");
 
+
+
   const submitAssignment = async (id) => {
     if (!submittedFile) {
-      alert("Please upload file");
+      toast.warning("Please upload file");
+      return;
+    }
+
+    if(!comment){
+      toast.warning("Please comment , comment is required");
       return;
     }
 
     try {
       const formData = new FormData();
-      formData.append("assignmentId", id); // 
+      formData.append("assignmentId", id); //
       formData.append("courseId", state._id);
       formData.append("comment", comment);
-      formData.append("submittedFile", submittedFile); 
+      formData.append("submittedFile", submittedFile);
 
       let res = await fetch(
-        `http://localhost:3001/api/v1/assignment/assignmentSubmission/${id}`, 
+        `http://localhost:3001/api/v1/assignment/assignmentSubmission/${id}`,
         {
           method: "POST",
           credentials: "include",
           body: formData, //  correct way
-        }
+        },
       );
 
       const result = await res.json();
 
       if (res.ok) {
-        alert("Assignment submission completed");
+        toast.success("Assignment submission completed");
         setComment("");
         setSubmittedFile("");
       } else {
-        alert(result.message || "Something went wrong");
+        toast.error(result.message || "Something went wrong");
       }
     } catch (error) {
       console.log("Error occured at submitAssignment", error);
+      toast.error("Error occured at submitAssignment");
     }
   };
 
@@ -51,7 +60,7 @@ const AssignmentSubmission = () => {
         `http://localhost:3001/api/v1/assignment/getCourse/${state._id}`,
         {
           credentials: "include",
-        }
+        },
       );
 
       const data = await res.json();
@@ -108,9 +117,7 @@ const AssignmentSubmission = () => {
               </div>
 
               {/* Description */}
-              <p className="text-gray-600 text-sm mt-3">
-                {assign.description}
-              </p>
+              <p className="text-gray-600 text-sm mt-3">{assign.description}</p>
 
               {/* File + Meta */}
               <div className="flex flex-col md:flex-row md:items-center justify-between mt-4 gap-3">
@@ -148,9 +155,7 @@ const AssignmentSubmission = () => {
                   <input
                     type="file"
                     className="border p-2 rounded-lg w-full"
-                    onChange={(e) =>
-                      setSubmittedFile(e.target.files?.[0])
-                    }
+                    onChange={(e) => setSubmittedFile(e.target.files?.[0])}
                     name="submittedFile"
                   />
 

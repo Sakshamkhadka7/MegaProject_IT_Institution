@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -6,6 +7,8 @@ const UserManagement = () => {
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
+
+  const navigate=useNavigate();
 
   // ✅ Fetch Users
   const getUsers = async () => {
@@ -33,7 +36,7 @@ const UserManagement = () => {
     getUsers();
   }, []);
 
-  // ✅ Filtering (Production logic)
+  //  Filtering (Production logic)
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchSearch = user.fullName
@@ -61,7 +64,7 @@ const UserManagement = () => {
       </div>
 
       {/* 🔍 Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm justify-center items-center">
         
         {/* Search */}
         <input
@@ -83,6 +86,13 @@ const UserManagement = () => {
           <option value="Instructor">Instructor</option>
           <option value="Admin">Admin</option>
         </select>
+       
+       <div className="text-center border px-9 py-2 bg-blue-500 text-white"
+       onClick={()=> navigate("/access/instructor")}
+       >
+        Add Instructor
+       </div>
+
       </div>
 
       {/* Loading */}

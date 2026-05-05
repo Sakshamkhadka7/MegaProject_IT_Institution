@@ -5,6 +5,7 @@ import {
   createAssignment,
   deleteAssignment,
   getAssignmentByCourse,
+  getInstructorAssignment,
   getSubmittedAssignments,
   instructorFeedBack,
   SubmittedAssignmentForInstructor,
@@ -20,6 +21,7 @@ assigmentRouter.post(
   createAssignment,
 );
 assigmentRouter.get("/getCourse/:id", getAssignmentByCourse);
+assigmentRouter.get("/getInstructorAssignment",userMiddleware,getInstructorAssignment);
 assigmentRouter.post(
   "/assignmentSubmission/:id",
   userMiddleware,

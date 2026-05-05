@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const AddResources = () => {
   const [courses, setCourses] = useState([]);
@@ -38,6 +39,42 @@ const AddResources = () => {
     getCourses();
   }, []);
 
+
+  const validateForm = () => {
+  const { courseId, title, file, link } = formData;
+
+  // Course
+  if (!courseId) {
+    toast.error("Please select a course");
+    return false;
+  }
+
+  // Title
+  if (!title.trim()) {
+    toast.error("Title is required");
+    return false;
+  }
+
+  if (title.trim().length < 3) {
+    toast.error("Title must be at least 3 characters");
+    return false;
+  }
+
+  // File or Link (only one required)
+  if (!file && !link) {
+    toast.error("Please provide either a file or a link");
+    return false;
+  }
+
+
+
+
+
+  
+
+  return true;
+};
+
   // Handle Input
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -51,14 +88,15 @@ const AddResources = () => {
   // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(!validateForm()) return;
 
     if (!formData.courseId || !formData.title) {
-      alert("Course and title are required");
+      toast.error("Course and title are required");
       return;
     }
 
     if (!formData.file && !formData.link) {
-      alert("Provide either file or link");
+      toast.error("Provide either file or link");
       return;
     }
 
@@ -86,7 +124,7 @@ const AddResources = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert("Resource added successfully");
+        toast.success("Resource added successfully");
 
         // Reset form
         setFormData({
@@ -96,10 +134,11 @@ const AddResources = () => {
           link: "",
         });
       } else {
-        alert(result.message || "Failed to add resource");
+        toast.error(result.message || "Failed to add resource");
       }
     } catch (error) {
       console.log("Error adding resource", error);
+      toast.error("Error occured at adding resources");
     } finally {
       setSubmitting(false);
     }

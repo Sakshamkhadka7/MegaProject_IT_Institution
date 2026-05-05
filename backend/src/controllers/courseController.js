@@ -122,7 +122,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
 export const deleteCourse = asyncHandler(async (req, res) => {
   const role = req.user?.role;
   console.log(role);
-  if (role !== "Instructor") {
+  if (role !== "Instructor" && role!=="Admin") {
     throw new ApiError(401, "Unauthorized to access");
   }
   const id = req.params.id;
@@ -208,8 +208,11 @@ export const enrolledCourse = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(401, "User couldnot found please register or login");
   }
-  if (user.enrolledCourses.includes(courseId)) {  
-    throw new ApiError(401, "You are already enrolled in this courses");
+  if (user.enrolledCourses.includes(courseId)) { 
+
+   return res
+    .status(200)
+    .json(new ApiResponse(200, "User already enrolled in this course"));
   }
 
   user.enrolledCourses.push(courseId);

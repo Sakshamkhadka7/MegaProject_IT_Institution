@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { StudentContext } from "../context/StudentProvider";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const { setUser } = useContext(StudentContext);
@@ -37,13 +38,14 @@ const Login = () => {
 
       if (res.ok) {
         res = await res.json();
-        alert("Login successfully");
+        toast.success("Login successfully");
         navigate("/access");
         setUser(res.data);
         //  console.log(res.loggedInUser);
       }
     } catch (error) {
       console.log("Error occured at Login fetch frontend", error);
+      toast.error("error occured at student login");
     }
   };
 

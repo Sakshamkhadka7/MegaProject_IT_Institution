@@ -5,14 +5,15 @@ import CryptoJS from "crypto-js";
 
 const Payment = () => {
   const { state } = useLocation();
+  console.log(state);
    const total=state?.total;
    const order=state?.orderData;
    console.log(total);
    console.log(order);
+   console.log(order._id);
+
    
    const transaction_uuid=order._id;
-
-
   const message = `total_amount=${total},transaction_uuid=${transaction_uuid},product_code=EPAYTEST`;
   let hash = CryptoJS.HmacSHA256(message, "8gBm/:&EnhH.1/q");
   let signature = CryptoJS.enc.Base64.stringify(hash);

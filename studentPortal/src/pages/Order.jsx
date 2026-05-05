@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const Order = () => {
   const [order, setOrder] = useState([]);
@@ -17,6 +18,7 @@ const Order = () => {
       setOrder(data.data || []);
     } catch (error) {
       console.log("Error fetching orders:", error);
+      toast.error("Error occured at fetching orders");
     }
   };
 

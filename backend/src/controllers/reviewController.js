@@ -6,6 +6,9 @@ import asyncHandler from "../utils/asyncHandler.js";
 export const createReview = asyncHandler(async (req, res) => {
   const user = req.user._id;
   const { course, rating, comment } = req.body;
+
+  const photo = req.file.filename;
+
   if (!user || !course || !rating || !comment) {
     throw new ApiError(403, "All fields are madatory");
   }
@@ -15,6 +18,7 @@ export const createReview = asyncHandler(async (req, res) => {
     course: course,
     rating: rating,
     comment: comment,
+    photo: photo,
   });
 
   return res
@@ -32,4 +36,16 @@ export const getReviewByCourse = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(new ApiResponse(201, "Review fetcehd successfully", review));
+});
+
+export const getAllReview = asyncHandler(async (req, res) => {
+  const review = await Review.find();
+
+  if (review.length < 0) {
+    throw new ApiError(404, "No review found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Review fetched successfully", review));
 });

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const EditCourseManagement = () => {
   const { state } = useLocation();
@@ -64,14 +65,15 @@ const EditCourseManagement = () => {
       const result = await res.json();
 
       if (res.ok) {
-        alert("Course updated successfully");
+        toast.success("Course updated successfully");
         navigate("/access/courseManagement");
       } else {
         console.log(result);
-        alert(result.message || "Update failed");
+        toast.error(result.message || "Update failed");
       }
     } catch (error) {
       console.log("Update error:", error);
+      toast.error("Update course error");
     } finally {
       setLoading(false);
     }

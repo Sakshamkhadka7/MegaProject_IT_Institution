@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   FiMenu,
   FiHome,
@@ -11,6 +11,8 @@ import {
   FiLayers,
   FiUpload,
 } from "react-icons/fi";
+import { InstructorContext } from "../context/IntructorProvider";
+import { toast } from "react-toastify";
 
 const navItems = [
   {
@@ -62,6 +64,29 @@ const navItems = [
 
 const InstructorLayout = () => {
   const [sideBarOpen, setSideBarOpen] = useState(false);
+  const {instrutor}=useContext(InstructorContext);
+  const navigate=useNavigate();
+   const Logout = async () => {
+    try {
+      let res = await fetch("http://localhost:3001/api/v1/student/logout", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        toast.success("Student logout successfully");
+        navigate("/login");
+      } else {
+        toast.error("Error at logout");
+      }
+    } catch (error) {
+      console.log("Error occured at logout", error);
+      toast.error("Error occured at logout");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 flex">
@@ -111,6 +136,10 @@ const InstructorLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="border px-10 py-1 rounded-xl bg-blue-500 text-white" onClick={()=> Logout()}>
+              Logout
+            </div>
+
             <div className="hidden sm:flex flex-col text-right">
               <span className="text-sm font-medium text-slate-800">
                 Instructor
@@ -119,7 +148,9 @@ const InstructorLayout = () => {
             </div>
 
             <div className="h-10 w-10  rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
-              I
+              {
+                instrutor ? <div><img  className="rounded-full w-20 h-10" src={`http://localhost:3001/image/${instrutor.avatar}`} /></div>:<div></div>
+              }
             </div>
           </div>
         </header>

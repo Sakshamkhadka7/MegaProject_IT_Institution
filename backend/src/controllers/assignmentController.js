@@ -46,19 +46,44 @@ export const getAssignmentByCourse = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Couldnot found a assignment by course");
   }
 
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, "AssignnmentByCourse fetched", assignmentCourse),
+    );
+});
+
+export const getInstructorAssignment = asyncHandler(async (req, res) => {
+
+  const instructorId = req.user._id;
+
+  const courses = await Course.find({ instructor: instructorId });
+
+  const courseIds = courses.map(c => c._id);
+
+  if (!courseIds.length) {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "No courses found", []));
+  }
+
+  const assignments = await Assignment.find({
+    course: { $in: courseIds }
+  }).populate("course", "title");
+
   return res.status(200).json(
-    new ApiResponse(200, "AssignnmentByCourse fetched", assignmentCourse),
+    new ApiResponse(200, "Assignments fetched", assignments)
   );
 });
 
 export const assignmentSubmission = asyncHandler(async (req, res) => {
   const assignmentId = req.params.id;
-   console.log(req.body);
+  console.log(req.body);
   if (!assignmentId) {
     throw new ApiError(401, "Id couldnot found");
   }
 
-  const {courseId} = req.body;
+  const { courseId } = req.body;
   if (!courseId) {
     throw new ApiError(401, "Id couldnot found");
   }
@@ -93,18 +118,22 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
     comment: comment,
   });
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      "Assignment submitted successfully",
-      assignmentSubmission,
-    ),
-  );
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "Assignment submitted successfully",
+        assignmentSubmission,
+      ),
+    );
 });
 
 export const getSubmittedAssignments = asyncHandler(async (req, res) => {
   const studentId = req.user._id;
-  const assignment = await AssignmentSubmission.find({ student: studentId }).populate("assignment")
+  const assignment = await AssignmentSubmission.find({
+    student: studentId,
+  }).populate("assignment");
   if (assignment.length == 0) {
     throw new ApiError(401, "No assignment has been submitted");
   }
@@ -124,19 +153,18 @@ export const deleteAssignment = asyncHandler(async (req, res) => {
   if (!assignment) {
     throw new ApiError(401, "No assigmnet found");
   }
-  return res.status(200).json(
-    new ApiResponse(200, "Assignment deleted successfully"),
-  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Assignment deleted successfully"));
 });
 
 export const SubmittedAssignmentForInstructor = asyncHandler(
   async (req, res) => {
-  
     const instructorId = req.user._id;
     console.log(instructorId);
-    const instructor=req.user.role;
-    if(instructor!=="Instructor"){
-      throw new ApiError(401,"Not authorized to check assignment");
+    const instructor = req.user.role;
+    if (instructor !== "Instructor") {
+      throw new ApiError(401, "Not authorized to check assignment");
     }
     if (!instructorId) {
       throw new ApiError(401, "Id coulnot found");
@@ -152,7 +180,9 @@ export const SubmittedAssignmentForInstructor = asyncHandler(
 
     const submission = await AssignmentSubmission.find({
       courses: { $in: courseId },
-    }).populate("courses").populate("student")
+    })
+      .populate("courses")
+      .populate("student");
 
     console.log(submission);
 
@@ -167,7 +197,7 @@ export const SubmittedAssignmentForInstructor = asyncHandler(
 export const instructorFeedBack = asyncHandler(async (req, res) => {
   const submissionId = req.params.id;
   const { feedback, score } = req.body;
-  console.log(feedback,score);
+  console.log(feedback, score);
 
   const submission = await AssignmentSubmission.findById(submissionId);
   if (!submissionId) {
@@ -179,9 +209,8 @@ export const instructorFeedBack = asyncHandler(async (req, res) => {
   if (feedback) {
     submission.instructorFeedBack = feedback;
   }
- 
 
-if (score !== undefined) {
+  if (score !== undefined) {
     submission.score = Number(score);
   }
 

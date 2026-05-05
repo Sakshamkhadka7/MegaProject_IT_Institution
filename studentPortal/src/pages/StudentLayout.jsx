@@ -1,65 +1,165 @@
-import React from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import {
+  FiMenu,
+  FiBookOpen,
+  FiShoppingCart,
+  FiBarChart2,
+  FiAward,
+  FiClipboard,
+} from "react-icons/fi";
+import { StudentContext } from "../context/StudentProvider";
+import { toast } from "react-toastify";
+
+const navItems = [
+  {
+    to: "/access/course",
+    label: "My Courses",
+    icon: FiBookOpen,
+  },
+  {
+    to: "/access/order",
+    label: "Orders",
+    icon: FiShoppingCart,
+  },
+  {
+    to: "/access/progress",
+    label: "Progress Tracking",
+    icon: FiBarChart2,
+  },
+  {
+    to: "/access/certificate",
+    label: "Certificates",
+    icon: FiAward,
+  },
+  {
+    to: "/access/getSubmitted",
+    label: "Assignments",
+    icon: FiClipboard,
+  },
+];
 
 const StudentLayout = () => {
+  const [sideBarOpen, setSideBarOpen] = useState(false);
+  const { user } = useContext(StudentContext);
+  const navigate=useNavigate();
+
+  const Logout = async () => {
+    try {
+      let res = await fetch("http://localhost:3001/api/v1/student/logout", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        toast.success("Student logout successfully");
+        navigate("/login");
+      } else {
+        toast.error("Error at logout");
+      }
+    } catch (error) {
+      console.log("Error occured at logout", error);
+      toast.error("Error occured at logout");
+    }
+  };
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      
-      {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md">
-        <div className="p-6 text-2xl font-bold border-b">
-          Student Panel
+    <div className="min-h-screen bg-slate-100 flex">
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-72 bg-slate-900 text-white transform transition-transform duration-300 md:translate-x-0 ${
+          sideBarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-700">
+          <h1 className="text-lg font-semibold">Student Portal</h1>
+
+          <button
+            onClick={() => setSideBarOpen(false)}
+            className="md:hidden text-slate-300 hover:text-white"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Static menu (no NavLink) */}
-        <div className="p-4 space-y-3">
-          <div className="block px-4 py-2 rounded-lg text-gray-700 bg-gray-100">
-            Dashboard
-          </div>
-
-          <NavLink to="course" className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200">
-            My Courses
-          </NavLink>
-
-          <NavLink to="order" className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200">
-            Orders
-          </NavLink>
-
-          <NavLink to="progress" className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200">
-            Progress Tracking
-          </NavLink>
-
-           <NavLink to="certificate" className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200">
-            Certificate Earned
-          </NavLink>
-            <NavLink to="getSubmitted" className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200">
-            Assignment Submission
-          </NavLink>
-
-          
-        </div>
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+          {navItems.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition ${
+                  isActive
+                    ? "bg-indigo-600 text-white"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                }`
+              }
+            >
+              <Icon className="text-lg" />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
       </aside>
 
-      {/* Main Section */}
-      <div className="flex-1 flex flex-col">
-        
-        {/* Top Navbar */}
-        <header className="bg-white shadow px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-700">
-            Student Dashboard
-          </h1>
+      <div className="flex-1 md:ml-72">
+        <header className="h-16 sticky top-0 z-30 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSideBarOpen(true)}
+              className="md:hidden inline-flex items-center justify-center rounded-lg p-2 hover:bg-slate-100"
+            >
+              <FiMenu className="text-xl text-black" />
+            </button>
 
-          <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-            Logout
-          </button>
+            <h2 className="text-lg font-semibold text-slate-800">
+              Student Dashboard
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="border px-10 py-1 rounded-xl bg-blue-500 text-white" onClick={()=> Logout()}>
+              Logout
+            </div>
+
+            <div className="hidden sm:flex flex-col text-right">
+              <span className="text-sm font-medium text-slate-800">
+                Student
+              </span>
+              <span className="text-xs text-slate-500">Logged In</span>
+            </div>
+
+            <div className="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
+              {user ? (
+                <div>
+                  <img
+                    className="rounded-full w-20 h-10"
+                    src={`http://localhost:3001/image/${user.avatar}`}
+                  />
+                </div>
+              ) : (
+                <div></div>
+              )}
+            </div>
+          </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
-          <Outlet />
+        <main className="p-4 md:p-1">
+          <div className="rounded-2xl bg-white shadow-sm border border-slate-200 p-4 md:p-3 min-h-[calc(100vh-8rem)]">
+            <Outlet />
+          </div>
         </main>
-
       </div>
+
+      {sideBarOpen && (
+        <div
+          onClick={() => setSideBarOpen(false)}
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+        ></div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const BookDemo = () => {
   const { state } = useLocation();
@@ -74,9 +75,11 @@ const BookDemo = () => {
 
       if (res.ok) {
         setSuccess(true);
+        toast.success("Demo booked successfully")
       }
     } catch (error) {
       console.log("Error occured at bookDemo", error);
+      toast.error("Error occured at booking demo");
     } finally {
       setLoading(false);
     }

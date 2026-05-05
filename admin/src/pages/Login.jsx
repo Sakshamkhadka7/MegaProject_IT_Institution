@@ -13,6 +13,23 @@ const Login = () => {
     password: "",
   });
 
+
+  const validateForm = () => {
+    const { email, password } = formData;
+
+    if (!email) {
+      toast.error("Email is required");
+      return false;
+    }
+
+    if (!password) {
+      toast.error("Password is required");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -24,6 +41,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+     if (!validateForm()) return;
 
     try {
       let res = await fetch("http://localhost:3001/api/v1/student/login", {

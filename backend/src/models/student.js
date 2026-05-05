@@ -38,6 +38,9 @@ const studentSchema = new mongoose.Schema(
         ref: "Course",
       },
     ],  
+    qualification:{
+     type:String
+    },
 
     progress: [
       {

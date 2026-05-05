@@ -43,7 +43,7 @@ const FinancialManagement = () => {
 
       return  matchStatus;
     });
-  }, [orders,  statusFilter]);
+  }, [orders,  statusFilter]);  
 
   //  Revenue Calculation
   const totalRevenue = orders.reduce(

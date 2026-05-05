@@ -14,6 +14,7 @@ import reviewRouter from "./src/routes/reviewRoute.js";
 import resourcesRouter from "./src/routes/resourcesRoute.js";
 import cors from "cors";
 import DemoRouter from "./src/routes/demoRoute.js";
+import contactRouter from "./src/routes/contactRoute.js";
 
 const app = express();
 dotenv.config();
@@ -53,3 +54,4 @@ app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/blog", blogRouter);
 app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/resources", resourcesRouter);
+app.use("/api/v1/contact",contactRouter)

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const EditBlog = () => {
   const { state } = useLocation(); // blog data from previous page
@@ -58,7 +59,7 @@ const EditBlog = () => {
       );
 
       if (res.ok) {
-        alert("Blog updated successfully ");
+        toast.success("Blog updated successfully ");
         navigate("/access/manageBlog"); // redirect back
       }
     } catch (error) {

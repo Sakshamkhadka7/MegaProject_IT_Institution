@@ -28,7 +28,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 export const registerStudent = asyncHandler(async (req, res) => {
   console.log(req.body);
-  const { fullName, email, password, phone } = req.body;
+  const { fullName, email, password, phone,qualification } = req.body;
   const image = req.file.filename;
   if (!fullName || !email || !password || !phone) {
     throw new ApiError(400, "All fields are mandatory");
@@ -45,6 +45,7 @@ export const registerStudent = asyncHandler(async (req, res) => {
     email,
     phone,
     password,
+    qualification,
     avatar: image,
   });
 
@@ -182,12 +183,12 @@ export const getAllUsers = asyncHandler(async (req, res) => {
     const students = await Student.find({
       role: "Student",
       enrolledCourses: { $in: courseId },
-    }).populate("enrolledCourses", "title");
+    }).populate("enrolledCourses")
 
     const filteredStudents = students.map((student) => {
-      const filteredCourses = student.enrolledCourses.filter((courses) => 
-        courseId.includes(courses._id.toString())
-      );
+      const filteredCourses = student.enrolledCourses.filter((courses) =>
+        courseId.includes(courses._id.toString()),
+      )
 
       return {
         ...student.toObject(),
@@ -253,4 +254,30 @@ export const updateUser = asyncHandler(async (req, res) => {
   if (!userUpdate) {
     throw new ApiError(401, "Failed to update User");
   }
+});
+
+export const getStudent = asyncHandler(async (req, res) => {
+  const user = await Student.find({ role: "Student" }).populate(
+    "enrolledCourses",
+  );
+
+  if (!user) {
+    throw new ApiError(404, "No students is found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Stident only fetched successfully", user));
+});
+
+export const getInstructor = asyncHandler(async (req, res) => {
+  const user = await Student.find({ role: "Instructor" });
+
+  if (!user) {
+    throw new ApiError(404, "No instructor found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Instructor fetched successfully", user));
 });

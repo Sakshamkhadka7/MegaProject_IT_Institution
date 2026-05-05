@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { MdDeleteSweep } from "react-icons/md";
+import { toast } from "react-toastify";
 
 const ResourcesManagement = () => {
   const [courses, setCourses] = useState([]);
@@ -16,12 +17,13 @@ const ResourcesManagement = () => {
       })
      
       if(res.ok){
-        alert("Resources successfully deleted");
+        toast.error("Resources successfully deleted");
         getCourses();
         getResources();
       }
   } catch (error) {
     console.log("Resources deleted successfully",error);
+    toast.error("Error occured at deleted resources");
   }
 
   }
@@ -41,6 +43,7 @@ const ResourcesManagement = () => {
       }
     } catch (error) {
       console.log("Error fetching courses", error);
+      toast.error("Error occured at fetching courses");
     }
   };
 
@@ -65,6 +68,7 @@ const ResourcesManagement = () => {
       }
     } catch (error) {
       console.log("Error fetching resources", error);
+      toast.error("Error occured at getResouces");
       setResources([]);
     } finally {
       setLoading(false);

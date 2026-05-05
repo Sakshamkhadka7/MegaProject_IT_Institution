@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const StudentManagement = () => {
   const [users, setUsers] = useState([]);
@@ -22,8 +23,10 @@ const StudentManagement = () => {
 
       if (res.ok) {
         setUsers(data.data);
+        console.log(data.data);
       }
     } catch (error) {
+      toast.error("Error occured at fetching users");
       console.log("Error fetching users", error);
     } finally {
       setLoading(false);

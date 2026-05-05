@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Course = () => {
   const [course, setCourse] = useState([]);
@@ -25,6 +26,7 @@ const Course = () => {
       }
     } catch (error) {
       console.log("Error occured at getMyCourse Fetch", error);
+      toast.error("Error occured at getMyCourse fetch");
     }
   };
 

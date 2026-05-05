@@ -4,7 +4,10 @@ import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 export const createCertificate = asyncHandler(async (req, res) => {
-  const { studentId, courseId, title, descriptions, founderSign } = req.body;
+  const { title, descriptions, founderSign } = req.body;
+  const {studentId}=req.params;
+  const {courseId}=req.params;
+  
 
   if (!studentId || !courseId || !title || !descriptions || !founderSign) {
     throw new ApiError(401, "All fields are mandatory");

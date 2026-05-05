@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const EditJob = () => {
   const { state } = useLocation();
@@ -49,7 +50,7 @@ const EditJob = () => {
         throw new Error(data.message);
       }
 
-      alert("Job updated successfully 🚀");
+      toast.success("Job updated successfully 🚀");
       navigate("/access/manageJob"); // redirect after update
     } catch (err) {
       setError(err.message);

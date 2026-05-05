@@ -2,7 +2,9 @@ import express from "express";
 import upload from "../middleware/upload.js";
 import {
   getAllUsers,
+  getInstructor,
   getMe,
+  getStudent,
   login,
   logout,
   registerStudent,
@@ -17,6 +19,8 @@ studentRoute.post("/login", login);
 studentRoute.get("/logout", userMiddleware, logout);
 studentRoute.get("/getMe", userMiddleware, getMe);
 studentRoute.get("/getAllUsers",userMiddleware,getAllUsers);
+studentRoute.get("/getStudents",userMiddleware,getStudent);
 studentRoute.post("/enrolledCourse",userMiddleware,enrolledCourse);
+studentRoute.get("/getInstructor",getInstructor);
 
 export default studentRoute;

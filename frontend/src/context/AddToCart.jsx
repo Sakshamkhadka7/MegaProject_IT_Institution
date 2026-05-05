@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useReducer } from "react";
 import { createContext } from "react";
+import { toast } from "react-toastify";
 
 export const CartContext = createContext();
 
@@ -24,14 +25,14 @@ const cardReducer = (state, action) => {
       });
 
       if (isExists) {
-        alert("Product is already exists");
+       toast.warning("Course already exists ⚠️");
         return state;
       }
 
       console.log(state);
       
       const newObj = [...state.cartItems, action.payload];
-      alert("Product is added");
+      toast.success("Course is successfully added to cart")
       return {
         ...state,
         cartItems: newObj,
@@ -40,6 +41,7 @@ const cardReducer = (state, action) => {
 
     case "delete": {
       const newObject = state.cartItems.filter((item) => item._id !== action.payload._id);
+      toast.error("Cart is deleted");
 
       return {
         ...state,

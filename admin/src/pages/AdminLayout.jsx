@@ -1,13 +1,17 @@
-import  { useState } from "react";
+import  { useContext, useState } from "react";
 import { FaMicroblog } from "react-icons/fa6";
 import { MdContentPaste } from "react-icons/md";
 import { SiCashapp } from "react-icons/si";
 import { FaUserSecret } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { IoMenu } from "react-icons/io5";
 import { HiOfficeBuilding } from "react-icons/hi";
 import { FaCertificate } from "react-icons/fa6";
+import { MdOutlinePreview } from "react-icons/md";
+import { AdminContext } from "../context/AdminProvider";
+import { toast } from "react-toastify";
+import { IoIosContact } from "react-icons/io";
 
 const navItems = [
   {
@@ -49,11 +53,42 @@ const navItems = [
     to:"/access/certificate",
     label:"Certificate Management",
     icon:FaCertificate
+  },{
+    to:"/access/review",
+    label:"Create Review",
+    icon:MdOutlinePreview
+  },{
+    to:"/access/contact",
+    label:"Contact Information",
+    icon:IoIosContact
   }
 ];
 
 const AdminLayout = () => {
   const [sideBarOpen, setSideBarOpen] = useState(false);
+  const {admin}=useContext(AdminContext);
+   const navigate=useNavigate();
+   const Logout = async () => {
+    try {
+      let res = await fetch("http://localhost:3001/api/v1/student/logout", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        toast.success("Student logout successfully");
+        navigate("/login");
+      } else {
+        toast.error("Error at logout");
+      }
+    } catch (error) {
+      console.log("Error occured at logout", error);
+      toast.error("Error occured at logout");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 flex">
@@ -100,6 +135,10 @@ const AdminLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
+              <div className="border px-10 py-1 rounded-xl bg-blue-500 text-white" onClick={()=> Logout()}>
+              Logout
+            </div>
+
             <div className="hidden sm:flex flex-col text-right">
               <span className="text-sm font-medium text-slate-800">
                 Instructor
@@ -109,7 +148,9 @@ const AdminLayout = () => {
             </div>
 
             <div className="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
-              I
+              {
+                admin ? <div><img  className="rounded-full w-20 h-10" src={`http://localhost:3001/image/${admin.avatar}`} /></div> :<div></div>
+              }
             </div>
           </div>
         </header>

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { FaArrowCircleRight } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/AddToCart";
+import { toast } from "react-toastify";
 
 const CourseDetails = () => {
   const { state } = useLocation();

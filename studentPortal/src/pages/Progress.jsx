@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const Progress = () => {
   const [courses, setCourse] = useState([]);
@@ -24,6 +25,7 @@ const Progress = () => {
       }
     } catch (error) {
       console.log("Error occured at getMyCourse Fetch", error);
+      toast.error("Error occured at getMyCourse Fetch");
     }
   };
 
@@ -51,6 +53,7 @@ const Progress = () => {
       }
     } catch (error) {
       console.log("Error occured at viewProgress", error);
+      toast.error("Error occured ar viewProgress")
     }
   };
 

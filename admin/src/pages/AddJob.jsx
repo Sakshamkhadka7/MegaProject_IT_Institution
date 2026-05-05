@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 const CreateJob = () => {
   const [form, setForm] = useState({
@@ -20,23 +21,52 @@ const CreateJob = () => {
     });
   };
 
+  const validateForm = () => {
+    const { title, company, location, position, description } = form;
+
+    if (!title) {
+      toast.warning("Title is required");
+      return false;
+    }
+
+    if (!company) {
+      toast.warning("company is required");
+      return false;
+    }
+
+    if (!location) {
+      toast.warning("Location is required");
+      return false;
+    }
+
+    if (!position) {
+      toast.warning("Position is required");
+      return false;
+    }
+
+    if (!description) {
+      toast.warning("Descriptions is required");
+      return false;
+    }
+
+    return true;
+  };
+
   const createJob = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setLoading(true);
     setError("");
 
     try {
-      let res = await fetch(
-        "http://localhost:3001/api/v1/job/createJob",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(form),
-        }
-      );
+      let res = await fetch("http://localhost:3001/api/v1/job/createJob", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
 
       let data = await res.json();
 
@@ -52,6 +82,8 @@ const CreateJob = () => {
         position: "",
         description: "",
       });
+
+      toast.success("Job added successfully");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -61,11 +93,7 @@ const CreateJob = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-
-     
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
-
-      
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           Post a New Job
         </h2>
@@ -73,7 +101,6 @@ const CreateJob = () => {
           Fill in the details below to publish a job listing.
         </p>
 
-    
         {success && (
           <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm">
             Job created successfully 🎉
@@ -88,8 +115,6 @@ const CreateJob = () => {
 
         {/* Form */}
         <form onSubmit={createJob} className="space-y-4">
-
-         
           <input
             type="text"
             name="title"
@@ -99,7 +124,6 @@ const CreateJob = () => {
             className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
 
-        
           <input
             type="text"
             name="company"
@@ -109,7 +133,6 @@ const CreateJob = () => {
             className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
 
-        
           <input
             type="text"
             name="location"
@@ -119,7 +142,6 @@ const CreateJob = () => {
             className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
 
-       
           <input
             type="text"
             name="position"
@@ -129,7 +151,6 @@ const CreateJob = () => {
             className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
 
-      
           <textarea
             name="description"
             placeholder="Job Description"
@@ -139,7 +160,6 @@ const CreateJob = () => {
             className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           ></textarea>
 
-        
           <button
             type="submit"
             disabled={loading}

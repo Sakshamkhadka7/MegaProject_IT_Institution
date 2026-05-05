@@ -1,154 +1,126 @@
 import React, { useEffect, useState } from "react";
 import { MdDeleteSweep } from "react-icons/md";
+import { toast } from "react-toastify";
 
 const AssignmentManagement = () => {
-  const [courseAssignments, setCourseAssignments] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const deleteAssignment = async (id) => {
-    try {
-      let res = await fetch(
-        `http://localhost:3001/api/v1/assignment/deleteAssignment/${id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
-
-      if (res.ok) {
-        alert("Assignment deleted successfully");
-        fetchData();
-      }
-    } catch (error) {
-      console.log("Error occured at a delete assignment", error);
-    }
-  };
-
-  // Fetch courses + assignments
-  const fetchData = async () => {
+  const fetchAssignments = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/course/getAllCourses",
+        "http://localhost:3001/api/v1/assignment/getInstructorAssignment",
         {
           credentials: "include",
-        },
+        }
       );
 
-      const courseData = await res.json();
-      if (!res.ok) throw new Error("Failed to fetch courses");
+      const data = await res.json();
 
-      const combinedData = await Promise.all(
-        courseData.data.map(async (course) => {
-          try {
-            const assignmentRes = await fetch(
-              `http://localhost:3001/api/v1/assignment/getCourse/${course._id}`,
-              {
-                credentials: "include",
-              },
-            );
+      if (!res.ok) throw new Error(data.message);
 
-            const assignmentData = await assignmentRes.json();
-            return {
-              ...course,
-              assignments: assignmentData.data || [],
-            };
-          } catch (error) {
-            console.log(
-              "Error occured ar courseData of assignmentManagement",
-              error,
-            );
-            return {
-              ...course,
-              assignments: [],
-            };
-          }
-        }),
-      );
-
-      setCourseAssignments(combinedData);
-     
+      setAssignments(data.data || []);
     } catch (error) {
-      console.log("Error occured at fetchData of assignmentManagement", error);
+      console.error(error);
+      toast.error("Failed to load assignments");
     } finally {
       setLoading(false);
     }
   };
 
+  const deleteAssignment = async (id) => {
+    try {
+      const res = await fetch(
+        `http://localhost:3001/api/v1/assignment/deleteAssignment/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (res.ok) {
+        toast.success("Assignment deleted");
+        setAssignments((prev) => prev.filter((a) => a._id !== id));
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Delete failed");
+    }
+  };
+
   useEffect(() => {
-    fetchData();
+    fetchAssignments();
   }, []);
 
-  // UI
   if (loading) {
-    return <p className="p-6 text-gray-500">Loading assignments...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading assignments...
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-        Assignment Management
-      </h2>
-       {
-         console.log(courseAssignments)
-       }
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Instructor Assignments
+          </h1>
+        </div>
 
-      <div className="space-y-6">
-        {courseAssignments.map((course) => (
-          <div key={course._id} className="bg-white shadow-md rounded-xl p-5">
-            {/* Course Title */}
-
-            <h3 className="text-lg font-semibold text-blue-600 mb-4">
-              {course.title}
-            </h3>
-
-            {/* Assignments */}
-            {course.assignments.length === 0 ? (
-              <p className="text-gray-500 text-sm">
-                No assignments created for this course
-              </p>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {course.assignments.map((assignment) => (
-                  <div
-                    key={assignment._id}
-                    className="border rounded-lg p-4 hover:shadow transition"
-                  >
-                    <h4 className="font-medium text-gray-800">
-                      {assignment.title}
-                    </h4>
-
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                      {assignment.description}
-                    </p>
-
-                    <div className="mt-3 flex justify-between items-center">
-                      <span className="text-xs text-gray-500">
-                        Due:{" "}
-                        {new Date(assignment.deadline).toLocaleDateString()}
-                      </span>
-
-                      <a
-                        href={`http://localhost:3001/image/${assignment.fileUrl}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-500 text-sm hover:underline"
-                      >
-                        View File
-                      </a>
-
-                      <MdDeleteSweep
-                        onClick={() => deleteAssignment(assignment._id)}
-                        size={27}
-                        className="hover:text-red-500 hover:cursor-pointer"
-                      />
-                      <h1></h1>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+        {assignments.length === 0 ? (
+          <div className="bg-white rounded-xl shadow p-6 text-center text-gray-500">
+            No assignments created yet
           </div>
-        ))}
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {assignments.map((assignment) => (
+              <div
+                key={assignment._id}
+                className="bg-white rounded-2xl shadow-sm hover:shadow-md transition p-5 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex justify-between items-start">
+                    <h2 className="text-lg font-semibold text-gray-800">
+                      {assignment.title}
+                    </h2>
+                    <MdDeleteSweep
+                      onClick={() => deleteAssignment(assignment._id)}
+                      size={22}
+                      className="text-gray-400 hover:text-red-500 cursor-pointer"
+                    />
+                  </div>
+
+                  <p className="text-sm text-gray-500 mt-2 line-clamp-3">
+                    {assignment.description || "No description provided"}
+                  </p>
+
+                  <div className="mt-4 text-xs text-gray-400">
+                    Course: {assignment.course?.title}
+                  </div>
+                </div>
+
+                <div className="mt-5 flex justify-between items-center">
+                  <span className="text-xs text-gray-500">
+                    Due: {new Date(assignment.deadline).toLocaleDateString()}
+                  </span>
+
+                  {assignment.fileUrl && (
+                    <a
+                      href={`http://localhost:3001/image/${assignment.fileUrl}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      View File
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

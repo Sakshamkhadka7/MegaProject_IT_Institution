@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { CartContext } from "../context/AddToCart";
 import { useNavigate } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
+import { toast } from "react-toastify";
 
 const Cart = () => {
   const { state, dispatch } = useContext(CartContext);
@@ -43,8 +44,7 @@ const Cart = () => {
       const data = await res.json(); //  IMPORTANT FIX
 
       if (res.ok) {
-        alert("Order created Successfully");
-
+        toast.success("Order created Successfully");
         //  pass correct structured state
         navigate("/payment", {
           state: {
@@ -53,7 +53,7 @@ const Cart = () => {
           },
         });
       } else {
-        alert(data.message || "Order failed");
+        toast.error(data.message || "Order failed");
       }
     } catch (error) {
       console.log("Error occured at create order", error);
@@ -91,7 +91,7 @@ const Cart = () => {
                   <MdDelete
                     onClick={() => {
                       dispatch({ type: "delete", payload: item });
-                      alert("Product deleted");
+                      
                     }}
                     size={24}
                     className="text-red-700 hover:cursor-pointer"
@@ -128,7 +128,7 @@ const Cart = () => {
           <button
             onClick={() => {
               if (cartItems.length === 0) {
-                alert("No order to proceed");
+                toast.error("No orders to proceed")
                 return;
               }
               createOrder();

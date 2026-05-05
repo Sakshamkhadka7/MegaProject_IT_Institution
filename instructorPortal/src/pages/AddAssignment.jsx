@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AddAssignment = () => {
   const [courses, setCourses] = useState([]);
@@ -20,7 +21,7 @@ const AddAssignment = () => {
   const getAllCourses = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/course/getAllCourses",
+        "http://localhost:3001/api/v1/course/getInstructorCourse",
         {
           method: "GET",
           credentials: "include",
@@ -43,6 +44,41 @@ const AddAssignment = () => {
     getAllCourses();
   }, []);
 
+  const validateForm = () => {
+    const { title, description, deadline, courseId, fileUrl } = formData;
+
+    if (!courseId) {
+      toast.error("Please select a course");
+      return false;
+    }
+
+    if (!title.trim()) {
+      toast.error("Title is required");
+      return false;
+    }
+
+    if (title.length < 5) {
+      toast.error("Title must be at least 5 characters");
+      return false;
+    }
+
+    if (!description.trim()) {
+      toast.error("Description is required");
+      return false;
+    }
+
+    if (!fileUrl) {
+      toast.error("Assignment file is required");
+      return false;
+    }
+    if (!deadline) {
+      toast.error("Deadline is required");
+      return false;
+    }
+
+    return true;
+  };
+
   // Handle Input Change
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -55,44 +91,47 @@ const AddAssignment = () => {
 
   // Submit Assignment
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    
+    if(!validateForm()) return;
 
-  if (!formData.courseId) {
-    alert("Please select a course");
-    return;
-  }
-
-  try {
-    setSubmitting(true);
-
-    const formDataToSend = new FormData();
-    formDataToSend.append("title", formData.title);
-    formDataToSend.append("description", formData.description);
-    formDataToSend.append("deadline", formData.deadline);
-    formDataToSend.append("fileUrl", formData.fileUrl);
-
-    const response = await fetch(
-      `http://localhost:3001/api/v1/assignment/createAssignment/${formData.courseId}`,
-      {
-        method: "POST",
-        credentials: "include",
-        body: formDataToSend,
-      }
-    );
-
-    const result = await response.json();
-
-    if (response.ok) {
-      alert("Assignment created successfully");
-    } else {
-      alert(result.message || "Something went wrong");
+    if (!formData.courseId) {
+      toast.warning("Please select a course");
+      return;
     }
-  } catch (error) {
-    console.log("Error creating assignment", error);
-  } finally {
-    setSubmitting(false);
-  }
-};
+
+    try {
+      setSubmitting(true);
+
+      const formDataToSend = new FormData();
+      formDataToSend.append("title", formData.title);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("deadline", formData.deadline);
+      formDataToSend.append("fileUrl", formData.fileUrl);
+
+      const response = await fetch(
+        `http://localhost:3001/api/v1/assignment/createAssignment/${formData.courseId}`,
+        {
+          method: "POST",
+          credentials: "include",
+          body: formDataToSend,
+        },
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Assignment created successfully");
+      } else {
+        toast.error(result.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log("Error creating assignment", error);
+      toast.error("Error occured at a assignment");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">

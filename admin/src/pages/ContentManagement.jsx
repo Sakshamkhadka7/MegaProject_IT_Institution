@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MdEditSquare } from "react-icons/md";
 import { RiDeleteBin7Fill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const ContentManagement = () => {
   const [courses, setCourses] = useState([]);
@@ -23,7 +24,7 @@ const ContentManagement = () => {
 
       if (res.ok) {
         res = await res.json();
-        alert("Course has been deleted");
+        toast.error("Course has been deleted");
         getAllCourses();
       }
     } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const SubmittedAssignment = () => {
   const [assignment, setAssignment] = useState([]);
@@ -25,6 +26,7 @@ const SubmittedAssignment = () => {
       }
     } catch (error) {
       console.log("Error occured at getAssignment", error);
+      toast.error("Error occured at getAssignment");
     } finally {
       setLoading(false);
     }
@@ -114,6 +116,7 @@ const SubmittedAssignment = () => {
 
                   <td>
                     <h1
+                    className="border px-2 bg-blue-600 text-white cursor-pointer"
                       onClick={() => {
                         navigate(`/access/feedback/${assign._id}`, {
                           state: assign,
