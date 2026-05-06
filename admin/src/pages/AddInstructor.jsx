@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const AddInstructor = () => {
   const navigate = useNavigate();
@@ -79,7 +81,7 @@ const AddInstructor = () => {
     data.append("qualification", formData.qualification);
 
     try {
-      let res = await fetch("http://localhost:3001/api/v1/student/register", {
+      let res = await fetch(`${API}/api/v1/student/register`, {
         method: "POST",
         body: data,
       });

@@ -1,6 +1,8 @@
 import React, { createContext, useEffect, useState } from "react";
 
 export const AdminContext = createContext();
+const API = import.meta.env.VITE_API_URL;
+
 
 export const AdminProvider = ({ children }) => {
   const [admin,setAdmin ] = useState();
@@ -10,11 +12,8 @@ export const AdminProvider = ({ children }) => {
   const getAdmin = async () => {
     try {
       setLoading(true);
-      let res = await fetch("http://localhost:3001/api/v1/student/getMe", {
+      let res = await fetch(`${API}/api/v1/student/getMe`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
         credentials: "include",
       });
 

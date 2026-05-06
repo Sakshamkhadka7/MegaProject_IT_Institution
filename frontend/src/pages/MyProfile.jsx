@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FaFilePdf, FaBriefcase, FaBuilding } from "react-icons/fa";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const MyProfile = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -8,7 +11,7 @@ const MyProfile = () => {
   const getMyApplications = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/job/getMyApplication",
+        `${API}/api/v1/job/getMyApplication`,
         {
           method: "GET",
           credentials: "include",
@@ -115,7 +118,7 @@ const MyProfile = () => {
 
               {/* Resume */}
               <a
-                href={`http://localhost:3001/image/${app.resume}`}
+                href={`${API}/image/${app.resume}`}
                 target="_blank"
                 className="flex items-center gap-2 text-blue-600 text-sm hover:underline"
               >

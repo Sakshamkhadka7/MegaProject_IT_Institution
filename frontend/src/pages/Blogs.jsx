@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +14,7 @@ const Blogs = () => {
   const getBlogs = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/blog/getBlog"
+        `${API}/api/v1/blog/getBlog`
       );
 
       if (res.ok) {
@@ -62,7 +65,7 @@ const Blogs = () => {
               {/* Image */}
               {blog.image && (
                 <img
-                  src={`http://localhost:3001/image/${blog.image}`}
+                  src={`${API}/image/${blog.image}`}
                   alt={blog.title}
                   className="w-full h-48 object-cover"
                 />

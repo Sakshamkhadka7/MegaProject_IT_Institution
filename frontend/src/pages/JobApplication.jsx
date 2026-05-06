@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { FaBuilding, FaMapMarkerAlt, FaBriefcase } from "react-icons/fa";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const JobApplication = () => {
   const { state } = useLocation();
   const [coverLetter, setCoverLetter] = useState("");
@@ -18,7 +21,7 @@ const JobApplication = () => {
       formData.append("resume", resume);
 
       const res = await fetch(
-        `http://localhost:3001/api/v1/job/jobApply/${state._id}`,
+        `${API}/api/v1/job/jobApply/${state._id}`,
         {
           method: "POST",
           credentials: "include",

@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { MdDeleteSweep } from "react-icons/md";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const AssignmentManagement = () => {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +12,7 @@ const AssignmentManagement = () => {
   const fetchAssignments = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/assignment/getInstructorAssignment",
+        `${API}/api/v1/assignment/getInstructorAssignment`,
         {
           credentials: "include",
         }
@@ -31,7 +34,7 @@ const AssignmentManagement = () => {
   const deleteAssignment = async (id) => {
     try {
       const res = await fetch(
-        `http://localhost:3001/api/v1/assignment/deleteAssignment/${id}`,
+        `${API}/api/v1/assignment/deleteAssignment/${id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -108,7 +111,7 @@ const AssignmentManagement = () => {
 
                   {assignment.fileUrl && (
                     <a
-                      href={`http://localhost:3001/image/${assignment.fileUrl}`}
+                      href={`${API}/image/${assignment.fileUrl}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-sm text-blue-600 hover:underline"

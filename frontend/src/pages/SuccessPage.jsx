@@ -2,6 +2,8 @@ import React, { useContext, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CartContext } from "../context/AddToCart";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const SuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -14,7 +16,7 @@ const SuccessPage = () => {
   const updateOrder = async () => {
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/order/updateOrder/${data.transaction_uuid}`,
+        `${API}/api/v1/order/updateOrder/${data.transaction_uuid}`,
         {
           method: "PUT",
           credentials: "include",

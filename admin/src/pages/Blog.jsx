@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const CreateBlog = () => {
   const [formData, setFormData] = useState({
@@ -72,7 +74,7 @@ const CreateBlog = () => {
       data.append("category", formData.category);
       data.append("image", image);
 
-      const res = await fetch("http://localhost:3001/api/v1/blog/createBlog", {
+      const res = await fetch(`${API}/api/v1/blog/createBlog`, {
         method: "POST",
         credentials: "include", // for auth
         body: data,

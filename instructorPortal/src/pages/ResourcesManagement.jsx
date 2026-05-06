@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { MdDeleteSweep } from "react-icons/md";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const ResourcesManagement = () => {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -11,7 +14,7 @@ const ResourcesManagement = () => {
   const deleteResources=async(id)=>{
  
   try {
-      let res=await fetch(`http://localhost:3001/api/v1/resources/deleteResources/${id}`,{
+      let res=await fetch(`${API}/api/v1/resources/deleteResources/${id}`,{
         method:"DELETE",
         credentials:"include"
       })
@@ -32,7 +35,7 @@ const ResourcesManagement = () => {
   const getCourses = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/course/getAllCourses",
+        `${API}/api/v1/course/getAllCourses`,
         {
           credentials: "include",
         }
@@ -53,7 +56,7 @@ const ResourcesManagement = () => {
       setLoading(true);
 
       const res = await fetch(
-        `http://localhost:3001/api/v1/resources/getResources/${courseId}`,
+        `${API}/api/v1/resources/getResources/${courseId}`,
         {
           credentials: "include",
         }
@@ -152,7 +155,7 @@ const ResourcesManagement = () => {
                 {/* File */}
                 {resource.fileUrl && (
                   <a
-                    href={`http://localhost:3001/image/${resource.fileUrl}`}
+                    href={`${API}/image/${resource.fileUrl}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-blue-600 text-sm hover:underline"

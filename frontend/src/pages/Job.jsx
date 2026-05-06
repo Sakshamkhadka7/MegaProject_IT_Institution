@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { FaMapMarkerAlt, FaBriefcase, FaBuilding } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const Job = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +12,7 @@ const Job = () => {
 
   const getJobs = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/v1/job/getJob", {
+      const res = await fetch(`${API}/api/v1/job/getJob`, {
         method: "GET",
         credentials: "include",
       });

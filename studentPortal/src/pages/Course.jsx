@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const Course = () => {
   const [course, setCourse] = useState([]);
@@ -10,12 +12,9 @@ const Course = () => {
   const getMyCourse = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/course/getMyCourses",
+        `${API}/api/v1/course/getMyCourses`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );
@@ -49,7 +48,7 @@ const Course = () => {
             >
               {/* Image */}
               <img
-                src={`http://localhost:3001/image/${cours?.courseImage}`}
+                src={`${API}/image/${cours?.courseImage}`}
                 alt=""
                 className="w-full h-40 object-cover"
               />

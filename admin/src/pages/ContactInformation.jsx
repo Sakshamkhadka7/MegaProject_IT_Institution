@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+const API = import.meta.env.VITE_API_URL;
+
 
 const ContactInformation = () => {
   const [contacts, setContacts] = useState([]);
@@ -7,12 +9,9 @@ const ContactInformation = () => {
   const fetchContacts = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/contact/getContact",
+        `${API}/api/v1/contact/getContact`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );

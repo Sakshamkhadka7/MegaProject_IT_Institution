@@ -3,6 +3,8 @@ import { MdEditSquare } from "react-icons/md";
 import { RiDeleteBin7Fill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const ContentManagement = () => {
   const [courses, setCourses] = useState([]);
@@ -12,12 +14,9 @@ const ContentManagement = () => {
   const deleteCourse = async (id) => {
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/course/deleteCourse/${id}`,
+        `${API}/api/v1/course/deleteCourse/${id}`,
         {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );
@@ -35,7 +34,7 @@ const ContentManagement = () => {
   const getAllCourses = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/course/getAllCourses",
+        `${API}/api/v1/course/getAllCourses`,
         {
           method: "GET",
           credentials: "include",
@@ -102,7 +101,7 @@ const ContentManagement = () => {
 
                     <td className="px-4 py-3 flex justify-center">
                       <img
-                        src={`http://localhost:3001/image/${item.courseImage}`}
+                        src={`${API}/image/${item.courseImage}`}
                         alt="course"
                         className="w-14 h-14 object-cover rounded-lg border"
                       />

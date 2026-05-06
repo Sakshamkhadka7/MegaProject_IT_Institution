@@ -6,6 +6,9 @@ import { useContext } from "react";
 import { CartContext } from "../context/AddToCart";
 import { UserContext } from "../context/UserProvider";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
@@ -23,7 +26,7 @@ const Courses = () => {
   const getCourses = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/course/getAllCourses",
+        `${API}/api/v1/course/getAllCourses`,
         {
           method: "GET",
           credentials: "include",
@@ -118,7 +121,7 @@ const Courses = () => {
               className="w-72 bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
             >
               <img
-                src={`http://localhost:3001/image/${item.courseImage}`}
+                src={`${API}/image/${item.courseImage}`}
                 alt={item.title}
                 className="w-full h-44 object-cover"
               />

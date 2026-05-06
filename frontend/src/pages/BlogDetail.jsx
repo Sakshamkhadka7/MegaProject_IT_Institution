@@ -2,6 +2,9 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const BlogDetail = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -33,7 +36,7 @@ const BlogDetail = () => {
         {/* 🔷 Image */}
         {state.image && (
           <img
-            src={`http://localhost:3001/image/${state.image}`}
+            src={`${API}/image/${state.image}`}
             alt={state.title}
             className="w-full h-72 object-cover"
           />

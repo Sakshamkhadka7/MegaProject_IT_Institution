@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { FaTrash, FaEdit, FaBriefcase } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const ManageJob = () => {
   const [jobs, setJobs] = useState([]);
@@ -11,12 +13,9 @@ const ManageJob = () => {
   const deleteJob = async (id) => {
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/job/deleteJob/${id}`,
+        `${API}/api/v1/job/deleteJob/${id}`,
         {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );
@@ -34,7 +33,7 @@ const ManageJob = () => {
   // 🔥 Fetch Jobs
   const getJobs = async () => {
     try {
-      let res = await fetch("http://localhost:3001/api/v1/job/getJob", {
+      let res = await fetch(`${API}/api/v1/job/getJob`, {
         method: "GET",
         credentials: "include",
       });

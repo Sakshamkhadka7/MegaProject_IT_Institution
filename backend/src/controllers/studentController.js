@@ -60,9 +60,11 @@ export const registerStudent = asyncHandler(async (req, res) => {
     studentCreated._id,
   );
 
-  const options = {
-    httpOnly: true,
-  };
+ const options = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+};
 
   return res
     .cookie("accessToken", accessToken, options)
@@ -98,9 +100,11 @@ export const login = asyncHandler(async (req, res) => {
     "-password -refreshToken",
   );
 
-  const options = {
-    httpOnly: true,
-  };
+const options = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+};
 
   return res
     .cookie("accessToken", accessToken, options)
@@ -123,9 +127,11 @@ export const logout = asyncHandler(async (req, res) => {
     },
   );
 
-  const options = {
-    httpOnly: true,
-  };
+const options = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+};
 
   return res
     .status(200)

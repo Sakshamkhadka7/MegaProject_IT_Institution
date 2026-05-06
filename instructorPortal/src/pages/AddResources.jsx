@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const AddResources = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +20,7 @@ const AddResources = () => {
   const getCourses = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/course/getAllCourses",
+        `${API}/api/v1/course/getAllCourses`,
         {
           credentials: "include",
         }
@@ -113,7 +116,7 @@ const AddResources = () => {
       }
 
       const response = await fetch(
-        "http://localhost:3001/api/v1/resources/createResource",
+        `${API}/api/v1/resources/createResource`,
         {
           method: "POST",
           credentials: "include",

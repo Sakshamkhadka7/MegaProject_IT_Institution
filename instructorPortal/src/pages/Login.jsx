@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { InstructorContext } from "../context/IntructorProvider";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const Login = () => {
   const navigate = useNavigate();
   const {setInstructor}=useContext(InstructorContext);
@@ -43,7 +46,7 @@ const Login = () => {
     if (!validateForm()) return;
 
     try {
-      let res = await fetch("http://localhost:3001/api/v1/student/login", {
+      let res = await fetch(`${API}/api/v1/student/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

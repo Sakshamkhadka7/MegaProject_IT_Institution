@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const FeedBack = () => {
   const { state } = useLocation();
@@ -47,7 +49,7 @@ const FeedBack = () => {
 
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/assignment/instructorFeedBack/${state._id}`,
+        `${API}/api/v1/assignment/instructorFeedBack/${state._id}`,
         {
           method: "POST",
           headers: {

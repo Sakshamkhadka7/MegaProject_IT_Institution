@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { StudentContext } from "../context/StudentProvider";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const Login = () => {
   const { setUser } = useContext(StudentContext);
   const navigate = useNavigate();
@@ -27,7 +30,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      let res = await fetch("http://localhost:3001/api/v1/student/login", {
+      let res = await fetch(`${API}/api/v1/student/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

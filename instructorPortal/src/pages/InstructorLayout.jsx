@@ -14,6 +14,9 @@ import {
 import { InstructorContext } from "../context/IntructorProvider";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const navItems = [
   {
     to: "/access/course",
@@ -68,11 +71,7 @@ const InstructorLayout = () => {
   const navigate=useNavigate();
    const Logout = async () => {
     try {
-      let res = await fetch("http://localhost:3001/api/v1/student/logout", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      let res = await fetch(`${API}/api/v1/student/logout`, {
         credentials: "include",
       });
 
@@ -149,7 +148,7 @@ const InstructorLayout = () => {
 
             <div className="h-10 w-10  rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
               {
-                instrutor ? <div><img  className="rounded-full w-20 h-10" src={`http://localhost:3001/image/${instrutor.avatar}`} /></div>:<div></div>
+                instrutor ? <div><img  className="rounded-full w-20 h-10" src={`${API}/image/${instrutor.avatar}`} /></div>:<div></div>
               }
             </div>
           </div>

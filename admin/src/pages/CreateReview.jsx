@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { MdOutlineStarRate } from "react-icons/md";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const CreateReview = () => {
   const [courses, setCourses] = useState([]);
@@ -19,7 +21,7 @@ const CreateReview = () => {
   const getCourses = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/course/getAllCourses",
+        `${API}/api/v1/course/getAllCourses`,
         {
           method: "GET",
           credentials: "include",
@@ -69,7 +71,7 @@ const CreateReview = () => {
       setLoading(true);
 
       let res = await fetch(
-        "http://localhost:3001/api/v1/review/createReview",
+        `${API}/api/v1/review/createReview`,
         {
           method: "POST",
           body: formData,
@@ -98,14 +100,14 @@ const CreateReview = () => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-md p-6">
 
-        {/* Title */}
+     
         <h2 className="text-xl font-semibold text-gray-800 mb-6">
           Submit Your Review
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* ✅ Course Select */}
+       
           <div>
             <label className="text-sm font-medium text-gray-700">
               Select Course
@@ -125,7 +127,7 @@ const CreateReview = () => {
             </select>
           </div>
 
-          {/* ✅ Rating */}
+         
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2">
               Rating
@@ -159,7 +161,7 @@ const CreateReview = () => {
             </p>
           </div>
 
-          {/* ✅ Comment */}
+      
           <div>
             <label className="text-sm font-medium text-gray-700">
               Comment
@@ -174,7 +176,6 @@ const CreateReview = () => {
             />
           </div>
 
-          {/* ✅ Upload Photo */}
           <div>
             <label className="text-sm font-medium text-gray-700">
               Upload Photo
@@ -196,7 +197,7 @@ const CreateReview = () => {
             )}
           </div>
 
-          {/* ✅ Submit */}
+          
           <button
             type="submit"
             disabled={loading}

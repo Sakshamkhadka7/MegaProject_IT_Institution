@@ -2,6 +2,8 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import CryptoJS from "crypto-js";
+const API = import.meta.env.VITE_API_URL;
+
 
 const Payment = () => {
   const { state } = useLocation();

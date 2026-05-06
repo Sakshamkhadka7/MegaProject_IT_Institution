@@ -23,15 +23,23 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174","http://localhost:5175","http://localhost:5176"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:5176",
+      "https://it-institution-frontend.vercel.app",
+       "https://it-admin-sepia.vercel.app",
+       "https://it-instructor.vercel.app",
+       "https://it-student-phi.vercel.app"
+    ],
     credentials: true,
   }),
 );
 
+app.use(cookieParser());
 
-app.use(cookieParser());  
-
-app.use("/image",express.static("public/images"));
+app.use("/image", express.static("public/images"));
 
 connectDb()
   .then(() => {
@@ -46,7 +54,7 @@ connectDb()
 app.use("/api/v1/student", studentRoute);
 app.use("/api/v1/course", courseRoute);
 app.use("/api/v1/assignment", assigmentRouter);
-app.use("/api/v1/demo",DemoRouter);
+app.use("/api/v1/demo", DemoRouter);
 app.use("/api/v1/certificate", certifcateRoute);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/progress", progressRouter);
@@ -54,4 +62,4 @@ app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/blog", blogRouter);
 app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/resources", resourcesRouter);
-app.use("/api/v1/contact",contactRouter)
+app.use("/api/v1/contact", contactRouter);

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const EditCourse = () => {
   const { state } = useLocation();
@@ -54,7 +56,7 @@ const EditCourse = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/v1/course/updateCourse/${state._id}`,
+        `${API}/api/v1/course/updateCourse/${state._id}`,
         {
           method: "PUT",
           body: data,
@@ -159,7 +161,7 @@ const EditCourse = () => {
             <div>
               <p className="text-sm text-gray-500 mb-1">Current Image</p>
               <img
-                src={`http://localhost:3001/image/${state.courseImage}`}
+                src={`${API}/image/${state.courseImage}`}
                 alt="course"
                 className="w-24 h-24 object-cover rounded border"
               />

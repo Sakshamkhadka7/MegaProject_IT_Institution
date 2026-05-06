@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+
+const API = import.meta.env.VITE_API_URL;
+
+
 const AddAssignment = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +25,7 @@ const AddAssignment = () => {
   const getAllCourses = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/course/getInstructorCourse",
+        `${API}/api/v1/course/getInstructorCourse`,
         {
           method: "GET",
           credentials: "include",
@@ -110,7 +114,7 @@ const AddAssignment = () => {
       formDataToSend.append("fileUrl", formData.fileUrl);
 
       const response = await fetch(
-        `http://localhost:3001/api/v1/assignment/createAssignment/${formData.courseId}`,
+        `${API}/api/v1/assignment/createAssignment/${formData.courseId}`,
         {
           method: "POST",
           credentials: "include",

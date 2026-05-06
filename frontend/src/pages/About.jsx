@@ -7,6 +7,9 @@ const partners = [
   "Google Cloud",
 ];
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const About = () => {
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +18,7 @@ const About = () => {
   const getInstructors = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/student/getInstructor",
+        `${API}/api/v1/student/getInstructor`,
         {
           method: "GET",
           credentials: "include",
@@ -113,7 +116,7 @@ const About = () => {
               >
                 {/* Avatar */}
                 <img
-                  src={`http://localhost:3001/image/${inst.avatar}`}
+                  src={`${API}/image/${inst.avatar}`}
                   alt={inst.fullName}
                   className="w-full h-56 object-cover"
                 />

@@ -1,6 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 
 export const StudentContext = createContext();
+const API = import.meta.env.VITE_API_URL;
+
 
 export const StudentProvider = ({ children }) => {
   const [user, setUser] = useState();
@@ -10,7 +12,7 @@ export const StudentProvider = ({ children }) => {
   const getMe = async () => {
     try {
       setLoading(true);
-      let res = await fetch("http://localhost:3001/api/v1/student/getMe", {
+      let res = await fetch(`${API}/api/v1/student/getMe`, {
         method: "GET",
         credentials: "include",
       });

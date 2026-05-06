@@ -6,6 +6,9 @@ import { UserContext } from "../context/UserProvider";
 import { toast } from "react-toastify";
 import { FiShoppingCart } from "react-icons/fi";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 
 const navLinkClass =
   "relative text-gray-600 hover:text-blue-600 transition font-medium";
@@ -26,7 +29,7 @@ const Header = () => {
 
   const logOut = async () => {
     console.log("Logout called");
-    let res = await fetch("http://localhost:3001/api/v1/student/logout ", {
+    let res = await fetch(`${API}/api/v1/student/logout`, {
       method: "GET",
       credentials: "include",
     });
@@ -123,7 +126,7 @@ const Header = () => {
             <div>
               <img
                 className="rounded-full w-10 h-10"
-                src={`http://localhost:3001/image/${user?.avatar}`}
+                src={`${API}/image/${user?.avatar}`}
                 alt="profile"
               />
             </div>
@@ -223,7 +226,7 @@ const Header = () => {
             >
               <img
                 className="rounded-full w-10 h-10"
-                src={`http://localhost:3001/image/${user?.avatar}`}
+                src={`${API}/image/${user?.avatar}`}
                 alt="profile"
               />
             </div>

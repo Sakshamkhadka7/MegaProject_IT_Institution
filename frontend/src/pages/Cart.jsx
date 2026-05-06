@@ -3,6 +3,8 @@ import { CartContext } from "../context/AddToCart";
 import { useNavigate } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const Cart = () => {
   const { state, dispatch } = useContext(CartContext);
@@ -27,7 +29,7 @@ const Cart = () => {
     setLoading(true);
 
     try {
-      let res = await fetch("http://localhost:3001/api/v1/order/createOrder", {
+      let res = await fetch(`${API}/api/v1/order/createOrder`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

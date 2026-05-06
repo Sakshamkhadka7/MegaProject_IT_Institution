@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const CertificateManagement = () => {
   const [students, setStudents] = useState([]);
@@ -54,7 +56,7 @@ const CertificateManagement = () => {
   const getStudents = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/student/getStudents",
+        `${API}/api/v1/student/getStudents`,
         {
           method: "GET",
           credentials: "include",
@@ -77,7 +79,7 @@ const CertificateManagement = () => {
   const getProgress = async (studentId, courseId) => {
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/progress/getStudentProgress/${courseId}/${studentId}`,
+        `${API}/api/v1/progress/getStudentProgress/${courseId}/${studentId}`,
         {
           method: "GET",
           credentials: "include",
@@ -131,7 +133,7 @@ const CertificateManagement = () => {
       const { studentId, courseId } = selectedIds;
 
       const res = await fetch(
-        `http://localhost:3001/api/v1/certificate/createCertificate/${studentId}/${courseId}`,
+        `${API}/api/v1/certificate/createCertificate/${studentId}/${courseId}`,
         {
           method: "POST",
           headers: {
@@ -169,7 +171,6 @@ const CertificateManagement = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <h1 className="text-2xl font-semibold mb-6">Certificate Management</h1>
 
-      {/* ✅ MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center">
           <div className="bg-white p-6 rounded-xl w-full max-w-md md:ml-80">
@@ -216,7 +217,7 @@ const CertificateManagement = () => {
         </div>
       )}
 
-      {/* ✅ STUDENTS */}
+     
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {students.map((student) => (
           <div key={student._id} className="bg-white p-4 rounded-xl shadow">

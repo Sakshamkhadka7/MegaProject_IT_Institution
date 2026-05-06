@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const AssignmentSubmission = () => {
   const [assignments, setAssignments] = useState([]);
@@ -31,7 +33,7 @@ const AssignmentSubmission = () => {
       formData.append("submittedFile", submittedFile);
 
       let res = await fetch(
-        `http://localhost:3001/api/v1/assignment/assignmentSubmission/${id}`,
+        `${API}/api/v1/assignment/assignmentSubmission/${id}`,
         {
           method: "POST",
           credentials: "include",
@@ -57,7 +59,7 @@ const AssignmentSubmission = () => {
   const getAssignment = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3001/api/v1/assignment/getCourse/${state._id}`,
+        `${API}/api/v1/assignment/getCourse/${state._id}`,
         {
           credentials: "include",
         },
@@ -123,7 +125,7 @@ const AssignmentSubmission = () => {
               <div className="flex flex-col md:flex-row md:items-center justify-between mt-4 gap-3">
                 {/* File Button */}
                 <a
-                  href={`http://localhost:3001/image/${assign.fileUrl}`}
+                  href={`${API}/image/${assign.fileUrl}`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-block bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition"

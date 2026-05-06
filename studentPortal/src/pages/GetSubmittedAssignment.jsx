@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { FaFileAlt, FaCheckCircle, FaClock } from "react-icons/fa";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const GetSubmittedAssignment = () => {
   const [assignments, setAssignments] = useState([]);
@@ -9,7 +11,7 @@ const GetSubmittedAssignment = () => {
   const getAssignments = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/assignment/getSubmittedAssigment",
+        `${API}/api/v1/assignment/getSubmittedAssigment`,
         {
           method: "GET",
           credentials: "include",
@@ -104,7 +106,7 @@ const GetSubmittedAssignment = () => {
 
             {/* File */}
             <a
-              href={`http://localhost:3001/image/${item.submittedFile}`}
+              href={`${API}/image/${item.submittedFile}`}
               target="_blank"
               className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
             >

@@ -3,6 +3,8 @@ import { FaUserEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -13,11 +15,8 @@ const Blog = () => {
   
   const deleteBlog = async (id) => {
     try {
-      let res = await fetch(`http://localhost:3001/api/v1/blog/deleteBlog/${id}`, {
+      let res = await fetch(`${API}/api/v1/blog/deleteBlog/${id}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
         credentials: "include",
       });
 
@@ -32,7 +31,7 @@ const Blog = () => {
 
   const getBlogs = async () => {
     try {
-      let res = await fetch("http://localhost:3001/api/v1/blog/getBlog");
+      let res = await fetch(`${API}/api/v1/blog/getBlog`);
 
       if (res.ok) {
         res = await res.json();
@@ -78,7 +77,7 @@ const Blog = () => {
             {/* Image */}
             {blog.image && (
               <img
-                src={`http://localhost:3001/image/${blog.image}`}
+                src={`${API}/image/${blog.image}`}
                 alt={blog.title}
                 className="w-full h-48 object-cover"
               />

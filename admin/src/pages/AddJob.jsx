@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const CreateJob = () => {
   const [form, setForm] = useState({
@@ -59,7 +61,7 @@ const CreateJob = () => {
     setError("");
 
     try {
-      let res = await fetch("http://localhost:3001/api/v1/job/createJob", {
+      let res = await fetch(`${API}/api/v1/job/createJob`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

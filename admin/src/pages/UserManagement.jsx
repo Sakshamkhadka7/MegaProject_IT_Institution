@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,11 +13,11 @@ const UserManagement = () => {
 
   const navigate=useNavigate();
 
-  // ✅ Fetch Users
+  
   const getUsers = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/student/getAllUsers",
+        `${API}/api/v1/student/getAllUsers`,
         {
           method: "GET",
           credentials: "include",
@@ -119,7 +122,7 @@ const UserManagement = () => {
             {/* Top Section */}
             <div className="flex items-center gap-3 mb-4">
               <img
-                src={`http://localhost:3001/image/${user.avatar}`}
+                src={`${API}/image/${user.avatar}`}
                 alt="avatar"
                 className="w-12 h-12 rounded-full object-cover"
               />

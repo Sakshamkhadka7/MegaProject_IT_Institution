@@ -8,13 +8,16 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const Alumni = () => {
   const [review, setReview] = useState([]);
 
   const getReview = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/review/getAllReview",
+        `${API}/api/v1/review/getAllReview`,
         {
           method: "GET",
           credentials: "include",
@@ -52,7 +55,7 @@ const Alumni = () => {
 
              
               <img
-                src={`http://localhost:3001/image/${rev.photo}`}
+                src={`${API}/image/${rev.photo}`}
                 alt="review"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />

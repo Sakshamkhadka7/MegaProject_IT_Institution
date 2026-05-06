@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const ContactUs = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -17,13 +20,13 @@ const ContactUs = () => {
     });
   };
 
-  // ✅ CONNECTED TO BACKEND
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/contact/createContact",
+        `${API}/api/v1/contact/createContact`,
         {
           method: "POST",
           headers: {
@@ -57,7 +60,7 @@ const ContactUs = () => {
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
 
-        {/* ================= FORM ================= */}
+        
         <div className="bg-white p-8 rounded-2xl shadow-xl">
           <h2 className="text-3xl font-bold mb-6">Contact Us</h2>
 
@@ -113,10 +116,10 @@ const ContactUs = () => {
           </form>
         </div>
 
-        {/* ================= INFO ================= */}
+       
         <div className="space-y-6">
 
-          {/* Contact Info */}
+       
           <div className="bg-white p-6 rounded-2xl shadow-xl">
             <h3 className="text-2xl font-bold mb-4">Location</h3>
             <p>📍 Kathmandu, Nepal</p>
@@ -135,7 +138,7 @@ const ContactUs = () => {
             ></iframe>
           </div>
 
-          {/* Social */}
+         
           <div className="bg-white p-6 rounded-2xl shadow-xl">
             <h3 className="text-xl font-bold mb-4">Follow Us</h3>
 

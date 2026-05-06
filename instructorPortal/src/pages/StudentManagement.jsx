@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const StudentManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,12 +12,9 @@ const StudentManagement = () => {
   const getUsers = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/student/getAllUsers",
+        `${API}/api/v1/student/getAllUsers`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );
@@ -99,7 +99,7 @@ const StudentManagement = () => {
                 <img
                   src={
                     user.avatar
-                      ? `http://localhost:3001/image/${user.avatar}`
+                      ? `${API}/image/${user.avatar}`
                       : "https://via.placeholder.com/40"
                   }
                   alt="avatar"

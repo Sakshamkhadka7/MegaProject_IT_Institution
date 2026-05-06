@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 import { InstructorContext } from "../context/IntructorProvider";
 import { Navigate } from "react-router-dom";
 
+
+
 const InstructorProtected = ({ children }) => {
   const { instrutor, loading } = useContext(InstructorContext);
 

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const Order = () => {
   const [order, setOrder] = useState([]);
@@ -7,7 +9,7 @@ const Order = () => {
   const getOrder = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3001/api/v1/order/getMyOrder",
+        `${API}/api/v1/order/getMyOrder`,
         {
           method: "GET",
           credentials: "include",
@@ -80,7 +82,7 @@ const Order = () => {
                     <img
                       src={
                         cour.coursesId?.courseImage
-                          ? `http://localhost:3001/image/${cour.coursesId.courseImage}`
+                          ? `${API}/image/${cour.coursesId.courseImage}`
                           : "https://via.placeholder.com/50"
                       }
                       alt=""

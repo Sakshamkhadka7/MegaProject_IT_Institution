@@ -5,6 +5,9 @@ import { UserContext } from "../context/UserProvider";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const Login = () => {
   const { setUser } = useContext(UserContext);
   const [formData, setFormData] = useState({
@@ -45,7 +48,7 @@ const Login = () => {
     if (!validateForm()) return;
 
     try {
-      let res = await fetch("http://localhost:3001/api/v1/student/login", {
+      let res = await fetch(`${API}/api/v1/student/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

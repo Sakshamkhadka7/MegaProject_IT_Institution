@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const EditJob = () => {
   const { state } = useLocation();
@@ -33,7 +35,7 @@ const EditJob = () => {
 
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/job/updateJobs/${state._id}`,
+        `${API}/api/v1/job/updateJobs/${state._id}`,
         {
           method: "PUT",
           headers: {

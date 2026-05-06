@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const SubmittedAssignment = () => {
   const [assignment, setAssignment] = useState([]);
@@ -10,12 +12,9 @@ const SubmittedAssignment = () => {
   const getAssignment = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/assignment/submittedInstructor",
+        `${API}/api/v1/assignment/submittedInstructor`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );
@@ -105,7 +104,7 @@ const SubmittedAssignment = () => {
                   {/* File */}
                   <td className="p-4">
                     <a
-                      href={`http://localhost:3001/image/${assign.submittedFile}`}
+                      href={`${API}/image/${assign.submittedFile}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline text-sm font-medium"

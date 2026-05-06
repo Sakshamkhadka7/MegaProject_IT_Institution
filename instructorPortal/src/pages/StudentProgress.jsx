@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const StudentProgress = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +14,7 @@ const StudentProgress = () => {
   const getStudents = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/student/getAllUsers",
+        `${API}/api/v1/student/getAllUsers`,
         {
           method: "GET",
           credentials: "include",
@@ -33,7 +36,7 @@ const StudentProgress = () => {
   const getProgress = async (studentId, courseId) => {
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/progress/getStudentProgress/${courseId}/${studentId}`,
+        `${API}/api/v1/progress/getStudentProgress/${courseId}/${studentId}`,
         {
           method: "GET",
           credentials: "include",
@@ -90,7 +93,7 @@ const StudentProgress = () => {
               {/* Student Info */}
               <div className="flex items-center gap-3 mb-4">
                 <img
-                  src={`http://localhost:3001/image/${student.avatar}`}
+                  src={`${API}/image/${student.avatar}`}
                   className="w-12 h-12 rounded-full"
                 />
                 <div>
@@ -190,7 +193,7 @@ const StudentProgress = () => {
                                   {/* File */}
                                   {item.file && (
                                     <a
-                                      href={`http://localhost:3001/image/${item.file}`}
+                                      href={`${API}/image/${item.file}`}
                                       target="_blank"
                                       className="text-xs text-blue-500 underline mt-1 block"
                                     >

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const Progress = () => {
   const [courses, setCourse] = useState([]);
@@ -9,12 +11,9 @@ const Progress = () => {
   const getMyCourse = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/course/getMyCourses",
+        `${API}/api/v1/course/getMyCourses`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         }
       );
@@ -32,12 +31,9 @@ const Progress = () => {
   const viewProgresses = async (id) => {
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/progress/my/${id}`,
+        `${API}/api/v1/progress/my/${id}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         }
       );

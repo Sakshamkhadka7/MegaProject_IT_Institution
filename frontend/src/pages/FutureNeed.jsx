@@ -6,6 +6,7 @@ import { useContext } from "react";
 import { CartContext } from "../context/AddToCart";
 import { UserContext } from "../context/UserProvider";
 
+
 const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");

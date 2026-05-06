@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const BookDemo = () => {
   const { state } = useLocation();
 
@@ -26,7 +29,7 @@ const BookDemo = () => {
   const getAvailableSlot = async (selectedDate) => {
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/demo/getAvailableSLot/${state._id}?date=${selectedDate}`,
+        `${API}/api/v1/demo/getAvailableSLot/${state._id}?date=${selectedDate}`,
         {
           method: "GET",
           headers: {
@@ -59,7 +62,7 @@ const BookDemo = () => {
       setLoading(true);
 
       let res = await fetch(
-        "http://localhost:3001/api/v1/demo/bookDemo",
+        `${API}/api/v1/demo/bookDemo`,
         {
           method: "POST",
           headers: {

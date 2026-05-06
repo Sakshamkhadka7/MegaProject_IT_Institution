@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const EditBlog = () => {
   const { state } = useLocation(); // blog data from previous page
@@ -14,7 +16,7 @@ const EditBlog = () => {
   });
 
   const [preview, setPreview] = useState(
-    state?.image ? `http://localhost:3001/image/${state.image}` : null,
+    state?.image ? `${API}/image/${state.image}` : null,
   );
 
   const [loading, setLoading] = useState(false);
@@ -50,7 +52,7 @@ const EditBlog = () => {
       }
 
       let res = await fetch(
-        `http://localhost:3001/api/v1/blog/updateBlog/${state._id}`,
+        `${API}/api/v1/blog/updateBlog/${state._id}`,
         {
           method: "PUT",
           body: data,

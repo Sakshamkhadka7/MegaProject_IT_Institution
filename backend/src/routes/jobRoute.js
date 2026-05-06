@@ -6,7 +6,7 @@ import upload from "../middleware/upload.js";
 const jobRouter=express.Router();
 
 jobRouter.post("/createJob",userMiddleware,createJob);
-jobRouter.get("/getJob",userMiddleware,getAllJobs);
+jobRouter.get("/getJob",getAllJobs);
 jobRouter.delete("/deleteJob/:jobId",userMiddleware,deleteJobs)
 jobRouter.put("/updateJobs/:jobId",userMiddleware,updateJob);
 jobRouter.post("/jobApply/:jobId",upload.single("resume"),userMiddleware,jobApply);

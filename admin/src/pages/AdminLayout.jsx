@@ -13,6 +13,9 @@ import { AdminContext } from "../context/AdminProvider";
 import { toast } from "react-toastify";
 import { IoIosContact } from "react-icons/io";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const navItems = [
   {
     to: "/access/finance",
@@ -70,11 +73,8 @@ const AdminLayout = () => {
    const navigate=useNavigate();
    const Logout = async () => {
     try {
-      let res = await fetch("http://localhost:3001/api/v1/student/logout", {
+      let res = await fetch(`${API}/api/v1/student/logout`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
         credentials: "include",
       });
 
@@ -149,7 +149,7 @@ const AdminLayout = () => {
 
             <div className="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
               {
-                admin ? <div><img  className="rounded-full w-20 h-10" src={`http://localhost:3001/image/${admin.avatar}`} /></div> :<div></div>
+                admin ? <div><img  className="rounded-full w-20 h-10" src={`${API}/image/${admin.avatar}`} /></div> :<div></div>
               }
             </div>
           </div>

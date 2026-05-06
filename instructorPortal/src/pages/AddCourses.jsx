@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 
+const API = import.meta.env.VITE_API_URL;
+
+
 const AddCourses = () => {
   const [courses, setCourses] = useState({
     title: "",
@@ -105,7 +108,7 @@ const AddCourses = () => {
 
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/course/createCourse",
+        `${API}/api/v1/course/createCourse`,
         {
           method: "POST",
           body: data,

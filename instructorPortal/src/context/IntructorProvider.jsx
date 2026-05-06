@@ -2,6 +2,9 @@ import React, { createContext, useEffect, useState } from "react";
 
 export const InstructorContext = createContext();
 
+const API = import.meta.env.VITE_API_URL;
+
+
 export const IntructorProvider = ({ children }) => {
   const [instrutor, setInstructor] = useState();
   const [loading, setLoading] = useState(true);
@@ -10,11 +13,8 @@ export const IntructorProvider = ({ children }) => {
   const getInstructor = async () => {
     try {
       setLoading(true);
-      let res = await fetch("http://localhost:3001/api/v1/student/getMe", {
+      let res = await fetch(`${API}/api/v1/student/getMe`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
         credentials: "include",
       });
 

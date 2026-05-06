@@ -3,6 +3,8 @@ import { FaArrowCircleRight } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/AddToCart";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const CourseDetails = () => {
   const { state } = useLocation();
@@ -15,7 +17,7 @@ const CourseDetails = () => {
   const enrolledCourse = async (courseId) => {
     try {
       let res = await fetch(
-        `http://localhost:3001/api/v1/course/enrolledCourse/${courseId}`,
+        `${API}/api/v1/course/enrolledCourse/${courseId}`,
         {
           method: "POST",
           headers: {
@@ -73,7 +75,7 @@ const CourseDetails = () => {
       <div>
         <img
           className="rounded-2xl w-70 h-50"
-          src={`http://localhost:3001/image/${state.courseImage}`}
+          src={`${API}/image/${state.courseImage}`}
         />
       </div>
     </div>

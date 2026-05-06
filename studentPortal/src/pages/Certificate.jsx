@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
@@ -8,7 +10,7 @@ const Certificate = () => {
   const getCertificates = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/certificate/getCertificate",
+        `${API}/api/v1/certificate/getCertificate`,
         {
           method: "GET",
           credentials: "include",
@@ -99,7 +101,7 @@ const Certificate = () => {
               <button
                 onClick={() =>
                   window.open(
-                    `http://localhost:3001/image/${cert._id}`,
+                    `${API}/image/${cert._id}`,
                     "_blank"
                   )
                 }

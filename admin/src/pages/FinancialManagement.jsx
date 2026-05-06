@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
+const API = import.meta.env.VITE_API_URL;
+
 
 const FinancialManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -11,7 +13,7 @@ const FinancialManagement = () => {
   const getOrders = async () => {
     try {
       let res = await fetch(
-        "http://localhost:3001/api/v1/order/getAllOrders",
+        `${API}/api/v1/order/getAllOrders`,
         {
           method: "GET",
           credentials: "include",

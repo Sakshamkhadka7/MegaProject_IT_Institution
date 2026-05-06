@@ -10,6 +10,8 @@ import {
 } from "react-icons/fi";
 import { StudentContext } from "../context/StudentProvider";
 import { toast } from "react-toastify";
+const API = import.meta.env.VITE_API_URL;
+
 
 const navItems = [
   {
@@ -46,7 +48,7 @@ const StudentLayout = () => {
 
   const Logout = async () => {
     try {
-      let res = await fetch("http://localhost:3001/api/v1/student/logout", {
+      let res = await fetch(`${API}/api/v1/student/logout`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +139,7 @@ const StudentLayout = () => {
                 <div>
                   <img
                     className="rounded-full w-20 h-10"
-                    src={`http://localhost:3001/image/${user.avatar}`}
+                    src={`${API}/image/${user.avatar}`}
                   />
                 </div>
               ) : (
