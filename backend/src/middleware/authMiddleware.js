@@ -3,7 +3,7 @@ import ApiError from "../utils/apiError.js";
 import Student from "../models/student.js";
 
 const userMiddleware = async (req, res, next) => {
-  const token = req.cookies.accessToken;
+  const token = req.cookies?.accessToken;
 
   if (!token) {
     throw new ApiError(401, "Cookies not found please register or login first");

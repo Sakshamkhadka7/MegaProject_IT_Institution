@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { InstructorContext } from "../context/IntructorProvider";
 import { toast } from "react-toastify";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+
 
 
 const Login = () => {
@@ -55,15 +57,17 @@ const Login = () => {
         body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        res = await res.json();
-        navigate("/access");
-        console.log(res.data);
-        setInstructor(res.data);
+      const data=await res.json();
 
+      if (res.ok) {
+        navigate("/access");
+        setInstructor(data.data);
+      }else{
+        toast.error(data.message);
       }
     } catch (error) {
       console.log("Error occured at Login fetch frontend", error);
+      toast.error("Server error");
     }
   };
 

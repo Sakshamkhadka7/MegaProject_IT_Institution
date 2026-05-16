@@ -1,16 +1,14 @@
-import React from 'react'
-import Header from './components/Header'
-import AppRouter from './components/AppRouter'
-import Footer from './components/Footer'
+import React from "react";
+import Header from "./components/Header";
+import AppRouter from "./components/AppRouter";
+import Footer from "./components/Footer";
 
 const App = () => {
   return (
     <div>
-    
-      <AppRouter/>
-    
+      <AppRouter />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

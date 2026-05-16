@@ -1,58 +1,120 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { MdEditSquare } from "react-icons/md";
 import { RiDeleteBin7Fill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
 
+
+const CourseRow = memo(({ item, onDelete, onEdit }) => {
+  return (
+    <tr className="hover:bg-gray-50 transition duration-200">
+      <td className="px-4 py-3 font-medium text-gray-700">{item.title}</td>
+
+      <td className="px-4 py-3 flex justify-center">
+        <img
+          src={`${API}/image/${item.courseImage}`}
+          alt="course"
+          className="w-14 h-14 object-cover rounded-lg border"
+        />
+      </td>
+
+      <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
+        {item.descriptions}
+      </td>
+
+      <td className="px-4 py-3 text-center">{item.duration}</td>
+
+      <td className="px-4 py-3 text-center">{item.enrollmentDeadline}</td>
+
+      <td className="px-4 py-3 text-center font-semibold text-indigo-600">
+        ₹ {item.fee}
+      </td>
+
+      <td className="px-4 py-3 text-center">
+        <span className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">
+          {item.level}
+        </span>
+      </td>
+
+      <td className="px-4 py-3 text-center">
+        <button>
+          <MdEditSquare
+            size={24}
+            className="hover:text-green-400 hover:cursor-pointer"
+            onClick={() => onEdit(item)}
+          />
+        </button>
+        <button>
+          <RiDeleteBin7Fill
+            size={24}
+            className="hover:text-red-500 hover:cursor-pointer"
+            onClick={() => onDelete(item._id)}
+          />
+        </button>
+      </td>
+    </tr>
+  );
+});
 
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
-  const deleteCourse = async (id) => {
-    try {
-      let res = await fetch(
-        `${API}/api/v1/course/deleteCourse/${id}`,
-        {
-          credentials: "include",
-        },
+const deleteCourse = async (id) => {
+  try {
+    const res = await fetch(`${API}/api/v1/course/deleteCourse/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    const data = await res.json()
+
+    if (res.ok) {
+      toast.success(data?.message || "Course deleted successfully");
+
+      setCourses((prev) =>
+        prev.filter((course) => course._id !== id)
       );
-
-      if (res.ok) {
-        res = await res.json();
-        toast.error("Course has been deleted");
-        getAllCourses();
-      }
-    } catch (error) {
-      console.log("Error has been occured at deleteCourses", error);
-      toast.error("Error occured at a deleteCourses");
+    } else {
+      toast.error(data?.message || "Failed to delete course");
     }
+  } catch (error) {
+    console.log("Error occurred at deleteCourse", error);
+    toast.error("Network error while deleting course");
+  }
+};
+
+  const handleEdit = (item) => {
+    navigate(`/access/editCourse/${item._id}`, { state: item });
   };
 
-  const getAllCourses = async () => {
-    try {
-      const res = await fetch(
-        `${API}/api/v1/course/getInstructorCourse`,
-        {
-          credentials: "include",
-        },
-      );
+ const getAllCourses = async () => {
+  try {
+    setLoading(true);
 
-      const data = await res.json();
+    const res = await fetch(`${API}/api/v1/course/getInstructorCourse`, {
+      method: "GET",
+      credentials: "include",
+    });
 
-      if (res.ok) {
-        setCourses(data.data);
-      }
-    } catch (error) {
-      console.log("Error occurred at getAllCourses", error);
-      toast.error("Error occured at getAllCourses")
-    } finally {
-      setLoading(false);
+    const data = await res.json()
+
+    if (res.ok) {
+      setCourses(data?.data || []);
+    } else {
+      toast.error(data?.message || "Failed to fetch courses");
     }
-  };
+  } catch (error) {
+    console.log("Error occurred at getAllCourses", error);
+    toast.error("Network error while fetching courses");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     getAllCourses();
@@ -92,63 +154,12 @@ const CourseManagement = () => {
               {/* Table Body */}
               <tbody className="divide-y">
                 {courses.map((item) => (
-                  <tr
+                  <CourseRow
                     key={item._id}
-                    className="hover:bg-gray-50 transition duration-200"
-                  >
-                    <td className="px-4 py-3 font-medium text-gray-700">
-                      {item.title}
-                    </td>
-
-                    <td className="px-4 py-3 flex justify-center">
-                      <img
-                        src={`${API}/image/${item.courseImage}`}
-                        alt="course"
-                        className="w-14 h-14 object-cover rounded-lg border"
-                      />
-                    </td>
-
-                    <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
-                      {item.descriptions}
-                    </td>
-
-                    <td className="px-4 py-3 text-center">{item.duration}</td>
-
-                    <td className="px-4 py-3 text-center">
-                      {item.enrollmentDeadline}
-                    </td>
-
-                    <td className="px-4 py-3 text-center font-semibold text-indigo-600">
-                      ₹ {item.fee}
-                    </td>
-
-                    <td className="px-4 py-3 text-center">
-                      <span className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">
-                        {item.level}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3 text-center">
-                      <button>
-                        <MdEditSquare
-                          size={24}
-                          className="hover:text-green-400 hover:cursor-pointer"
-                          onClick={()=>{
-                           navigate(`/access/editCourse/${item._id}`, { state: item });
-                          }}
-                        />
-                      </button>
-                      <button>
-                        <RiDeleteBin7Fill
-                          size={24}
-                          className="hover:text-red-500 hover:cursor-pointer"
-                          onClick={() => {
-                            deleteCourse(item._id);
-                          }}
-                        />
-                      </button>
-                    </td>
-                  </tr>
+                    item={item}
+                    onDelete={deleteCourse}
+                    onEdit={handleEdit}
+                  />
                 ))}
               </tbody>
             </table>

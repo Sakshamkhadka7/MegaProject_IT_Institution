@@ -5,8 +5,11 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import { useContext } from "react";
 import { CartContext } from "../context/AddToCart";
 import { UserContext } from "../context/UserProvider";
+import { toast } from "react-toastify";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+
 
 
 const Courses = () => {
@@ -14,6 +17,7 @@ const Courses = () => {
   const [search, setSearch] = useState("");
   const [level, setLevel] = useState("All");
   const [sort, setSort] = useState("newest"); 
+  const [loading,setLoading]=useState(false);
 
   const navigate = useNavigate();
   const { dispatch } = useContext(CartContext);
@@ -24,29 +28,35 @@ const Courses = () => {
   };
 
   const getCourses = async () => {
-    try {
-      let res = await fetch(
-        `${API}/api/v1/course/getAllCourses`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
+  try {
+    setLoading(true);
 
-      if (res.ok) {
-        res = await res.json();
-        setCourses(res.data);
-      }
-    } catch (error) {
-      console.log("Error fetching courses", error);
+    const res = await fetch(`${API}/api/v1/course/getAllCourses`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await res.json()
+
+    if (res.ok) {
+      setCourses(data?.data || []);
+    } else {
+      console.log("API Error:", data?.message);
+      toast.error(data?.message || "Failed to fetch courses");
     }
-  };
+  } catch (error) {
+    console.log("Error fetching courses:", error);
+    toast.error("Network error while fetching courses");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     getCourses();
   }, []);
 
-  // 🔥 FILTER + SORT TOGETHER
+  //  FILTER + SORT TOGETHER
   const filteredCourses = useMemo(() => {
     let result = courses.filter((item) => {
       const matchSearch = item.title

@@ -28,7 +28,7 @@ export const getStudentProgress = asyncHandler(async (req, res) => {
   const submission = await AssignmentSubmission.find({
     student: studentId,
     courses: courseId,
-  });
+  }).populate("assignment");
 
   const progress = assignments.map((assign) => {
     const submitted = submission.find(
@@ -98,7 +98,7 @@ export const getMyProgress = asyncHandler(async (req, res) => {
       submitted: !!submitted,
       submittedAt: submitted?.createdAt || null,
       status: submitted?.status,
-      feedback: submitted.instructorFeedBack,
+      feedback: submitted?.instructorFeedBack || null,
       score: submitted?.score ?? null,
     };
   });

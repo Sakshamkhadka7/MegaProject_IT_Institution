@@ -4,23 +4,17 @@ import { v4 as uuidv4 } from "uuid";
 import CryptoJS from "crypto-js";
 const API = import.meta.env.VITE_API_URL;
 
-
 const Payment = () => {
   const { state } = useLocation();
-  console.log(state);
-   const total=state?.total;
-   const order=state?.orderData;
-   console.log(total);
-   console.log(order);
-   console.log(order._id);
-
-   
-   const transaction_uuid=order._id;
+  const total = state?.total;
+  const order = state?.orderData;
+  
+  const transaction_uuid = order._id;
   const message = `total_amount=${total},transaction_uuid=${transaction_uuid},product_code=EPAYTEST`;
   let hash = CryptoJS.HmacSHA256(message, "8gBm/:&EnhH.1/q");
   let signature = CryptoJS.enc.Base64.stringify(hash);
   return (
-    <div className="p-10">
+    <div className="p-10">  
       <form
         className="space-y-3 p-6 shadow-xl rounded-xl"
         action="https://rc-epay.esewa.com.np/api/epay/main/v2/form"
@@ -49,16 +43,16 @@ const Payment = () => {
           value="total_amount,transaction_uuid,product_code"
         />
         <input type="hidden" name="signature" value={signature} />
-       <div className="flex flex-col justify-center items-center space-y-10">
-         <h1 className="text-4xl text-center font-bold ">
-          Total Amount To Pay Rs : {total}
-        </h1>
-        <input
-          className="bg-orange-500  text-2xl  p-4 text-white text-center m-auto rounded-2xl px-35 py-5"
-          value="Submit"
-          type="submit"
-        />
-       </div>
+        <div className="flex flex-col justify-center items-center space-y-10">
+          <h1 className="text-4xl text-center font-bold ">
+            Total Amount To Pay Rs : {total}
+          </h1>
+          <input
+            className="bg-orange-500  text-2xl  p-4 text-white text-center m-auto rounded-2xl px-35 py-5"
+            value="Submit"
+            type="submit"
+          />
+        </div>
       </form>
     </div>
   );

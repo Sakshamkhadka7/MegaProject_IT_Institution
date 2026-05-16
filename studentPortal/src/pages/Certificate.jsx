@@ -1,33 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+ const API ="http://localhost:3001";
+
 
 
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const getCertificates = async () => {
-    try {
-      let res = await fetch(
-        `${API}/api/v1/certificate/getCertificate`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
-
-      if (res.ok) {
-        res = await res.json();
-        setCertificates(res.data);
+const getCertificates = async () => {
+  try {
+    const res = await fetch(
+      `${API}/api/v1/certificate/getCertificate`,
+      {
+        method: "GET",
+        credentials: "include",
       }
-    } catch (error) {
-      console.log("Error fetching certificates", error);
-      toast.error("Error fetching certificates");
-    } finally {
-      setLoading(false);
+    );
+
+    const data = await res.json();
+
+   
+    if (res.ok) {
+      setCertificates(data.data || []);
     }
-  };
+
+    
+    else {
+      toast.warning(data.message || "Failed to fetch certificates");
+    }
+  } catch (error) {
+    console.log("Error fetching certificates", error);
+
+    toast.error("Server error while fetching certificates");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     getCertificates();

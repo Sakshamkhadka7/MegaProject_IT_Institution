@@ -1,44 +1,58 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaBuilding, FaMapMarkerAlt, FaBriefcase } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { UserProvider } from "../context/UserProvider";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+
 
 
 const JobApplication = () => {
+  // const {user}=useContext(UserProvider);
   const { state } = useLocation();
   const [coverLetter, setCoverLetter] = useState("");
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const navigate=useNavigate();
 
-  const applyJob = async () => {
-    try {
-      setLoading(true);
+const applyJob = async () => {
+  // if (!user) {
+  //   toast.warning("Please login first");
+  //   navigate("/login");
+  //   return; //  IMPORTANT: stop here
+  // }
 
-      const formData = new FormData();
-      formData.append("coverLetter", coverLetter);
-      formData.append("resume", resume);
+  try {
+    setLoading(true);
 
-      const res = await fetch(
-        `${API}/api/v1/job/jobApply/${state._id}`,
-        {
-          method: "POST",
-          credentials: "include",
-          body: formData,
-        }
-      );
+    const formData = new FormData();
+    formData.append("coverLetter", coverLetter);
+    formData.append("resume", resume);
 
-      if (res.ok) {
-        setSuccess(true);
-      }
-    } catch (error) {
-      console.log("Error applying job", error);
-    } finally {
-      setLoading(false);
+    const res = await fetch(`${API}/api/v1/job/jobApply/${state._id}`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to apply job");
     }
-  };
 
+    setSuccess(true);
+    toast.success(data.message || "Job applied successfully");
+  } catch (error) {
+    console.log("Error applying job", error);
+    toast.error(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex justify-center items-center">
       <div className="max-w-6xl w-full grid md:grid-cols-2 gap-8">

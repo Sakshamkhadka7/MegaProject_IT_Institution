@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaMapMarkerAlt, FaBriefcase, FaBuilding } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { UserContext } from "../context/UserProvider";
 
-const API = import.meta.env.VITE_API_URL;
-
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
 
 const Job = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+  const { user } = useContext(UserContext);
 
   const getJobs = async () => {
     try {
@@ -17,12 +20,16 @@ const Job = () => {
         credentials: "include",
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setJobs(data.data);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch jobs");
       }
+
+      setJobs(data.data);
     } catch (error) {
       console.log("Error fetching jobs", error);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -44,9 +51,7 @@ const Job = () => {
 
       {/* Loading */}
       {loading && (
-        <div className="text-center text-gray-500 mt-10">
-          Loading jobs...
-        </div>
+        <div className="text-center text-gray-500 mt-10">Loading jobs...</div>
       )}
 
       {/* Empty State */}
@@ -97,7 +102,17 @@ const Job = () => {
                 Posted: {new Date(job.createdAt).toDateString()}
               </span>
 
-              <button onClick={()=> navigate("/jobApply",{state:job}) } className="bg-blue-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-blue-700 transition">
+              <button
+                onClick={() => {
+                  if (user) {
+                    navigate("/jobApply", { state: job });
+                  } else {
+                    toast.warning("Please login first");
+                    navigate("/login");
+                  }
+                }}
+                className="bg-blue-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-blue-700 transition"
+              >
                 Apply Now
               </button>
             </div>

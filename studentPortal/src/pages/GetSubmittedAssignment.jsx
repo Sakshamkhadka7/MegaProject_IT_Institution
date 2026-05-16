@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FaFileAlt, FaCheckCircle, FaClock } from "react-icons/fa";
 import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+ const API ="http://localhost:3001";
+
 
 
 const GetSubmittedAssignment = () => {
@@ -17,11 +19,13 @@ const GetSubmittedAssignment = () => {
           credentials: "include",
         }
       );
-
-      if (res.ok) {
         const data = await res.json();
+      if (res.ok) {
+      
         setAssignments(data.data);
         console.log(data.data);
+      }else{
+        toast.warning (data?.message || "There is No Submitted Assignments");
       }
     } catch (error) {
       console.log("Error fetching assignments", error);
@@ -50,7 +54,7 @@ const GetSubmittedAssignment = () => {
           Submitted Assignments
         </h1>
         <p className="text-sm text-gray-500">
-          Track your assignment submissions and performance
+          Track your assignment submissions and per formance
         </p>
       </div>
 
@@ -77,7 +81,7 @@ const GetSubmittedAssignment = () => {
           >
             {/* Title */}
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              {item.assignment.title || "Assignment"}
+              {item.assignment?.title || "Assignment"}
             </h2>
 
             {/* Status */}

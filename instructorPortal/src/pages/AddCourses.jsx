@@ -3,30 +3,63 @@ import { toast } from "react-toastify";
 
 const API = import.meta.env.VITE_API_URL;
 
+const INITIAL_STATE = {
+  title: "",
+  descriptions: "",
+  syllabus: [""],
+  duration: "",
+  fee: "",
+  level: "Beginner",
+  courseImage: null,
+  enrollment: "",
+  prerequisities: "",
+};
 
 const AddCourses = () => {
-  const [courses, setCourses] = useState({
-    title: "",
-    descriptions: "",
-    syllabus: "",
-    duration: "",
-    fee: "",
-    level: "",
-    courseImage: "",
-    enrollment: "",
-    prerequisities: "",
-  });
+  const [courses, setCourses] = useState(INITIAL_STATE);
+  const [submitting, setSubmitting] = useState(false);
 
+  // ---------------- HANDLE NORMAL INPUT ----------------
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
-    setCourses({
-      ...courses,
+    setCourses((prev) => ({
+      ...prev,
       [name]: files ? files[0] : value,
-    });
+    }));
   };
 
+  // ---------------- HANDLE SYLLABUS ----------------
+  const handleSyllabusChange = (index, value) => {
+    const updatedSyllabus = [...courses.syllabus];
 
+    updatedSyllabus[index] = value;
+
+    setCourses((prev) => ({
+      ...prev,
+      syllabus: updatedSyllabus,
+    }));
+  };
+
+  // ---------------- ADD SYLLABUS FIELD ----------------
+  const addSyllabusField = () => {
+    setCourses((prev) => ({
+      ...prev,
+      syllabus: [...prev.syllabus, ""],
+    }));
+  };
+
+  // ---------------- REMOVE SYLLABUS FIELD ----------------
+  const removeSyllabusField = (index) => {
+    const filtered = courses.syllabus.filter((_, i) => i !== index);
+
+    setCourses((prev) => ({
+      ...prev,
+      syllabus: filtered,
+    }));
+  };
+
+  // ---------------- VALIDATION ----------------
   const validateForm = () => {
     const {
       title,
@@ -50,8 +83,10 @@ const AddCourses = () => {
       return false;
     }
 
-    if (!syllabus.trim()) {
-      toast.error("Syllabus is required");
+    const validSyllabus = syllabus.filter((item) => item.trim() !== "");
+
+    if (validSyllabus.length === 0) {
+      toast.error("At least one syllabus topic is required");
       return false;
     }
 
@@ -60,12 +95,12 @@ const AddCourses = () => {
       return false;
     }
 
-    if (!fee || isNaN(fee) || Number(fee) <= 0) {
-      toast.error("Fee must be a valid positive number");
+    if (!fee || Number(fee) <= 0) {
+      toast.error("Fee must be valid");
       return false;
     }
 
-    if (!level.trim()) {
+    if (!level) {
       toast.error("Level is required");
       return false;
     }
@@ -75,7 +110,6 @@ const AddCourses = () => {
       return false;
     }
 
- 
     if (!enrollment.trim()) {
       toast.error("Enrollment deadline is required");
       return false;
@@ -89,82 +123,246 @@ const AddCourses = () => {
     return true;
   };
 
+  // ---------------- SUBMIT ----------------
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
-    if (!validateForm()) return;
-
-    const data = new FormData();
-    data.append("title", courses.title);
-    data.append("descriptions", courses.descriptions);
-    data.append("syllabus", courses.syllabus);
-    data.append("duration", courses.duration);
-    data.append("fee", courses.fee);
-    data.append("level", courses.level);
-    data.append("enrollmentDeadline", courses.enrollment);
-    data.append("courseImage", courses.courseImage);
-    data.append("prerequisities", courses.prerequisities);
+    if (!validateForm() || submitting) return;
 
     try {
-      let res = await fetch(
-        `${API}/api/v1/course/createCourse`,
-        {
-          method: "POST",
-          body: data,
-          credentials: "include",
-        }
+      setSubmitting(true);
+
+      const formData = new FormData();
+
+      formData.append("title", courses.title);
+      formData.append("descriptions", courses.descriptions);
+
+      // IMPORTANT
+      formData.append(
+        "syllabus",
+        JSON.stringify(
+          courses.syllabus.filter((item) => item.trim() !== "")
+        )
       );
 
-      if (res.ok) {
-        await res.json();
-        toast.success("Course added successfully");
+      formData.append("duration", courses.duration);
+      formData.append("fee", courses.fee);
+      formData.append("level", courses.level);
+      formData.append("courseImage", courses.courseImage);
+      formData.append("enrollmentDeadline", courses.enrollment);
+      formData.append("prerequisities", courses.prerequisities);
 
-        //  Reset form
-        setCourses({
-          title: "",
-          descriptions: "",
-          syllabus: "",
-          duration: "",
-          fee: "",
-          level: "",
-          courseImage: "",
-          enrollment: "",
-          prerequisities: "",
-        });
+      const res = await fetch(`${API}/api/v1/course/createCourse`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Course created successfully");
+
+        // RESET FORM
+        setCourses(INITIAL_STATE);
       } else {
-        toast.error("Failed to add course");
+        toast.error(data.message || "Failed to create course");
       }
     } catch (error) {
-      toast.error("Error occurred while adding course");
-      console.log("Error:", error);
+      console.log(error);
+      toast.error("Error creating course");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div>
-      <h1 className="text-center text-2xl font-bold">Add Courses</h1>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">
+          Create New Course
+        </h1>
 
-      <div className="p-6 rounded-2xl shadow-2xl">
-        <form
-          className="flex flex-col justify-center gap-4"
-          onSubmit={handleSubmit}
-        >
-          <input name="title" onChange={handleChange} className="border p-2" placeholder="Title" />
-          <input name="descriptions" onChange={handleChange} className="border p-2" placeholder="Description" />
-          <input name="syllabus" onChange={handleChange} className="border p-2" placeholder="Syllabus" />
-          <input name="duration" onChange={handleChange} className="border p-2" placeholder="Duration" />
-          <input name="fee" type="number" onChange={handleChange} className="border p-2" placeholder="Fee" />
-          <input name="level" onChange={handleChange} className="border p-2" placeholder="Level" />
-          <input name="courseImage" type="file" onChange={handleChange} className="border p-2" />
-          <input name="enrollment" onChange={handleChange} className="border p-2" placeholder="Enrollment deadline" />
-          <input name="prerequisities" onChange={handleChange} className="border p-2" placeholder="Prerequisites" />
+        <form onSubmit={handleSubmit} className="space-y-6">
 
+          {/* TITLE */}
+          <div>
+            <label className="block mb-2 font-medium text-gray-700">
+              Course Title
+            </label>
+
+            <input
+              type="text"
+              name="title"
+              value={courses.title}
+              onChange={handleChange}
+              placeholder="Enter course title"
+              className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          {/* DESCRIPTION */}
+          <div>
+            <label className="block mb-2 font-medium text-gray-700">
+              Description
+            </label>
+
+            <textarea
+              name="descriptions"
+              value={courses.descriptions}
+              onChange={handleChange}
+              rows={5}
+              placeholder="Enter course description"
+              className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          {/* SYLLABUS */}
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <label className="font-medium text-gray-700">
+                Course Syllabus
+              </label>
+
+              <button
+                type="button"
+                onClick={addSyllabusField}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+              >
+                + Add Topic
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {courses.syllabus.map((topic, index) => (
+                <div key={index} className="flex gap-3">
+                  <input
+                    type="text"
+                    value={topic}
+                    onChange={(e) =>
+                      handleSyllabusChange(index, e.target.value)
+                    }
+                    placeholder={`Topic ${index + 1}`}
+                    className="flex-1 border rounded-xl p-3"
+                  />
+
+                  {courses.syllabus.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSyllabusField(index)}
+                      className="bg-red-500 text-white px-4 rounded-lg hover:bg-red-600"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DURATION + FEE */}
+          <div className="grid md:grid-cols-2 gap-5">
+            <div>
+              <label className="block mb-2 font-medium text-gray-700">
+                Duration
+              </label>
+
+              <input
+                type="text"
+                name="duration"
+                value={courses.duration}
+                onChange={handleChange}
+                placeholder="e.g 3 Months"
+                className="w-full border rounded-xl p-3"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 font-medium text-gray-700">
+                Course Fee
+              </label>
+
+              <input
+                type="number"
+                name="fee"
+                value={courses.fee}
+                onChange={handleChange}
+                placeholder="Enter course fee"
+                className="w-full border rounded-xl p-3"
+              />
+            </div>
+          </div>
+
+          {/* LEVEL */}
+          <div>
+            <label className="block mb-2 font-medium text-gray-700">
+              Level
+            </label>
+
+            <select
+              name="level"
+              value={courses.level}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+            >
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+
+          {/* IMAGE */}
+          <div>
+            <label className="block mb-2 font-medium text-gray-700">
+              Course Image
+            </label>
+
+            <input
+              type="file"
+              name="courseImage"
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+            />
+          </div>
+
+          {/* ENROLLMENT */}
+          <div>
+            <label className="block mb-2 font-medium text-gray-700">
+              Enrollment Deadline
+            </label>
+
+            <input
+              type="date"
+              name="enrollment"
+              value={courses.enrollment}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+            />
+          </div>
+
+          {/* PREREQUISITES */}
+          <div>
+            <label className="block mb-2 font-medium text-gray-700">
+              Prerequisites
+            </label>
+
+            <textarea
+              name="prerequisities"
+              value={courses.prerequisities}
+              onChange={handleChange}
+              rows={3}
+              placeholder="Enter course prerequisites"
+              className="w-full border rounded-xl p-3"
+            />
+          </div>
+
+          {/* BUTTON */}
           <button
             type="submit"
-            className="text-xl border px-10 py-2 font-semibold bg-indigo-400 text-white hover:bg-indigo-700"
+            disabled={submitting}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition"
           >
-            Add Course
+            {submitting ? "Creating Course..." : "Create Course"}
           </button>
         </form>
       </div>

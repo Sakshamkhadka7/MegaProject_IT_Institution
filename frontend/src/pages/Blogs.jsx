@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -12,21 +13,28 @@ const Blogs = () => {
 
   //  Fetch Blogs
   const getBlogs = async () => {
-    try {
-      let res = await fetch(
-        `${API}/api/v1/blog/getBlog`
-      );
+  try {
+    setLoading(true);
 
-      if (res.ok) {
-        res = await res.json();
-        setBlogs(res.data);
-      }
-    } catch (error) {
-      console.log("Error fetching blogs", error);
-    } finally {
-      setLoading(false);
+    const res = await fetch(`${API}/api/v1/blog/getBlog`, {
+      method: "GET",
+    });
+
+    const data = await res.json().catch(() => null);
+
+    if (res.ok) {
+      setBlogs(data?.data || []);
+    } else {
+      console.log("API Error:", data?.message);
+      toast.error(data?.message || "Failed to fetch blogs");
     }
-  };
+  } catch (error) {
+    console.log("Error fetching blogs:", error);
+    toast.error("Network error while fetching blogs");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     getBlogs();

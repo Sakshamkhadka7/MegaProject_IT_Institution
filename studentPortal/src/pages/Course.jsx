@@ -1,96 +1,128 @@
-import React, { useEffect, useState } from "react";
-import { FaArrowAltCircleRight } from "react-icons/fa";
+import React, { useEffect, useState, useCallback } from "react";
+import { FaArrowCircleRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
 
+const API = "http://localhost:3001";
 
-const Course = () => {
-  const [course, setCourse] = useState([]);
+const CourseCard = ({ course }) => {
   const navigate = useNavigate();
 
-  const getMyCourse = async () => {
-    try {
-      let res = await fetch(
-        `${API}/api/v1/course/getMyCourses`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-      );
+  if (!course) return null;
 
-      if (res.ok) {
-        res = await res.json();
-        setCourse(res.data);
+  return (
+    <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+
+      {/* IMAGE */}
+      <div className="relative overflow-hidden">
+        <img
+          src={`${API}/image/${course.courseImage}`}
+          alt={course.title}
+          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+
+        <span className="absolute top-3 left-3 bg-green-600 text-white text-xs px-3 py-1 rounded-full">
+          {course.level}
+        </span>
+      </div>
+
+      {/* CONTENT */}
+      <div className="p-5 space-y-3">
+
+        <h2 className="font-bold text-lg text-gray-800 line-clamp-1">
+          {course.title}
+        </h2>
+
+        <p className="text-sm text-gray-500 line-clamp-2">
+          {course.descriptions}
+        </p>
+
+        {/* INFO GRID */}
+        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+          <p>⏳ {course.duration}</p>
+          <p>💰 Rs {course.fee}</p>
+        </div>
+
+        {/* BUTTON */}
+        <button
+          onClick={() =>
+            navigate(`/access/submission/${course._id}`, {
+              state: course,
+            })
+          }
+          className="w-full flex items-center justify-center gap-2 py-2.5 mt-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition"
+        >
+          Start Learning
+          <FaArrowCircleRight />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const Course = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getMyCourse = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/api/v1/course/getMyCourses`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Failed to fetch courses");
+        return;
       }
+
+      setCourses(data.data || []);
     } catch (error) {
-      console.log("Error occured at getMyCourse Fetch", error);
-      toast.error("Error occured at getMyCourse fetch");
+      toast.error("Error fetching courses");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     getMyCourse();
-  }, []);
+  }, [getMyCourse]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh] text-gray-500">
+        Loading your courses...
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      {/* Heading */}
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">My Courses</h1>
+    <div className="w-full">
+      {/* HEADER */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">
+          My Learning Courses
+        </h1>
+        <p className="text-gray-500">
+          Courses you have successfully purchased
+        </p>
+      </div>
 
-      {/* Courses Grid */}
-      {course.length > 0 ? (
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {course.map((cours) => (
-            <div
-              key={cours._id}
-              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden"
-            >
-              {/* Image */}
-              <img
-                src={`${API}/image/${cours?.courseImage}`}
-                alt=""
-                className="w-full h-40 object-cover"
-              />
-
-              {/* Content */}
-              <div className="p-4 space-y-2">
-                <h2 className="font-semibold text-lg text-gray-800 line-clamp-1">
-                  {cours.title}
-                </h2>
-
-                <p className="text-sm text-gray-500 line-clamp-2">
-                  {cours.descriptions}
-                </p>
-
-                {/* Info */}
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p>⏳ Duration: {cours.duration}</p>
-                  <p>💰 Fee: Rs. {cours.fee}</p>
-                  <p>📅 Deadline: {cours.enrollmentDeadline}</p>
-                  <p>📊 Level: {cours.level}</p>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <h1 className="text-xl font-bold text-green-600">
-                    Assignment
-                  </h1>
-                  <FaArrowAltCircleRight
-                    onClick={() =>
-                      navigate(`/access/submission/${cours._id}`, {
-                        state: cours,
-                      })
-                    }
-                    size={20}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+      {/* EMPTY STATE */}
+      {courses.length === 0 ? (
+        <div className="bg-white p-10 rounded-2xl text-center shadow">
+          <h2 className="text-xl font-semibold text-gray-700">
+            No enrolled courses yet
+          </h2>
         </div>
       ) : (
-        <div className="text-center text-gray-500 mt-20">
-          No course has been enrolled
+        /* GRID FIXED */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {courses.map((course) => (
+            <CourseCard key={course._id} course={course} />
+          ))}
         </div>
       )}
     </div>

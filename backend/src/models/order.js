@@ -11,10 +11,10 @@ const orderSchema = new mongoose.Schema(
       {
         coursesId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Courses",
+          ref: "Course",
         },
         quantity: {
-          type: Number,
+          type: Number, 
           default: 1,
         },
       },

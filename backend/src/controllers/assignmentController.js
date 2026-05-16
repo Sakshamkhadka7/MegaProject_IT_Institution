@@ -102,7 +102,7 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
 
   const existingSubmission = await AssignmentSubmission.findOne({
     assignment: assignmentId,
-    course: courseId,
+    courses: courseId,
     student: studentId,
   });
 
@@ -158,41 +158,81 @@ export const deleteAssignment = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Assignment deleted successfully"));
 });
 
-export const SubmittedAssignmentForInstructor = asyncHandler(
-  async (req, res) => {
-    const instructorId = req.user._id;
-    console.log(instructorId);
-    const instructor = req.user.role;
-    if (instructor !== "Instructor") {
-      throw new ApiError(401, "Not authorized to check assignment");
-    }
-    if (!instructorId) {
-      throw new ApiError(401, "Id coulnot found");
-    }
+// export const SubmittedAssignmentForInstructor = asyncHandler(
+//   async (req, res) => {
+//     const instructorId = req.user._id;
+    
+//     const instructor = req.user.role;
+//     if (instructor !== "Instructor") {
+//       throw new ApiError(401, "Not authorized to check assignment");
+//     }
+//     if (!instructorId) {
+//       throw new ApiError(401, "Id coulnot found");
+//     }
 
-    const courses = await Course.find({ instructor: instructorId });
-    if (courses.length == 0) {
-      throw new ApiError(401, "No courses is found for this instructor");
-    }
+//     const courses = await Course.find({ instructor: instructorId });
+//     if (courses.length == 0) {
+//       throw new ApiError(401, "No courses is found for this instructor");
+//     }
 
-    const courseId = await courses.map((course) => course._id);
-    console.log(courseId);
+//     const courseId = await courses.map((course) => course._id);
+    
 
-    const submission = await AssignmentSubmission.find({
-      courses: { $in: courseId },
+//     const submission = await AssignmentSubmission.find({
+//       courses: { $in: courseId },
+//     })
+//       .populate("courses")
+//       .populate("student");
+
+//     console.log(submission);
+
+//     return res
+//       .status(200)
+//       .json(
+//         new ApiResponse(200, "Assigment For Instructor is fetched", submission),
+//       );
+//   },
+// );
+
+export const SubmittedAssignmentForInstructor = asyncHandler(async (req, res) => {
+  const instructorId = req.user._id;
+
+  // 1. Get instructor courses (only active ones if needed)
+  const courses = await Course.find({
+    instructor: instructorId,
+  });
+  
+  const courseIds = courses.map((course) => course._id);
+
+  if (!courseIds.length) {
+    return res.status(200).json(
+      new ApiResponse(200, "No courses found", [])
+    );
+  }
+
+  // 2. Fetch submissions
+  const submission = await AssignmentSubmission.find({
+    courses: { $in: courseIds },
+  })
+    .populate({
+      path: "student",
+      match: { isActive: true }, // soft delete filter
     })
-      .populate("courses")
-      .populate("student");
+    .populate("courses")
+    .populate("assignment");
 
-    console.log(submission);
+  // 3. IMPORTANT: remove invalid records safely
+  const filteredSubmission = submission.filter(
+    (item) =>
+      item.student && // removes soft-deleted users
+      item.assignment &&
+      item.courses
+  );
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(200, "Assigment For Instructor is fetched", submission),
-      );
-  },
-);
+  return res.status(200).json(
+    new ApiResponse(200, "Assignment fetched", filteredSubmission)
+  );
+});
 
 export const instructorFeedBack = asyncHandler(async (req, res) => {
   const submissionId = req.params.id;

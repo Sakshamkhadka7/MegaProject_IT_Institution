@@ -10,13 +10,14 @@ import {
 } from "react-icons/fi";
 import { StudentContext } from "../context/StudentProvider";
 import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
 
 
 const navItems = [
   {
     to: "/access/course",
-    label: "My Courses",
+    label: "Enrolled Courses",
     icon: FiBookOpen,
   },
   {
@@ -44,11 +45,11 @@ const navItems = [
 const StudentLayout = () => {
   const [sideBarOpen, setSideBarOpen] = useState(false);
   const { user } = useContext(StudentContext);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const Logout = async () => {
     try {
-      let res = await fetch(`${API}/api/v1/student/logout`, {
+      const res = await fetch(`${API}/api/v1/student/logout`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -56,15 +57,20 @@ const StudentLayout = () => {
         credentials: "include",
       });
 
+      const data = await res.json();
+
+      // SUCCESS
       if (res.ok) {
-        toast.success("Student logout successfully");
+        toast.success(data.message || "Logout successful");
+
         navigate("/login");
       } else {
-        toast.error("Error at logout");
+        toast.error(data.message || "Logout failed");
       }
     } catch (error) {
-      console.log("Error occured at logout", error);
-      toast.error("Error occured at logout");
+      console.log("Error occurred at logout", error);
+
+      toast.error("Server error. Please try again.");
     }
   };
 
@@ -123,7 +129,10 @@ const StudentLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="border px-10 py-1 rounded-xl bg-blue-500 text-white" onClick={()=> Logout()}>
+            <div
+              className="border px-10 py-1 rounded-xl bg-blue-500 text-white"
+              onClick={() => Logout()}
+            >
               Logout
             </div>
 

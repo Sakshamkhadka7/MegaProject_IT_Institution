@@ -71,7 +71,6 @@ const EditCourseManagement = () => {
         toast.success("Course updated successfully");
         navigate("/access/courseManagement");
       } else {
-        console.log(result);
         toast.error(result.message || "Update failed");
       }
     } catch (error) {

@@ -62,8 +62,8 @@ export const registerStudent = asyncHandler(async (req, res) => {
 
  const options = {
   httpOnly: true,
-  secure: true,
-  sameSite: "None",
+  secure: false,
+  sameSite: "lax",
 };
 
   return res
@@ -75,42 +75,91 @@ export const registerStudent = asyncHandler(async (req, res) => {
     );
 });
 
+// export const login = asyncHandler(async (req, res) => {
+//   const { email, password } = req.body;
+
+//   if (!email || !password) {
+//     throw new ApiError(400, "All fields are required");
+//   }
+//   const isExist = await Student.findOne({ email });
+
+//   if (!isExist) {
+//     throw new ApiError(404, "Student couldnot found please register !");
+//   }
+
+//   const isCorrectPassword = await isExist.isPasswordCorrect(password);
+//   if (!isCorrectPassword) {
+//     throw new ApiError(404, "Password is incoorect");
+//   }
+
+//   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+//     isExist._id,
+//   );
+
+//   const loggedInUser = await Student.findById(isExist._id).select(
+//     "-password -refreshToken",
+//   );
+
+// const options = {
+//   httpOnly: true,
+//   secure: false,
+//   sameSite: "lax",
+// };
+
+//   return res
+//     .cookie("accessToken", accessToken, options)
+//     .cookie("refreshToken", refreshToken, options)
+//     .status(200)
+//     .json(new ApiResponse(200, "Student Login Successfully", loggedInUser));
+// });
+
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     throw new ApiError(400, "All fields are required");
   }
-  const isExist = await Student.findOne({ email });
 
-  if (!isExist) {
-    throw new ApiError(404, "Student couldnot found please register !");
+  const user = await Student.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(404, "Student could not be found");
   }
 
-  const isCorrectPassword = await isExist.isPasswordCorrect(password);
+  // ✅ SOFT DELETE CHECK (IMPORTANT)
+  if (!user.isActive) {
+    throw new ApiError(
+      403,
+      "Your account has been deactivated. Please contact admin."
+    );
+  }
+
+  const isCorrectPassword = await user.isPasswordCorrect(password);
+
   if (!isCorrectPassword) {
-    throw new ApiError(404, "Password is incoorect");
+    throw new ApiError(400, "Incorrect password");
   }
 
-  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
-    isExist._id,
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshToken(user._id);
+
+  const loggedInUser = await Student.findById(user._id).select(
+    "-password -refreshToken"
   );
 
-  const loggedInUser = await Student.findById(isExist._id).select(
-    "-password -refreshToken",
-  );
-
-const options = {
-  httpOnly: true,
-  secure: true,
-  sameSite: "None",
-};
+  const options = {
+    httpOnly: true,
+    secure: false, // set true in production (HTTPS)
+    sameSite: "lax",
+  };
 
   return res
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .status(200)
-    .json(new ApiResponse(200, "Student Login Successfully", loggedInUser));
+    .json(
+      new ApiResponse(200, "Student Login Successfully", loggedInUser)
+    );
 });
 
 export const logout = asyncHandler(async (req, res) => {
@@ -129,8 +178,8 @@ export const logout = asyncHandler(async (req, res) => {
 
 const options = {
   httpOnly: true,
-  secure: true,
-  sameSite: "None",
+  secure: false,
+  sameSite: "lax",
 };
 
   return res
@@ -186,10 +235,11 @@ export const getAllUsers = asyncHandler(async (req, res) => {
     console.log(courses);
 
     const courseId = courses.map((course) => course._id.toString());
-    const students = await Student.find({
-      role: "Student",
-      enrolledCourses: { $in: courseId },
-    }).populate("enrolledCourses")
+  const students = await Student.find({
+  role: "Student",
+  isActive: true, 
+  enrolledCourses: { $in: courseId },
+}).populate("enrolledCourses");
 
     const filteredStudents = students.map((student) => {
       const filteredCourses = student.enrolledCourses.filter((courses) =>
@@ -274,6 +324,155 @@ export const getStudent = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, "Stident only fetched successfully", user));
+});
+
+
+export const deleteStudent = asyncHandler(async (req, res) => {
+  const studentId = req.params.id;
+
+  // CHECK STUDENT
+  const student = await Student.findById(studentId);
+
+  if (!student) {
+    throw new ApiError(404, "Student not found");
+  }
+   if (student.role === "Admin") {
+    throw new ApiError(403, "Admin cannot be deactivated");
+  }
+
+
+  // ALREADY DELETED
+  if (!student.isActive) {
+    throw new ApiError(400, "Student already deleted");
+  }
+
+  // SOFT DELETE
+  student.isActive = false;
+
+  // REMOVE REFRESH TOKEN
+  student.refreshToken = "";
+  student.accessToken="";
+
+  await student.save();
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      "Student deleted successfully"
+    )
+  );
+});
+
+export const activateStudent = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+
+  const user = await Student.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (user.role === "Admin") {
+    throw new ApiError(403, "Admin cannot be modified");
+  }
+
+  user.isActive = true;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User activated successfully"));
+});
+
+
+export const addInstructor = asyncHandler(async (req, res) => {
+
+ const userRole = req?.user?.role;
+
+
+  if (userRole !== "Admin") {
+    throw new ApiError(
+      401,
+      "Not allowed to add instructor"
+    );
+  }
+
+  const {
+    fullName,
+    email,
+    password,
+    phone,
+    qualification,
+  } = req.body;
+
+
+  if (!req.file) {
+    throw new ApiError(
+      400,
+      "Instructor image is required"
+    );
+  }
+
+  const image = req?.file?.filename;
+
+  
+  if (
+    !fullName ||
+    !email ||
+    !password ||
+    !phone
+  ) {
+    throw new ApiError(
+      400,
+      "All fields are mandatory"
+    );
+  }
+
+ 
+  const isExists = await Student.findOne({
+    email,
+  });
+
+  if (isExists) {
+    throw new ApiError(
+      409,
+      "User already exists"
+    );
+  }
+
+
+  const instructor = await Student.create({
+    fullName,
+    email,
+    phone,
+    password,
+    qualification,
+    avatar: image,
+    role: "Instructor",
+  });
+
+  
+  const instructorCreated =
+    await Student.findById(
+      instructor._id
+    ).select("-password -refreshToken");
+
+  if (!instructorCreated) {
+    throw new ApiError(
+      500,
+      "Error occurred while creating instructor"
+    );
+  }
+
+
+
+  return res.status(201).json(
+    new ApiResponse(
+      201,
+      "Instructor created successfully",
+      instructorCreated
+    )
+  );
 });
 
 export const getInstructor = asyncHandler(async (req, res) => {

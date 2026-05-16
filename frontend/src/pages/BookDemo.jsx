@@ -58,35 +58,36 @@ const BookDemo = () => {
 
   // booking API
   const bookDemo = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      let res = await fetch(
-        `${API}/api/v1/demo/bookDemo`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            courses: state?._id,
-            ...formData, // includes timeSlot
-          }),
-          credentials:"include"
-        }
-      );
+    const res = await fetch(`${API}/api/v1/demo/bookDemo`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        courses: state?._id,
+        ...formData, // includes timeSlot
+      }),
+    });
 
-      if (res.ok) {
-        setSuccess(true);
-        toast.success("Demo booked successfully")
-      }
-    } catch (error) {
-      console.log("Error occured at bookDemo", error);
-      toast.error("Error occured at booking demo");
-    } finally {
-      setLoading(false);
+    const data = await res.json().catch(() => null);
+
+    if (res.ok) {
+      setSuccess(true);
+      toast.success(data?.message || "Demo booked successfully");
+    } else {
+      toast.error(data?.message || "Failed to book demo");
     }
-  };
+  } catch (error) {
+    console.log("Error occurred at bookDemo:", error);
+    toast.error("Network error while booking demo");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">

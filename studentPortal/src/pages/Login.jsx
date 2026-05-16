@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { StudentContext } from "../context/StudentProvider";
 import { toast } from "react-toastify";
 
-const API = import.meta.env.VITE_API_URL;
-
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
 
 const Login = () => {
   const { setUser } = useContext(StudentContext);
@@ -30,7 +30,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      let res = await fetch(`${API}/api/v1/student/login`, {
+      const res = await fetch(`${API}/api/v1/student/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,16 +39,21 @@ const Login = () => {
         body: JSON.stringify(formData),
       });
 
+      // IMPORTANT
+      const data = await res.json();
+
       if (res.ok) {
-        res = await res.json();
-        toast.success("Login successfully");
+        toast.success(data.message);
+
+        setUser(data.data);
+
         navigate("/access");
-        setUser(res.data);
-        //  console.log(res.loggedInUser);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
-      console.log("Error occured at Login fetch frontend", error);
-      toast.error("error occured at student login");
+      console.log(error);
+      toast.error("Server error");
     }
   };
 

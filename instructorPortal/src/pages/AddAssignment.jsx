@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
 
 
 const AddAssignment = () => {
@@ -22,28 +22,29 @@ const AddAssignment = () => {
   const navigate = useNavigate();
 
   // Fetch Courses
-  const getAllCourses = async () => {
-    try {
-      const res = await fetch(
-        `${API}/api/v1/course/getInstructorCourse`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-      );
+ const getAllCourses = async () => {
+  try {
+    setLoading(true);
 
-      const data = await res.json();
+    const res = await fetch(`${API}/api/v1/course/getInstructorCourse`, {
+      method: "GET",
+      credentials: "include",
+    });
 
-      if (res.ok) {
-        setCourses(data.data);
-      }
-    } catch (error) {
-      console.log("Error occurred at getAllCourses", error);
-    } finally {
-      setLoading(false);
+    const data = await res.json()
+
+    if (res.ok) {
+      setCourses(data?.data || []);
+    } else {
+      toast.error(data?.message || "Failed to fetch courses");
     }
-  };
-
+  } catch (error) {
+    console.log("Error occurred at getAllCourses", error);
+    toast.error("Network error while fetching courses");
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     getAllCourses();
   }, []);
@@ -96,8 +97,8 @@ const AddAssignment = () => {
   // Submit Assignment
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if(!validateForm()) return;
+
+    if (!validateForm()) return;
 
     if (!formData.courseId) {
       toast.warning("Please select a course");
@@ -126,6 +127,13 @@ const AddAssignment = () => {
 
       if (response.ok) {
         toast.success("Assignment created successfully");
+        setFormData({
+          title: "",
+          description: "",
+          deadline: "",
+          courseId: "",
+          fileUrl: "",
+        });
       } else {
         toast.error(result.message || "Something went wrong");
       }

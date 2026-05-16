@@ -2,7 +2,9 @@ import React, { useContext, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CartContext } from "../context/AddToCart";
 import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+
 
 
 const SuccessPage = () => {
@@ -13,28 +15,51 @@ const SuccessPage = () => {
   const data = rawData ? JSON.parse(atob(rawData)) : null;
   console.log(data);
 
+  
+
   const updateOrder = async () => {
-    try {
-      let res = await fetch(
-        `${API}/api/v1/order/updateOrder/${data.transaction_uuid}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ paymentStatus: data.status }),
+  try {
+    let res = await fetch(
+      `${API}/api/v1/order/updateOrder/${data.transaction_uuid}`,
+      {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ paymentStatus: data.status }),
+      }
+    );
+
+    const result = await res.json();
+
+    if (res.ok) {
+      toast.success("Order status updated successfully");
+
+      // 1️⃣ get course list from order
+      const orderCourses = result.data.course;
+
+      // 2️⃣ enroll each course
+      await Promise.all(
+        orderCourses.map(async (item) => {
+          await fetch(
+            `${API}/api/v1/course/enrolledCourse/${item.coursesId}`,
+            {
+              method: "POST",
+              credentials: "include",
+            }
+          );
+        })
       );
 
-      if (res.ok) {
-        toast.success("Order status updated successfully");
-        dispatch({type:"clear"});
-      }
-    } catch (error) {
-      console.log("Error occured at success page of updateOrder", error);
+      dispatch({ type: "clear" });
+    }else{
+      toast.warning(result?.message);
     }
-  };
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   useEffect(()=>{
     updateOrder()

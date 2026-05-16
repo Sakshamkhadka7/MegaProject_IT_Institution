@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { FaFilePdf, FaBriefcase, FaBuilding } from "react-icons/fa";
+import { toast } from "react-toastify";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+
 
 
 const MyProfile = () => {
@@ -9,25 +12,26 @@ const MyProfile = () => {
   const [loading, setLoading] = useState(true);
 
   const getMyApplications = async () => {
-    try {
-      const res = await fetch(
-        `${API}/api/v1/job/getMyApplication`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
+  try {
+    const res = await fetch(`${API}/api/v1/job/getMyApplication`, {
+      method: "GET",
+      credentials: "include",
+    });
 
-      if (res.ok) {
-        const data = await res.json();
-        setApplications(Array.isArray(data.data) ? data.data : [data.data]);
-      }
-    } catch (error) {
-      console.log("Error fetching applications", error);
-    } finally {
-      setLoading(false);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to fetch applications");
     }
-  };
+
+    setApplications(Array.isArray(data.data) ? data.data : []);
+  } catch (error) {
+    console.log("Error fetching applications", error);
+    toast.error(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     getMyApplications();

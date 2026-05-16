@@ -64,37 +64,38 @@ const Register = () => {
 
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if(!validateForm()) return;
+  if (!validateForm()) return;
 
-    const data = new FormData();
-    data.append("fullName", formData.fullName);
-    data.append("email", formData.email);
-    data.append("password", formData.password);
-    data.append("phone", formData.phone);
-    data.append("avatar", formData.avatar);
+  const formDataToSend = new FormData();
+  formDataToSend.append("fullName", formData.fullName);
+  formDataToSend.append("email", formData.email);
+  formDataToSend.append("password", formData.password);
+  formDataToSend.append("phone", formData.phone);
+  formDataToSend.append("avatar", formData.avatar);
 
-    try {
-      let res = await fetch(`${API}/api/v1/student/register`, {
-        method: "POST",
-        body: data,
-      });
+  try {
+    let res = await fetch(`${API}/api/v1/student/register`, {
+      method: "POST",
+      body: formDataToSend,
+    });
 
-      if (res.ok) {
-        res = await res.json();
-        console.log(res.studentCreated);
-        toast.success("Register successfully");
-        navigate("/login");
-      }else{
-        toast.error("Register failed");
-      }
-    } catch (error) {
-      console.log("Error occured at Register fetch frontend", error);
-      toast.error("Something went wrong");
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Register failed");
     }
-  };
+
+    console.log(data.data || data.studentCreated);
+    toast.success(data.message || "Registered successfully");
+    navigate("/login");
+  } catch (error) {
+    console.log("Error occured at Register fetch frontend", error);
+    toast.error(error.message);
+  }
+};
 
   return (
     <div className="flex flex-col justify-center items-center w-120 h-130 m-auto p-14 shadow-2xl mt-2 mb-10 rounded-2xl">

@@ -13,7 +13,9 @@ import { AdminContext } from "../context/AdminProvider";
 import { toast } from "react-toastify";
 import { IoIosContact } from "react-icons/io";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+ const API ="http://localhost:3001";
+
 
 
 const navItems = [

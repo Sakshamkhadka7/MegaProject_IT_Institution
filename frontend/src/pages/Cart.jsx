@@ -3,7 +3,9 @@ import { CartContext } from "../context/AddToCart";
 import { useNavigate } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
 import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+  
 
 
 const Cart = () => {
@@ -43,7 +45,7 @@ const Cart = () => {
         }),
       });
 
-      const data = await res.json(); //  IMPORTANT FIX
+      const data = await res.json(); 
 
       if (res.ok) {
         toast.success("Order created Successfully");

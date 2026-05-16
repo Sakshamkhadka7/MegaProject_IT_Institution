@@ -5,24 +5,29 @@ const courseSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+
   descriptions: {
     type: String,
     required: true,
   },
+
   syllabus: [
     {
       type: String,
       required: true,
     },
   ],
+
   duration: {
     type: String,
     required: true,
   },
+
   fee: {
     type: Number,
     required: true,
   },
+
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Student",
@@ -33,17 +38,26 @@ const courseSchema = mongoose.Schema({
     enum: ["Beginner", "Intermediate", "Advanced"],
     default: "Beginner",
   },
+
   enrollmentDeadline: {
     type: String,
     required: true,
   },
+
   courseImage: {
     type: String,
     required: true,
   },
+
   prerequisities: {
     type: String,
     default: "Everyone can learn all courses",
+  },
+
+
+  isDeleted: {
+    type: Boolean,
+    default: false,
   },
 });
 

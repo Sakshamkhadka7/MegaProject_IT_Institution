@@ -14,7 +14,8 @@ import {
 import { InstructorContext } from "../context/IntructorProvider";
 import { toast } from "react-toastify";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
 
 
 const navItems = [
@@ -67,23 +68,26 @@ const navItems = [
 
 const InstructorLayout = () => {
   const [sideBarOpen, setSideBarOpen] = useState(false);
-  const {instrutor}=useContext(InstructorContext);
-  const navigate=useNavigate();
-   const Logout = async () => {
+  const { instrutor } = useContext(InstructorContext);
+  const navigate = useNavigate();
+  const Logout = async () => {
     try {
-      let res = await fetch(`${API}/api/v1/student/logout`, {
+      const res = await fetch(`${API}/api/v1/student/logout`, {
+        method: "GET",
         credentials: "include",
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        toast.success("Student logout successfully");
+        toast.success(data?.message || "Student logout successfully");
         navigate("/login");
       } else {
-        toast.error("Error at logout");
+        toast.error(data?.message || "Logout failed");
       }
     } catch (error) {
-      console.log("Error occured at logout", error);
-      toast.error("Error occured at logout");
+      console.log("Error occurred at logout", error);
+      toast.error("Network error while logging out");
     }
   };
 
@@ -135,7 +139,10 @@ const InstructorLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="border px-10 py-1 rounded-xl bg-blue-500 text-white" onClick={()=> Logout()}>
+            <div
+              className="border px-10 py-1 rounded-xl bg-blue-500 text-white"
+              onClick={() => Logout()}
+            >
               Logout
             </div>
 
@@ -147,9 +154,16 @@ const InstructorLayout = () => {
             </div>
 
             <div className="h-10 w-10  rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
-              {
-                instrutor ? <div><img  className="rounded-full w-20 h-10" src={`${API}/image/${instrutor.avatar}`} /></div>:<div></div>
-              }
+              {instrutor ? (
+                <div>
+                  <img
+                    className="rounded-full w-20 h-10"
+                    src={`${API}/image/${instrutor.avatar}`}
+                  />
+                </div>
+              ) : (
+                <div></div>
+              )}
             </div>
           </div>
         </header>
@@ -159,13 +173,12 @@ const InstructorLayout = () => {
           </div>
         </main>
       </div>
-      {
-        sideBarOpen &&(
-            <div onClick={()=>setSideBarOpen(false)} className="fixed inset-0 bg-black/40 z-30 md:hidden">
-
-            </div>
-        )
-      }
+      {sideBarOpen && (
+        <div
+          onClick={() => setSideBarOpen(false)}
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+        ></div>
+      )}
     </div>
   );
 };

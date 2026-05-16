@@ -1,7 +1,9 @@
 import { createContext, useEffect, useState } from "react";
 
 export const StudentContext = createContext();
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+
 
 
 export const StudentProvider = ({ children }) => {

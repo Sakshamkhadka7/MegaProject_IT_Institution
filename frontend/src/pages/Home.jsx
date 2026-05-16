@@ -1,20 +1,24 @@
-import React from "react";
-import HomeHeroSection from "./HomeHeroSection";
-import HomeHeroSection2 from "./HomeHeroSection2";
-import HomeHeroSection3 from "./HomeHeroSection3";
-import HomeHeroSection4 from "./HomeHeroSection4";
-import Alumni from "./Alumni";
+import React, { lazy, Suspense } from "react";
 
+import HomeHeroSection from "./HomeHeroSection";
+
+const HomeHeroSection2 = lazy(() => import("./HomeHeroSection2"));
+const HomeHeroSection3 = lazy(() => import("./HomeHeroSection3"));
+const HomeHeroSection4 = lazy(() => import("./HomeHeroSection4"));
+const Alumni = lazy(() => import("./Alumni"));
 
 const Home = () => {
   return (
-    <div>
+    <>
       <HomeHeroSection />
-      <HomeHeroSection3/>
-      <HomeHeroSection2/>
-      <Alumni/>
-      <HomeHeroSection4/>
-    </div>
+
+      <Suspense fallback={<div>Loading...</div>}>
+        <HomeHeroSection3 />
+        <HomeHeroSection2 />
+        <Alumni />
+        <HomeHeroSection4 />
+      </Suspense>
+    </>
   );
 };
 

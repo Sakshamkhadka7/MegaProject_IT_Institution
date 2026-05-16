@@ -6,7 +6,9 @@ import { UserContext } from "../context/UserProvider";
 import { toast } from "react-toastify";
 import { FiShoppingCart } from "react-icons/fi";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+
 
 
 

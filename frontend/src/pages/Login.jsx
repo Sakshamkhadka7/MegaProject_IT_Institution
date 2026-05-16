@@ -5,7 +5,9 @@ import { UserContext } from "../context/UserProvider";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
+
 
 
 const Login = () => {
@@ -42,32 +44,35 @@ const Login = () => {
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    try {
-      let res = await fetch(`${API}/api/v1/student/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
+  try {
+    let res = await fetch(`${API}/api/v1/student/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    });
 
-      if (res.ok) {
-        res = await res.json();
-        toast.success("Login successfully");
-        setUser(res.data);
-        navigate("/courses");
-        //  console.log(res.loggedInUser);
-      }
-    } catch (error) {
-      console.log("Error occured at Login fetch frontend", error);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Login failed");
     }
-  };
+
+    toast.success(data.message || "Login successfully");
+    setUser(data.data);
+    navigate("/courses");
+  } catch (error) {
+    console.log("Error occured at Login fetch frontend", error);
+    toast.error(error.message);
+  }
+};
 
   return (
     <div className="flex flex-col justify-center items-center w-100 h-80 m-auto p-5 shadow-2xl mt-4 mb-10 rounded-2xl">

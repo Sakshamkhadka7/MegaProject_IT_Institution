@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:3001";
 
 
 const FeedBack = () => {
@@ -11,7 +12,6 @@ const FeedBack = () => {
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState("");
 
- 
   const validateForm = () => {
     if (!state || !state._id) {
       toast.error("Invalid submission data");
@@ -43,44 +43,41 @@ const FeedBack = () => {
     return true;
   };
 
-  const onSubmit = async () => {
- 
-    if (!validateForm()) return;
+ const onSubmit = async () => {
+  if (!validateForm()) return;
 
-    try {
-      let res = await fetch(
-        `${API}/api/v1/assignment/instructorFeedBack/${state._id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            feedback: feedback.trim(),
-            score: Number(score),
-          }),
-        }
-      );
-
-      if (res.ok) {
-        toast.success("Feedback submitted successfully");
-
-        
-        setFeedback("");
-        setScore(""); 
-        navigate("/access/courseManagement");
-       
-      } else {
-        toast.error("Failed to submit feedback");
+  try {
+    const res = await fetch(
+      `${API}/api/v1/assignment/instructorFeedBack/${state._id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          feedback: feedback.trim(),
+          score: Number(score),
+        }),
       }
-    } catch (error) {
-      console.log("Error:", error);
-      toast.error("Something went wrong");
-    }
-  };
+    );
 
-  
+    const data = await res.json().catch(() => null);
+
+    if (res.ok) {
+      toast.success(data?.message || "Feedback submitted successfully");
+      setFeedback("");
+      setScore("");
+      navigate("/access/courseManagement");
+    } else {
+      toast.error(data?.message || "Failed to submit feedback");
+    }
+  } catch (error) {
+    console.log("Error submitting feedback:", error);
+    toast.error("Network error while submitting feedback");
+  }
+};
+
   if (!state) {
     return <h1 className="text-center mt-10">No Data Found</h1>;
   }
@@ -108,10 +105,7 @@ const FeedBack = () => {
         onChange={(e) => setScore(e.target.value)}
       />
 
-      <button
-        className="p-2 bg-blue-500 text-white rounded"
-        onClick={onSubmit}
-      >
+      <button className="p-2 bg-blue-500 text-white rounded" onClick={onSubmit}>
         Submit Feedback
       </button>
     </div>

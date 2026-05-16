@@ -9,33 +9,51 @@ export const createOrder = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { course } = req.body;
 
+  
+  if (!userId || !course || course.length === 0) {
+    throw new ApiError(400, "Course data is required");
+  }
+
+
+  const user = await Student.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+
+  const courseIds = course.map((c) => c.coursesId);
+
+  
   const existingOrder = await Order.findOne({
     user: userId,
     paymentStatus: "PENDING",
+    "course.coursesId": { $in: courseIds },
   });
 
   if (existingOrder) {
-    return res
-      .status(400)
-      .json(new ApiResponse(400, "Order already existed", existingOrder));
+    return res.status(400).json(
+      new ApiResponse(
+        400,
+        "Pending order already exists for this course",
+        existingOrder
+      )
+    );
   }
 
-  if (!userId || !course) {
-    throw new ApiError(401, "All fields are mandatory");
-  }
-  const user = await Student.findById(userId);
-  if (!user) {
-    throw new ApiError(401, "User no found");
-  }
 
   const order = await Order.create({
     user: userId,
     course,
   });
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Order created successfully", order));
+  return res.status(201).json(
+    new ApiResponse(
+      201,
+      "Order created successfully",
+      order
+    )
+  );
 });
 
 export const updateOrder = asyncHandler(async (req, res) => {
@@ -58,12 +76,10 @@ export const updateOrder = asyncHandler(async (req, res) => {
 });
 
 export const getAllOrders = asyncHandler(async (req, res) => {
- 
-  const role=req.user.role;
-  if(role !=="Instructor" && role!=="Admin"){
-    throw new ApiError(401,"Not authorized to take orders");
+  const role = req.user.role;
+  if (role !== "Instructor" && role !== "Admin") {
+    throw new ApiError(401, "Not authorized to take orders");
   }
-
 
   const orders = await Order.find();
   if (orders.length == 0) {
@@ -75,23 +91,18 @@ export const getAllOrders = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "All orders fetched successfully", orders));
 });
 
-export const getMyOrder = async (req, res) => {
-  try {
-    const userId = req.user._id;
+export const getMyOrder = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
 
-    const orders = await Order.find({ user: userId })
-      .populate("course")
+  const orders = await Order.find({ user: userId }).populate(
+    "course.coursesId",
+  );
 
-    return res.status(200).json({
-      success: true,
-      data: orders,
-    });
-
-  } catch (error) {
-    console.log("GET ORDER ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+  if (!orders || orders.length === 0) {
+    throw new ApiError(404, "No orders found for this user");
   }
-};
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "My orders fetched successfully", orders));
+});
