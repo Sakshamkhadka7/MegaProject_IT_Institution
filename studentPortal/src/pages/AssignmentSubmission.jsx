@@ -1,70 +1,83 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
 
+
+const Loading = React.lazy(() =>
+  import("../components/Loading")
+);
+
+// const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
 
 
 const AssignmentSubmission = () => {
+  const { state } = useLocation();
+  const courseId = state?._id;
+
+  const [lectures, setLectures] = useState([]);
+  const [activeLecture, setActiveLecture] = useState(null);
+
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { state } = useLocation();
   const [comment, setComment] = useState("");
   const [submittedFile, setSubmittedFile] = useState("");
 
-
-
-  const submitAssignment = async (id) => {
-    if (!submittedFile) {
-      toast.warning("Please upload file");
-      return;
-    }
-
-    if(!comment){
-      toast.warning("Please comment , comment is required");
-      return;
-    }
-
+  const markLectureCompleted = async (lectureId) => {
     try {
-      const formData = new FormData();
-      formData.append("assignmentId", id); //
-      formData.append("courseId", state._id);
-      formData.append("comment", comment);
-      formData.append("submittedFile", submittedFile);
-
-      let res = await fetch(
-        `${API}/api/v1/assignment/assignmentSubmission/${id}`,
-        {
-          method: "POST",
-          credentials: "include",
-          body: formData, //  correct way
+      const res = await fetch(`${API}/api/v1/progress/video/progress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        credentials: "include",
+        body: JSON.stringify({
+          courseId,
+          lectureId,
+          isCompleted: true,
+        }),
+      });
 
-      const result = await res.json();
+      const data = await res.json();
 
       if (res.ok) {
-        toast.success("Assignment submission completed");
-        setComment("");
-        setSubmittedFile("");
+        toast.success("Lecture marked as completed");
       } else {
-        toast.error(result.message || "Something went wrong");
+        toast.error(data.message || "Failed to update progress");
       }
-    } catch (error) {
-      console.log("Error occured at submitAssignment", error);
-      toast.error("Error occured at submitAssignment");
+    } catch (err) {
+      toast.error("Error updating progress");
     }
   };
 
-  const getAssignment = async () => {
+  const getLectures = async () => {
     try {
       const res = await fetch(
-        `${API}/api/v1/assignment/getCourse/${state._id}`,
+        `${API}/api/v1/course/course/${courseId}/lectures`,
         {
           credentials: "include",
-        },
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setLectures(data.lectures || []);
+        setActiveLecture(data.lectures?.[0] || null);
+      } else {
+        toast.error(data.message || "Failed to load lectures");
+      }
+    } catch (err) {
+      toast.error("Error fetching lectures");
+    }
+  };
+
+  const getAssignments = async () => {
+    try {
+      const res = await fetch(
+        `${API}/api/v1/assignment/getCourse/${courseId}`,
+        { credentials: "include" }
       );
 
       const data = await res.json();
@@ -72,110 +85,212 @@ const AssignmentSubmission = () => {
       if (res.ok) {
         setAssignments(data.data || []);
       }
-    } catch (error) {
-      console.log("Error fetching assignments", error);
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      toast.error("Error loading assignments");
     }
   };
 
   useEffect(() => {
-    getAssignment();
-  }, []);
+    if (!courseId) return;
 
+    Promise.all([getLectures(), getAssignments()])
+      .finally(() => setLoading(false));
+  }, [courseId]);
+
+  const submitAssignment = async (id) => {
+    if (!submittedFile) return toast.warning("Upload file");
+    if (!comment) return toast.warning("Add comment");
+
+    try {
+      const formData = new FormData();
+      formData.append("assignmentId", id);
+      formData.append("courseId", courseId);
+      formData.append("comment", comment);
+      formData.append("submittedFile", submittedFile);
+
+      const res = await fetch(
+        `${API}/api/v1/assignment/assignmentSubmission/${id}`,
+        {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Submitted successfully");
+        setComment("");
+        setSubmittedFile("");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (err) {
+      toast.error("Submission failed");
+    }
+  };
+
+ 
   if (loading) {
-    return <p className="p-6 text-gray-500">Loading assignments...</p>;
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center text-gray-500">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          Assignment Submission
+    <div className="min-h-screen bg-gray-100 p-6">
+
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow p-4">
+
+          <h2 className="text-xl font-bold mb-2">
+            {activeLecture?.title}
+          </h2>
+
+          <div className="rounded-xl overflow-hidden bg-black">
+            {activeLecture?.videoUrl ? (
+              <video
+                src={activeLecture.videoUrl}
+                controls
+                className="w-full max-h-[500px]"
+              />
+            ) : (
+              <div className="text-white p-10 text-center">
+                No Lecture Selected
+              </div>
+            )}
+          </div>
+
+          <p className="text-gray-600 mt-3">
+            {activeLecture?.description}
+          </p>
+
+          {activeLecture && (
+            <button
+              onClick={() =>
+                markLectureCompleted(activeLecture._id)
+              }
+              className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl transition"
+            >
+              Mark Lecture as Completed
+            </button>
+          )}
+        </div>
+
+  
+        <div className="bg-white rounded-2xl shadow p-4">
+
+          <h3 className="font-semibold mb-3">
+            Course Lectures
+          </h3>
+
+          <div className="space-y-2 max-h-[500px] overflow-y-auto">
+
+            {lectures.map((lec, i) => (
+              <div
+                key={lec._id}
+                onClick={() => setActiveLecture(lec)}
+                className={`p-3 rounded-xl cursor-pointer border transition ${
+                  activeLecture?._id === lec._id
+                    ? "bg-blue-600 text-white"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <p className="font-medium">
+                  {i + 1}. {lec.title}
+                </p>
+
+                <p className="text-xs opacity-70">
+                  Order: {lec.lectureOrder}
+                </p>
+              </div>
+            ))}
+
+          </div>
+        </div>
+      </div>
+
+ 
+      <div className="max-w-5xl mx-auto mt-10">
+
+        <h2 className="text-2xl font-bold mb-6">
+          Assignments
         </h2>
 
-        {/* Empty State */}
-        {assignments.length === 0 && (
-          <div className="bg-white p-6 rounded-xl shadow text-center text-gray-500">
-            No assignments assigned for this course
+        {assignments.length === 0 ? (
+          <div className="bg-white p-6 rounded-xl text-center text-gray-500">
+            No assignments available
           </div>
-        )}
-
-        {/* Assignment Cards */}
-        <div className="space-y-6">
-          {assignments.map((assign) => (
+        ) : (
+          assignments.map((a) => (
             <div
-              key={assign._id}
-              className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition"
+              key={a._id}
+              className="bg-white rounded-2xl shadow p-6 mb-6"
             >
-              {/* Title + Deadline */}
-              <div className="flex justify-between items-start">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  {assign.title}
+
+              <div className="flex justify-between">
+                <h3 className="font-semibold text-lg">
+                  {a.title}
                 </h3>
 
                 <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full">
-                  Due: {new Date(assign.deadline).toLocaleDateString()}
+                  Due:{" "}
+                  {new Date(a.deadline).toLocaleDateString()}
                 </span>
               </div>
 
-              {/* Description */}
-              <p className="text-gray-600 text-sm mt-3">{assign.description}</p>
+              <p className="text-gray-600 mt-2">
+                {a.description}
+              </p>
 
-              {/* File + Meta */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between mt-4 gap-3">
-                {/* File Button */}
-                <a
-                  href={`${API}/image/${assign.fileUrl}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-block bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  📄 View Assignment File
-                </a>
+              <a
+                href={`${API}/image/${a.fileUrl}`}
+                target="_blank"
+                className="text-blue-600 text-sm mt-2 inline-block"
+              >
+                View Assignment File
+              </a>
 
-                {/* Created By */}
-                <span className="text-xs text-gray-400">
-                  Created by: {assign.createdBy?.fullName || "Instructor"}
-                </span>
-              </div>
+              <div className="mt-5 space-y-3">
 
-              {/* Divider */}
-              <div className="border-t mt-5 pt-4 space-y-4">
-                {/* Submission Section */}
-                <h1 className="text-sm font-medium text-gray-700 mb-2">
-                  Submit Your Work
-                </h1>
                 <input
-                  onChange={(e) => setComment(e.target.value)}
-                  name="comment"
-                  className="p-2 border w-full"
                   type="text"
-                  placeholder="Enter your comment about this assignment"
+                  placeholder="Write comment..."
+                  className="w-full p-3 border rounded-xl"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
                 />
 
-                <div className="flex flex-col md:flex-row gap-3">
-                  <input
-                    type="file"
-                    className="border p-2 rounded-lg w-full"
-                    onChange={(e) => setSubmittedFile(e.target.files?.[0])}
-                    name="submittedFile"
-                  />
+                <input
+                  type="file"
+                  onChange={(e) =>
+                    setSubmittedFile(e.target.files[0])
+                  }
+                  className="w-full"
+                />
 
-                  <button
-                    onClick={() => {
-                      submitAssignment(assign._id);
-                    }}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-                  >
-                    Submit
-                  </button>
-                </div>
+                <button
+                  onClick={() => submitAssignment(a._id)}
+                  className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition"
+                >
+                  Submit Assignment
+                </button>
+
               </div>
             </div>
-          ))}
-        </div>
+          ))
+        )}
       </div>
     </div>
   );

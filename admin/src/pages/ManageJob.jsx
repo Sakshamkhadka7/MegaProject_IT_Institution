@@ -1,38 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { lazy, useEffect, useState } from "react";
 import { FaTrash, FaEdit, FaBriefcase } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
 
+const Loading=lazy(()=> import("../components/Loading"));
+
+const API = import.meta.env.VITE_API_URL;
 
 const ManageJob = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
   const deleteJob = async (id) => {
     try {
-      let res = await fetch(
-        `${API}/api/v1/job/deleteJob/${id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      let res = await fetch(`${API}/api/v1/job/deleteJob/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       if (res.ok) {
-        toast.error("deleted succesfully");
+        toast.error("Deleted successfully");
         getJobs();
       }
     } catch (error) {
-      toast.error("Error has been occured at deleteJob")
-      console.log("Error has been occured at deleteJOb", error);
+      toast.error("Error occurred while deleting job");
+      console.log("Delete job error", error);
     }
   };
 
-  // 🔥 Fetch Jobs
   const getJobs = async () => {
     try {
+      setLoading(true); 
+
       let res = await fetch(`${API}/api/v1/job/getJob`, {
         method: "GET",
         credentials: "include",
@@ -53,9 +54,19 @@ const ManageJob = () => {
     getJobs();
   }, []);
 
+ 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <Loading />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* 🔷 Header */}
+
+    
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Manage Jobs</h1>
         <p className="text-sm text-gray-500">
@@ -63,69 +74,63 @@ const ManageJob = () => {
         </p>
       </div>
 
-      {/* 🔷 Loading */}
-      {loading && (
-        <p className="text-center text-gray-500 mt-10">Loading jobs...</p>
-      )}
+   
+      {jobs.length === 0 ? (
+        <p className="text-center text-gray-400 mt-10">
+          No jobs found 😔
+        </p>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {jobs.map((job) => (
+            <div
+              key={job._id}
+              className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition p-5 border"
+            >
+             
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-3 bg-blue-100 text-blue-600 rounded-full">
+                  <FaBriefcase />
+                </div>
 
-      {/* 🔷 Empty State */}
-      {!loading && jobs.length === 0 && (
-        <p className="text-center text-gray-400 mt-10">No jobs found 😔</p>
-      )}
-
-      {/* 🔷 Jobs Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {jobs.map((job) => (
-          <div
-            key={job._id}
-            className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition p-5 border"
-          >
-            {/* Top */}
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-3 bg-blue-100 text-blue-600 rounded-full">
-                <FaBriefcase />
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {job.title}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {job.company}
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {job.title}
-                </h2>
-                <p className="text-xs text-gray-500">{job.company}</p>
+              <div className="text-sm text-gray-600 space-y-1 mb-4">
+                <p>📍 {job.location}</p>
+                <p>💼 {job.position}</p>
               </div>
-            </div>
 
-            {/* Info */}
-            <div className="text-sm text-gray-600 space-y-1 mb-4">
-              <p>
-                📍 <span className="font-medium">{job.location}</span>
+              <p className="text-sm text-gray-500 line-clamp-3 mb-4">
+                {job.description}
               </p>
-              <p>
-                💼 <span className="font-medium">{job.position}</span>
-              </p>
-            </div>
 
-            {/* Description */}
-            <p className="text-sm text-gray-500 line-clamp-3 mb-4">
-              {job.description}
-            </p>
-
-            {/* Actions */}
-            <div className="flex justify-between items-center">
-              <button className="flex items-center gap-2 text-blue-600 text-sm hover:underline">
+             
+              <div className="flex justify-between items-center">
                 <FaEdit
+                  className="text-blue-600 cursor-pointer"
                   onClick={() =>
-                    navigate(`/access/editJob/${job._id}`, { state: job })
+                    navigate(`/access/editJob/${job._id}`, {
+                      state: job,
+                    })
                   }
                 />
-              </button>
 
-              <button className="flex items-center gap-2 text-red-600 text-sm hover:underline">
-                <FaTrash onClick={() => deleteJob(job._id)} />
-              </button>
+                <FaTrash
+                  className="text-red-600 cursor-pointer"
+                  onClick={() => deleteJob(job._id)}
+                />
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

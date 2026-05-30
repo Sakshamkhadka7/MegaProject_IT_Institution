@@ -1,8 +1,12 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = "http://localhost:3001";
+const Loading=lazy(()=> import("../components/Loading"));
+
+// const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -13,9 +17,10 @@ const UserManagement = () => {
 
   const navigate = useNavigate();
 
-  // GET USERS
   const getUsers = async () => {
     try {
+      setLoading(true); 
+
       let res = await fetch(`${API}/api/v1/student/getAllUsers`, {
         method: "GET",
         credentials: "include",
@@ -40,13 +45,15 @@ const UserManagement = () => {
     getUsers();
   }, []);
 
-  // DEACTIVATE USER (soft delete)
   const deleteUser = async (userId) => {
     try {
-      const res = await fetch(`${API}/api/v1/student/deleteUser/${userId}`, {
-        method: "PATCH",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${API}/api/v1/student/deleteUser/${userId}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
 
       const data = await res.json();
 
@@ -67,13 +74,15 @@ const UserManagement = () => {
     }
   };
 
-  // ACTIVATE USER
   const activateUser = async (userId) => {
     try {
-      const res = await fetch(`${API}/api/v1/student/activate/${userId}`, {
-        method: "PATCH",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${API}/api/v1/student/activate/${userId}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
 
       const data = await res.json();
 
@@ -94,7 +103,6 @@ const UserManagement = () => {
     }
   };
 
-  // FILTER USERS
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchSearch = user.fullName
@@ -108,10 +116,18 @@ const UserManagement = () => {
     });
   }, [users, search, roleFilter]);
 
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <Loading />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
 
-      {/* HEADER */}
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">
           User Management
@@ -121,7 +137,6 @@ const UserManagement = () => {
         </p>
       </div>
 
-      {/* FILTERS */}
       <div className="flex flex-col md:flex-row gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm justify-center items-center">
 
         <input
@@ -149,129 +164,84 @@ const UserManagement = () => {
         >
           Add Instructor
         </div>
-
       </div>
 
-      {/* LOADING */}
-      {loading && (
-        <p className="text-center text-gray-500">Loading users...</p>
-      )}
-
-      {/* EMPTY */}
-      {!loading && filteredUsers.length === 0 && (
+      {filteredUsers.length === 0 ? (
         <p className="text-center text-gray-400">No users found</p>
-      )}
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredUsers.map((user) => (
+            <div
+              key={user._id}
+              className="bg-white rounded-2xl shadow-sm p-5"
+            >
+              <div className="flex items-center gap-3 mb-4">
 
-      {/* USERS */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <img
+                  src={user?.avatar}
+                  alt="avatar"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
 
-        {filteredUsers.map((user) => (
-          <div
-            key={user._id}
-            className="bg-white rounded-2xl shadow-sm p-5"
-          >
+                <div>
+                  <h2 className="font-semibold">
+                    {user.fullName}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {user.email}
+                  </p>
+                </div>
 
-            {/* USER INFO */}
-            <div className="flex items-center gap-3 mb-4">
-
-              <img
-                src={`${API}/image/${user.avatar}`}
-                alt="avatar"
-                className="w-12 h-12 rounded-full object-cover"
-              />
-
-              <div>
-                <h2 className="font-semibold">{user.fullName}</h2>
-                <p className="text-xs text-gray-500">
-                  {user.email}
-                </p>
               </div>
 
-            </div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
+                  {user.role}
+                </span>
 
-            {/* ROLE + STATUS */}
-            <div className="flex justify-between items-center mb-3">
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    user.isActive
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }`}
+                >
+                  {user.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
 
-              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
-                {user.role}
-              </span>
+              <div className="flex justify-between items-center text-xs text-gray-400">
+                <span>
+                  Joined:{" "}
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </span>
 
-              <span
-                className={`text-xs px-2 py-1 rounded-full ${
-                  user.isActive
-                    ? "bg-green-100 text-green-600"
-                    : "bg-red-100 text-red-600"
-                }`}
-              >
-                {user.isActive ? "Active" : "Inactive"}
-              </span>
+                <div className="flex gap-2">
 
-            </div>
-
-            {/* COURSES */}
-            <div className="mb-4">
-
-              <p className="text-sm font-medium mb-2">
-                Enrolled Courses
-              </p>
-
-              {user.enrolledCourses?.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-
-                  {user.enrolledCourses.map((course) => (
-                    <span
-                      key={course._id}
-                      className="text-xs bg-gray-100 px-2 py-1 rounded-full"
+                  {user.isActive ? (
+                    <button
+                      onClick={() => deleteUser(user._id)}
+                      className="px-3 py-1 bg-red-600 text-white rounded-lg"
                     >
-                      {course.title}
-                    </span>
-                  ))}
+                      Deactivate
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => activateUser(user._id)}
+                      className="px-3 py-1 bg-green-600 text-white rounded-lg"
+                    >
+                      Activate
+                    </button>
+                  )}
 
                 </div>
-              ) : (
-                <p className="text-xs text-gray-400">
-                  No courses
-                </p>
-              )}
-
-            </div>
-
-            {/* ACTIONS */}
-            <div className="flex justify-between items-center text-xs text-gray-400">
-
-              <span>
-                Joined:{" "}
-                {new Date(user.createdAt).toLocaleDateString()}
-              </span>
-
-              {/* BUTTONS */}
-              <div className="flex gap-2">
-
-                {user.isActive ? (
-                  <button
-                    onClick={() => deleteUser(user._id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded-lg"
-                  >
-                    Deactivate
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => activateUser(user._id)}
-                    className="px-3 py-1 bg-green-600 text-white rounded-lg"
-                  >
-                    Activate
-                  </button>
-                )}
 
               </div>
 
             </div>
-
-          </div>
-        ))}
-
-      </div>
-
+          ))}
+        </div>
+      )}
     </div>
   );
 };

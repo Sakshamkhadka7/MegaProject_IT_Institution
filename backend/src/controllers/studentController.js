@@ -3,6 +3,7 @@ import Student from "../models/student.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -26,10 +27,10 @@ const generateAccessAndRefreshToken = async (userId) => {
   }
 };
 
+
 export const registerStudent = asyncHandler(async (req, res) => {
-  console.log(req.body);
-  const { fullName, email, password, phone,qualification } = req.body;
-  const image = req.file.filename;
+  const { fullName, email, password, phone, qualification } = req.body;
+
   if (!fullName || !email || !password || !phone) {
     throw new ApiError(400, "All fields are mandatory");
   }
@@ -40,13 +41,23 @@ export const registerStudent = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User already exists");
   }
 
+  if (!req.file) {
+    throw new ApiError(400, "Avatar image is required");
+  }
+
+  const cloudinaryResult = await uploadToCloudinary(
+    req.file.buffer,
+    "lms-student-avatar",
+    "image",
+  );
+
   const student = await Student.create({
     fullName,
     email,
     phone,
     password,
     qualification,
-    avatar: image,
+    avatar: cloudinaryResult.secure_url,
   });
 
   const studentCreated = await Student.findById(student._id).select(
@@ -54,26 +65,76 @@ export const registerStudent = asyncHandler(async (req, res) => {
   );
 
   if (!studentCreated) {
-    throw new ApiError(500, "Error occured when registering student");
+    throw new ApiError(500, "Error occurred while registering student");
   }
+
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
     studentCreated._id,
   );
 
- const options = {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax",
-};
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  };
 
   return res
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .status(201)
     .json(
-      new ApiResponse(200, "Student registered successfully", studentCreated),
+      new ApiResponse(201, "Student registered successfully", studentCreated),
     );
 });
+
+// export const registerStudent = asyncHandler(async (req, res) => {
+//   console.log(req.body);
+//   const { fullName, email, password, phone,qualification } = req.body;
+//   const image = req.file.filename;
+//   if (!fullName || !email || !password || !phone) {
+//     throw new ApiError(400, "All fields are mandatory");
+//   }
+
+//   const isExists = await Student.findOne({ email });
+
+//   if (isExists) {
+//     throw new ApiError(409, "User already exists");
+//   }
+
+//   const student = await Student.create({
+//     fullName,
+//     email,
+//     phone,
+//     password,
+//     qualification,
+//     avatar: image,
+//   });
+
+//   const studentCreated = await Student.findById(student._id).select(
+//     "-password -refreshToken",
+//   );
+
+//   if (!studentCreated) {
+//     throw new ApiError(500, "Error occured when registering student");
+//   }
+//   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+//     studentCreated._id,
+//   );
+
+//  const options = {
+//   httpOnly: true,
+//   secure: false,
+//   sameSite: "lax",
+// };
+
+//   return res
+//     .cookie("accessToken", accessToken, options)
+//     .cookie("refreshToken", refreshToken, options)
+//     .status(201)
+//     .json(
+//       new ApiResponse(200, "Student registered successfully", studentCreated),
+//     );
+// });
 
 // export const login = asyncHandler(async (req, res) => {
 //   const { email, password } = req.body;
@@ -114,7 +175,7 @@ export const registerStudent = asyncHandler(async (req, res) => {
 // });
 
 export const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   if (!email || !password) {
     throw new ApiError(400, "All fields are required");
@@ -123,10 +184,17 @@ export const login = asyncHandler(async (req, res) => {
   const user = await Student.findOne({ email });
 
   if (!user) {
-    throw new ApiError(404, "Student could not be found");
+    throw new ApiError(404, "User could not be found");
   }
 
-  // ✅ SOFT DELETE CHECK (IMPORTANT)
+ 
+  if (role && user.role !== role) {
+    throw new ApiError(
+      403,
+      `Access denied. Only ${role} can login here`
+    );
+  }
+
   if (!user.isActive) {
     throw new ApiError(
       403,
@@ -149,8 +217,8 @@ export const login = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: false, // set true in production (HTTPS)
-    sameSite: "lax",
+    secure: true,
+    sameSite: "none",
   };
 
   return res
@@ -158,7 +226,7 @@ export const login = asyncHandler(async (req, res) => {
     .cookie("refreshToken", refreshToken, options)
     .status(200)
     .json(
-      new ApiResponse(200, "Student Login Successfully", loggedInUser)
+      new ApiResponse(200, "Login Successfully", loggedInUser)
     );
 });
 
@@ -178,8 +246,8 @@ export const logout = asyncHandler(async (req, res) => {
 
 const options = {
   httpOnly: true,
-  secure: false,
-  sameSite: "lax",
+  secure: true,
+  sameSite: "none",
 };
 
   return res
@@ -385,11 +453,9 @@ export const activateStudent = asyncHandler(async (req, res) => {
 });
 
 
+
 export const addInstructor = asyncHandler(async (req, res) => {
-
- const userRole = req?.user?.role;
-
-
+  const userRole = req?.user?.role;
   if (userRole !== "Admin") {
     throw new ApiError(
       401,
@@ -405,17 +471,12 @@ export const addInstructor = asyncHandler(async (req, res) => {
     qualification,
   } = req.body;
 
-
   if (!req.file) {
     throw new ApiError(
       400,
       "Instructor image is required"
     );
   }
-
-  const image = req?.file?.filename;
-
-  
   if (
     !fullName ||
     !email ||
@@ -427,8 +488,6 @@ export const addInstructor = asyncHandler(async (req, res) => {
       "All fields are mandatory"
     );
   }
-
- 
   const isExists = await Student.findOne({
     email,
   });
@@ -439,19 +498,23 @@ export const addInstructor = asyncHandler(async (req, res) => {
       "User already exists"
     );
   }
-
-
+  const uploadedImage = await uploadToCloudinary(
+    req.file.buffer,
+    "lms-instructor-avatar",
+    "image"
+  );
   const instructor = await Student.create({
     fullName,
     email,
     phone,
     password,
     qualification,
-    avatar: image,
+    avatar: uploadedImage.secure_url,
+
     role: "Instructor",
   });
 
-  
+
   const instructorCreated =
     await Student.findById(
       instructor._id
@@ -464,8 +527,6 @@ export const addInstructor = asyncHandler(async (req, res) => {
     );
   }
 
-
-
   return res.status(201).json(
     new ApiResponse(
       201,
@@ -474,7 +535,6 @@ export const addInstructor = asyncHandler(async (req, res) => {
     )
   );
 });
-
 export const getInstructor = asyncHandler(async (req, res) => {
   const user = await Student.find({ role: "Instructor" });
 

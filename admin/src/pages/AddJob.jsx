@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import React, {
+  lazy,
+  Suspense,
+  useState,
+} from "react";
+
 import { toast } from "react-toastify";
+
 const API = import.meta.env.VITE_API_URL;
 
+
+const Loading = lazy(() =>
+  import("../components/Loading")
+);
 
 const CreateJob = () => {
   const [form, setForm] = useState({
@@ -13,7 +23,9 @@ const CreateJob = () => {
   });
 
   const [loading, setLoading] = useState(false);
+
   const [success, setSuccess] = useState(false);
+
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -24,7 +36,13 @@ const CreateJob = () => {
   };
 
   const validateForm = () => {
-    const { title, company, location, position, description } = form;
+    const {
+      title,
+      company,
+      location,
+      position,
+      description,
+    } = form;
 
     if (!title) {
       toast.warning("Title is required");
@@ -56,27 +74,46 @@ const CreateJob = () => {
 
   const createJob = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) return;
-    setLoading(true);
-    setError("");
 
     try {
-      let res = await fetch(`${API}/api/v1/job/createJob`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(form),
-      });
+      
+      setLoading(true);
 
-      let data = await res.json();
+      setError("");
+
+      const res = await fetch(
+        `${API}/api/v1/job/createJob`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify(form),
+        }
+      );
+
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message);
+        toast.warning(
+          data.message || "Failed to create job"
+        );
+
+        setError(
+          data.message || "Failed to create job"
+        );
+
+        return;
       }
 
       setSuccess(true);
+
       setForm({
         title: "",
         company: "",
@@ -85,13 +122,38 @@ const CreateJob = () => {
         description: "",
       });
 
-      toast.success("Job added successfully");
+      toast.success(
+        data.message || "Job added successfully"
+      );
     } catch (err) {
-      setError(err.message);
+      console.log("Error in createJob:", err);
+
+      toast.warning(
+        "Network error or server not responding"
+      );
+
+      setError(
+        "Network error or server not responding"
+      );
     } finally {
       setLoading(false);
     }
   };
+
+ 
+  if (loading) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -99,8 +161,10 @@ const CreateJob = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           Post a New Job
         </h2>
+
         <p className="text-sm text-gray-500 mb-6">
-          Fill in the details below to publish a job listing.
+          Fill in the details below to publish a
+          job listing.
         </p>
 
         {success && (
@@ -115,8 +179,11 @@ const CreateJob = () => {
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={createJob} className="space-y-4">
+      
+        <form
+          onSubmit={createJob}
+          className="space-y-4"
+        >
           <input
             type="text"
             name="title"
@@ -165,9 +232,9 @@ const CreateJob = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50"
           >
-            {loading ? "Posting Job..." : "Post Job"}
+            Post Job
           </button>
         </form>
       </div>

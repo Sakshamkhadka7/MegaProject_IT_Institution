@@ -28,6 +28,10 @@ const orderSchema = new mongoose.Schema(
       enum: ["PENDING", "COMPLETE", "CANCELLED"],
       default: "PENDING",
     },
+    transactionUuid:{
+      type:String,
+      unique:true
+    }
   },
   {
     timestamps: true,

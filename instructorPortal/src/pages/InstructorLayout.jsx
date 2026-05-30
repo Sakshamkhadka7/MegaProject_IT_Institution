@@ -11,11 +11,12 @@ import {
   FiLayers,
   FiUpload,
 } from "react-icons/fi";
+import { FaVideo } from "react-icons/fa";
 import { InstructorContext } from "../context/IntructorProvider";
 import { toast } from "react-toastify";
 
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 
 const navItems = [
@@ -64,6 +65,15 @@ const navItems = [
     label: "Student Progress ",
     icon: FiBarChart2,
   },
+  {
+    to:"/access/addVideo",
+    label:"Add Video",
+    icon:FaVideo
+  },{
+    to:"/access/getAllLecture",
+    label:"Video Management",
+    icon:FaVideo
+  }
 ];
 
 const InstructorLayout = () => {
@@ -140,7 +150,7 @@ const InstructorLayout = () => {
 
           <div className="flex items-center gap-3">
             <div
-              className="border px-10 py-1 rounded-xl bg-blue-500 text-white"
+              className="border px-10 py-1 rounded-xl bg-blue-500 text-white hover:cursor-pointer"
               onClick={() => Logout()}
             >
               Logout
@@ -158,7 +168,7 @@ const InstructorLayout = () => {
                 <div>
                   <img
                     className="rounded-full w-20 h-10"
-                    src={`${API}/image/${instrutor.avatar}`}
+                    src={instrutor.avatar}
                   />
                 </div>
               ) : (

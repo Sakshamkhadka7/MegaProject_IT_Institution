@@ -1,12 +1,14 @@
-import { useContext } from "react";
+import { lazy, useContext } from "react";
 import { StudentContext } from "../context/StudentProvider";
 import { Navigate } from "react-router-dom";
+
+const Loading=lazy(()=> import("../components/Loading"));
 
 function StudentProtected({ children }) {
   const { user, loading } = useContext(StudentContext);
 
   if (loading) {
-    return <h1>Loading .....</h1>;
+    return <h1><Loading/></h1>;
   }
 
   if (!user) {

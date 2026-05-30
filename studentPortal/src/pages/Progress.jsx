@@ -1,281 +1,277 @@
-import React, { useEffect, useState } from "react";
+import React, { lazy, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
   ResponsiveContainer,
-  CartesianGrid,
-  Area,
-  AreaChart,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
 } from "recharts";
 
-const API = "http://localhost:3001";
+import {
+  BookOpen,
+  CheckCircle,
+  Clock,
+  Trophy,
+  PlayCircle,
+} from "lucide-react";
+
+// const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+
+
+const COLORS = ["#4F46E5", "#E5E7EB"];
+
+
+const LoadingScreen =lazy(()=> import("../components/Loading")); 
 
 const Progress = () => {
-  const [courses, setCourse] = useState([]);
-  const [viewProgress, setViewProgress] = useState({});
+  const [courses, setCourses] = useState([]);
+  const [progressMap, setProgressMap] = useState({});
   const [openCourseId, setOpenCourseId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // FETCH MY COURSES
-  const getMyCourse = async () => {
+  const getMyCourses = async () => {
     try {
-      let res = await fetch(`${API}/api/v1/course/getMyCourses`, {
-        method: "GET",
+      const res = await fetch(`${API}/api/v1/course/getMyCourses`, {
         credentials: "include",
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        res = await res.json();
-        setCourse(res.data);
+        setCourses(data.data || []);
+      } else {
+        toast.error(data.message || "Failed to load courses");
       }
-    } catch (error) {
-      console.log("Error occured at getMyCourse Fetch", error);
-      toast.error("Error occured at getMyCourse Fetch");
+    } catch (err) {
+      toast.error("Error fetching courses");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // FETCH PROGRESS
-  const viewProgresses = async (id) => {
+
+  const getProgress = async (courseId) => {
     try {
-      let res = await fetch(`${API}/api/v1/progress/my/${id}`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${API}/api/v1/progress/getProgressVideo/${courseId}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      const data = await res.json();
 
       if (res.ok) {
-        res = await res.json();
-
-        setViewProgress((prev) => ({
+        setProgressMap((prev) => ({
           ...prev,
-          [id]: res.data,
+          [courseId]: data.data,
         }));
+      } else {
+        toast.error(data.message || "Failed to load progress");
       }
-    } catch (error) {
-      console.log("Error occured at viewProgress", error);
-      toast.error("Error occured at viewProgress");
+    } catch (err) {
+      toast.error("Error loading progress");
     }
   };
 
-  // TOGGLE CARD
-  const handleToggle = (id) => {
-    if (openCourseId === id) {
+  const handleToggle = async (courseId) => {
+    if (openCourseId === courseId) {
       setOpenCourseId(null);
-    } else {
-      setOpenCourseId(id);
-      viewProgresses(id);
+      return;
+    }
+
+    setOpenCourseId(courseId);
+
+    if (!progressMap[courseId]) {
+      await getProgress(courseId);
     }
   };
 
   useEffect(() => {
-    getMyCourse();
+    getMyCourses();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-6 lg:p-8">
-      {/* HEADER */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">
-          My Learning Progress
-        </h1>
+  
+  if (loading) {
+    return <LoadingScreen text="Loading your progress..." />;
+  }
 
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold text-gray-800">
+          Learning Dashboard
+        </h1>
         <p className="text-gray-500 mt-2">
-          Track assignment scores and learning performance
+          Track your learning performance and completion analytics
         </p>
       </div>
 
-      {/* COURSE GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {courses.map((course) => {
-          const progressData = viewProgress[course._id] || [];
+     
+      {courses.length === 0 ? (
+        <div className="text-center text-gray-500 mt-20">
+          No courses found
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {courses.map((course) => {
+            const progress = progressMap[course._id];
 
-          // CHART DATA
-          const chartData = progressData.map((item, index) => ({
-            name: item.assignmentTitle || `A${index + 1}`,
-            score: item.score || 0,
-          }));
+            const pieData = progress
+              ? [
+                  {
+                    name: "Completed",
+                    value: progress.completedLectures,
+                  },
+                  {
+                    name: "Remaining",
+                    value:
+                      progress.totalLectures -
+                      progress.completedLectures,
+                  },
+                ]
+              : [];
 
-          // CALCULATE AVERAGE SCORE
-          const validScores = progressData.filter(
-            (item) => item.score !== null
-          );
-
-          const average =
-            validScores.length > 0
-              ? (
-                  validScores.reduce(
-                    (acc, item) => acc + item.score,
-                    0
-                  ) / validScores.length
-                ).toFixed(1)
-              : 0;
-
-          return (
-            <div
-              key={course._id}
-              className="bg-white rounded-3xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100"
-            >
-              {/* TOP */}
-              <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                <h2 className="text-2xl font-bold">
-                  {course.title}
-                </h2>
-
-                <p className="text-blue-100 mt-2 line-clamp-2">
-                  {course.descriptions}
-                </p>
-              </div>
-
-              {/* BODY */}
-              <div className="p-6">
-                {/* STATS */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-blue-50 rounded-2xl p-4">
-                    <p className="text-sm text-gray-500">
-                      Assignments
-                    </p>
-
-                    <h1 className="text-3xl font-bold text-blue-600 mt-2">
-                      {progressData.length}
-                    </h1>
-                  </div>
-
-                  <div className="bg-green-50 rounded-2xl p-4">
-                    <p className="text-sm text-gray-500">
-                      Average Score
-                    </p>
-
-                    <h1 className="text-3xl font-bold text-green-600 mt-2">
-                      {average}%
-                    </h1>
-                  </div>
+            return (
+              <div
+                key={course._id}
+                className="bg-white rounded-3xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition duration-300"
+              >
+               
+                <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6 text-white">
+                  <h2 className="text-2xl font-bold">
+                    {course.title}
+                  </h2>
+                  <p className="text-sm text-indigo-100 mt-2 line-clamp-2">
+                    {course.descriptions}
+                  </p>
                 </div>
 
-                {/* BUTTON */}
-                <button
-                  onClick={() => handleToggle(course._id)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-semibold transition duration-300"
-                >
-                  {openCourseId === course._id
-                    ? "Hide Progress"
-                    : "View Progress"}
-                </button>
-
-                {/* GRAPH */}
-                {openCourseId === course._id && (
-                  <div className="mt-8">
-                    {progressData.length > 0 ? (
-                      <>
-                        {/* CHART */}
-                        <div className="w-full h-[320px]">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData}>
-                              <defs>
-                                <linearGradient
-                                  id="colorScore"
-                                  x1="0"
-                                  y1="0"
-                                  x2="0"
-                                  y2="1"
-                                >
-                                  <stop
-                                    offset="5%"
-                                    stopColor="#2563eb"
-                                    stopOpacity={0.8}
-                                  />
-
-                                  <stop
-                                    offset="95%"
-                                    stopColor="#2563eb"
-                                    stopOpacity={0}
-                                  />
-                                </linearGradient>
-                              </defs>
-
-                              <CartesianGrid
-                                strokeDasharray="3 3"
-                              />
-
-                              <XAxis dataKey="name" />
-
-                              <YAxis domain={[0, 100]} />
-
-                              <Tooltip />
-
-                              <Area
-                                type="monotone"
-                                dataKey="score"
-                                stroke="#2563eb"
-                                fillOpacity={1}
-                                fill="url(#colorScore)"
-                              />
-                            </AreaChart>
-                          </ResponsiveContainer>
+              
+                <div className="p-6">
+                  {!progress ? (
+                    <div className="text-center py-10">
+                      <PlayCircle
+                        size={50}
+                        className="mx-auto text-indigo-500 mb-4"
+                      />
+                      <p className="text-gray-500">
+                        Click below to load progress
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                    
+                      <div className="grid grid-cols-3 gap-4 mb-8">
+                        <div className="bg-indigo-50 rounded-2xl p-4 text-center">
+                          <BookOpen className="mx-auto text-indigo-600 mb-2" size={26} />
+                          <h3 className="text-2xl font-bold text-indigo-700">
+                            {progress.totalLectures}
+                          </h3>
+                          <p className="text-sm text-gray-600">Total</p>
                         </div>
 
-                        {/* ASSIGNMENT DETAILS */}
-                        <div className="mt-6 space-y-4">
-                          {progressData.map((pro, idx) => (
-                            <div
-                              key={idx}
-                              className="bg-gray-50 rounded-2xl p-4 border"
+                        <div className="bg-green-50 rounded-2xl p-4 text-center">
+                          <CheckCircle className="mx-auto text-green-600 mb-2" size={26} />
+                          <h3 className="text-2xl font-bold text-green-700">
+                            {progress.completedLectures}
+                          </h3>
+                          <p className="text-sm text-gray-600">Completed</p>
+                        </div>
+
+                        <div className="bg-yellow-50 rounded-2xl p-4 text-center">
+                          <Trophy className="mx-auto text-yellow-600 mb-2" size={26} />
+                          <h3 className="text-2xl font-bold text-yellow-700">
+                            {progress.progressPercentage}%
+                          </h3>
+                          <p className="text-sm text-gray-600">Progress</p>
+                        </div>
+                      </div>
+
+                     
+                      <div className="mb-8">
+                        <div className="flex justify-between mb-2 text-sm">
+                          <span className="text-gray-600">
+                            Course Completion
+                          </span>
+                          <span className="font-semibold text-indigo-600">
+                            {progress.progressPercentage}%
+                          </span>
+                        </div>
+
+                        <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden">
+                          <div
+                            className="bg-gradient-to-r from-indigo-600 to-blue-500 h-4 rounded-full"
+                            style={{
+                              width: `${progress.progressPercentage}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* CHART */}
+                      <div className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={pieData}
+                              dataKey="value"
+                              nameKey="name"
+                              innerRadius={75}
+                              outerRadius={110}
+                              paddingAngle={5}
+                              label
                             >
-                              <div className="flex justify-between items-center flex-wrap gap-3">
-                                <div>
-                                  <h3 className="font-semibold text-gray-800">
-                                    {pro.assignmentTitle}
-                                  </h3>
+                              {pieData.map((_, index) => (
+                                <Cell
+                                  key={index}
+                                  fill={COLORS[index % COLORS.length]}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
 
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    Status:{" "}
-                                    <span className="font-medium">
-                                      {pro.status || "Pending"}
-                                    </span>
-                                  </p>
-                                </div>
-
-                                <div className="text-right">
-                                  <h1 className="text-2xl font-bold text-blue-600">
-                                    {pro.score ?? 0}%
-                                  </h1>
-                                </div>
-                              </div>
-
-                              {pro.feedback && (
-                                <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                                  <p className="text-sm text-blue-700">
-                                    <span className="font-semibold">
-                                      Instructor Feedback:
-                                    </span>{" "}
-                                    {pro.feedback}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                      {/* FOOTER */}
+                      <div className="mt-6 bg-gray-50 rounded-2xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Clock size={18} className="text-indigo-600" />
+                          <h3 className="font-semibold text-gray-800">
+                            Completed Lecture IDs
+                          </h3>
                         </div>
-                      </>
-                    ) : (
-                      <div className="bg-gray-50 rounded-2xl p-6 text-center border">
-                        <h2 className="text-lg font-semibold text-gray-700">
-                          No Progress Data
-                        </h2>
 
-                        <p className="text-gray-500 mt-2">
-                          Assignment scores will appear here
+                        <p className="text-sm text-gray-500 break-all">
+                          {progress.completedLectureIds?.join(", ") ||
+                            "No completed lectures"}
                         </p>
                       </div>
-                    )}
-                  </div>
-                )}
+                    </>
+                  )}
+
+                  {/* BUTTON */}
+                  <button
+                    onClick={() => handleToggle(course._id)}
+                    className="w-full mt-8 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl font-semibold"
+                  >
+                    {openCourseId === course._id
+                      ? "Hide Progress"
+                      : "View Progress"}
+                  </button>
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

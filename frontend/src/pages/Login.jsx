@@ -1,23 +1,22 @@
-import React from "react";
-import { useContext } from "react";
-import { useState } from "react";
+import React, { useContext, useState } from "react";
 import { UserContext } from "../context/UserProvider";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
-
-
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 const Login = () => {
   const { setUser } = useContext(UserContext);
+
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -44,70 +43,125 @@ const Login = () => {
     return true;
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!validateForm()) return;
+    if (!validateForm()) return;
 
-  try {
-    let res = await fetch(`${API}/api/v1/student/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(formData),
-    });
+    try {
+      setLoading(true);
 
-    const data = await res.json();
+      let res = await fetch(`${API}/api/v1/student/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
 
-    if (!res.ok) {
-      throw new Error(data.message || "Login failed");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      toast.success(data.message || "Login successfully");
+
+      setUser(data.data);
+
+      navigate("/courses");
+    } catch (error) {
+      console.log("Error occured at Login fetch frontend", error);
+
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    toast.success(data.message || "Login successfully");
-    setUser(data.data);
-    navigate("/courses");
-  } catch (error) {
-    console.log("Error occured at Login fetch frontend", error);
-    toast.error(error.message);
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center gap-4">
+          
+          {/* Spinner */}
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+
+          <p className="text-gray-600 text-lg font-medium">
+            Logging in...
+          </p>
+        </div>
+      </div>
+    );
   }
-};
 
+  // LOGIN UI
   return (
-    <div className="flex flex-col justify-center items-center w-100 h-80 m-auto p-5 shadow-2xl mt-4 mb-10 rounded-2xl">
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-col space-y-2">
-          <label className="text-2xl font-semibold">Email</label>
-          <input
-            onChange={handleChange}
-            name="email"
-            className="border p-2"
-            type="email"
-            placeholder="Enter your Email"
-          />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-50 px-4">
+      
+      <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800">
+            Welcome Back
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Login to continue learning
+          </p>
         </div>
 
-        <div className="flex flex-col space-y-2">
-          <label className="text-2xl font-semibold">Password</label>
-          <input
-            onChange={handleChange}
-            name="password"
-            className="border p-2"
-            type="password"
-            placeholder="password"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          
+          {/* Email */}
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold text-gray-700 mb-2">
+              Email
+            </label>
 
-        <div>
+            <input
+              onChange={handleChange}
+              value={formData.email}
+              name="email"
+              className="border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              type="email"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold text-gray-700 mb-2">
+              Password
+            </label>
+
+            <input
+              onChange={handleChange}
+              value={formData.password}
+              name="password"
+              className="border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              type="password"
+              placeholder="Enter your password"
+            />
+          </div>
+
+          {/* Button */}
           <button
             type="submit"
-            className="border px-35 py-2 mt-4 bg-blue-500 text-white hover:bg-blue-300"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition duration-300 shadow-md"
           >
             Login
           </button>
-        </div>
-      </form>
+        </form>
+
+        {/* Footer */}
+        <p className="text-center text-gray-500 text-sm mt-6">
+          Secure LMS Authentication
+        </p>
+      </div>
     </div>
   );
 };

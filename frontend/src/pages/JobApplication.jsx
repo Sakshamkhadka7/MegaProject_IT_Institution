@@ -4,8 +4,8 @@ import { FaBuilding, FaMapMarkerAlt, FaBriefcase } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { UserProvider } from "../context/UserProvider";
 
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 
 
@@ -19,11 +19,7 @@ const JobApplication = () => {
   const navigate=useNavigate();
 
 const applyJob = async () => {
-  // if (!user) {
-  //   toast.warning("Please login first");
-  //   navigate("/login");
-  //   return; //  IMPORTANT: stop here
-  // }
+ 
 
   try {
     setLoading(true);
@@ -57,7 +53,7 @@ const applyJob = async () => {
     <div className="min-h-screen bg-gray-50 p-6 flex justify-center items-center">
       <div className="max-w-6xl w-full grid md:grid-cols-2 gap-8">
 
-        {/* LEFT SIDE - JOB INFO */}
+       
         <div className="bg-white rounded-2xl shadow-md p-6">
           <h2 className="text-2xl font-bold text-gray-800">
             {state?.title}
@@ -85,7 +81,7 @@ const applyJob = async () => {
           </p>
         </div>
 
-        {/* RIGHT SIDE - FORM */}
+   
         <div className="bg-white rounded-2xl shadow-md p-6">
           {!success ? (
             <>
@@ -93,7 +89,7 @@ const applyJob = async () => {
                 Apply for this job
               </h2>
 
-              {/* Cover Letter */}
+             
               <textarea
                 rows="5"x
                 placeholder="Write your cover letter..."
@@ -102,7 +98,7 @@ const applyJob = async () => {
                 className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
 
-              {/* Resume Upload */}
+           
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-600 mb-2">
                   Upload Resume
@@ -115,7 +111,7 @@ const applyJob = async () => {
                 />
               </div>
 
-              {/* Button */}
+           
               <button
                 onClick={applyJob}
                 disabled={loading}

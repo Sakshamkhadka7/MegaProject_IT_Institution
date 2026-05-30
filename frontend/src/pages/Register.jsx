@@ -1,12 +1,16 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Loading from "../components/Loading";
 
 const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 const Register = () => {
   const navigate = useNavigate();
+
+  // LOADING STATE
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -19,152 +23,238 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
+    // PHONE VALIDATION
+    if (name === "phone") {
+      const onlyNumbers = value.replace(/\D/g, "");
+
+      setFormData({
+        ...formData,
+        phone: onlyNumbers,
+      });
+
+      return;
+    }
+
     setFormData({
       ...formData,
       [name]: files ? files[0] : value,
     });
   };
 
-
-  const  validateForm=()=>{
-
+  const validateForm = () => {
     const { fullName, email, password, phone, avatar } = formData;
-  
-    if(!fullName.trim()){
+
+    if (!fullName.trim()) {
       toast.error("Full name is required");
       return false;
     }
 
-    if(fullName.length < 3){
+    if (fullName.length < 3) {
       toast.error("Full name must be at least 3 characters");
       return false;
     }
 
-    if(!email){
+    if (!email) {
       toast.error("Email is required");
-      return false
+      return false;
     }
 
-    if(!password){
+    if (!password) {
       toast.error("Password is required");
-      return false
+      return false;
     }
 
-    if(!phone){
-      toast.error("Phone is required");
-      return false
+    if (!phone) {
+      toast.error("Phone number is required");
+      return false;
     }
 
-    if(!avatar){
+    if (!/^\d{10}$/.test(phone)) {
+      toast.error("Phone number must contain exactly 10 digits");
+      return false;
+    }
+
+    if (!avatar) {
       toast.error("Avatar is required");
-      return false
+      return false;
     }
 
-    return true
+    return true;
+  };
 
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+    if (!validateForm()) return;
 
-  if (!validateForm()) return;
+    const formDataToSend = new FormData();
 
-  const formDataToSend = new FormData();
-  formDataToSend.append("fullName", formData.fullName);
-  formDataToSend.append("email", formData.email);
-  formDataToSend.append("password", formData.password);
-  formDataToSend.append("phone", formData.phone);
-  formDataToSend.append("avatar", formData.avatar);
+    formDataToSend.append("fullName", formData.fullName);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("password", formData.password);
+    formDataToSend.append("phone", formData.phone);
+    formDataToSend.append("avatar", formData.avatar);
 
-  try {
-    let res = await fetch(`${API}/api/v1/student/register`, {
-      method: "POST",
-      body: formDataToSend,
-    });
+    try {
+     
+      setLoading(true);
 
-    const data = await res.json();
+      const res = await fetch(`${API}/api/v1/student/register`, {
+        method: "POST",
+        body: formDataToSend,
+      });
 
-    if (!res.ok) {
-      throw new Error(data.message || "Register failed");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Register failed");
+      }
+
+      toast.success(data.message || "Registered successfully");
+
+      navigate("/login");
+
+    } catch (error) {
+      console.log("Error occured at Register fetch frontend", error);
+
+      toast.error(error.message);
+
+    } finally {
+
+    
+      setLoading(false);
     }
+  };
 
-    console.log(data.data || data.studentCreated);
-    toast.success(data.message || "Registered successfully");
-    navigate("/login");
-  } catch (error) {
-    console.log("Error occured at Register fetch frontend", error);
-    toast.error(error.message);
+    if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center gap-4">
+          
+         
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+
+          <p className="text-gray-600 text-lg font-medium">
+            Registering..
+          </p>
+        </div>
+      </div>
+    );
   }
-};
 
   return (
-    <div className="flex flex-col justify-center items-center w-120 h-130 m-auto p-14 shadow-2xl mt-2 mb-10 rounded-2xl">
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-col space-y-2">
-          <label className="text-2xl font-semibold">Full Name</label>
-          <input
-            onChange={handleChange}
-            name="fullName"
-            className="border p-2"
-            type="text"
-            placeholder="Enter your full name"
-          />
-        </div>
-        <div className="flex flex-col space-y-2">
-          <label className="text-2xl font-semibold">Email</label>
-          <input
-            onChange={handleChange}
-            name="email"
-            className="border p-2"
-            type="email"
-            placeholder="Enter your Email"
-          />
+    <div className="p-6 bg-gray-100 flex items-center justify-center ">
+
+      <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-5">
+
+        
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Create Account
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Register to access LMS portal
+          </p>
         </div>
 
-        <div className="flex flex-col space-y-2">
-          <label className="text-2xl font-semibold">Password</label>
-          <input
-            onChange={handleChange}
-            name="password"
-            className="border p-2"
-            type="password"
-            placeholder="password"
-          />
-        </div>
+    
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-        <div className="flex flex-col space-y-2">
-          <label className="text-2xl font-semibold">Phone:</label>
-          <input
-            onChange={handleChange}
-            name="phone"
-            className="border p-2"
-            type="number"
-            placeholder="Enter your Number"
-            maxLength={10}
-          />
-        </div>
+         
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Full Name
+            </label>
 
-        <div className="flex flex-col space-y-2">
-          <label className="text-2xl font-semibold">
-            Upload Profile Picture
-          </label>
-          <input
-            onChange={handleChange}
-            name="avatar"
-            className="border p-2"
-            type="file"
-          />
-        </div>
+            <input
+              onChange={handleChange}
+              value={formData.fullName}
+              name="fullName"
+              type="text"
+              placeholder="Enter your full name"
+              className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-        <div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Email
+            </label>
+
+            <input
+              onChange={handleChange}
+              value={formData.email}
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+      
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Password
+            </label>
+
+            <input
+              onChange={handleChange}
+              value={formData.password}
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+       
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Phone Number
+            </label>
+
+            <input
+              onChange={handleChange}
+              value={formData.phone}
+              name="phone"
+              type="text"
+              placeholder="98XXXXXXXX"
+              maxLength={10}
+              className="w-full border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+       
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Upload Profile Picture
+            </label>
+
+            <input
+              onChange={handleChange}
+              name="avatar"
+              type="file"
+              className="w-full border border-gray-300 rounded-xl p-3 cursor-pointer"
+            />
+          </div>
+
+       
           <button
             type="submit"
-            className="border px-35 py-2 mt-4 bg-blue-500 text-white hover:bg-blue-300"
+            disabled={loading}
+            className={`w-full py-3 rounded-xl text-white font-semibold transition duration-300 ${
+              loading
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            Register
+            {loading ? <Loading /> : "Register"}
           </button>
-        </div>
-      </form>
+
+        </form>
+
+      </div>
     </div>
   );
 };

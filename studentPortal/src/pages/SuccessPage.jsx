@@ -1,89 +1,107 @@
-import React, { useEffect } from "react";
+import React, { lazy, useEffect, useState } from "react";
+
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { FaCheckCircle, FaArrowRight } from "react-icons/fa";
 
 import { toast } from "react-toastify";
 
-const API = "http://localhost:3001";
+// const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+
+
+const LoadingScreen = lazy(() =>
+  import("../components/Loading")
+);
 
 const SuccessPage = () => {
   const [searchParams] = useSearchParams();
 
   const navigate = useNavigate();
 
-  // eSewa sends encoded data
   const rawData = searchParams.get("data");
 
   const data = rawData ? JSON.parse(atob(rawData)) : null;
 
-  console.log(data);
+  const [loading, setLoading] = useState(true);
 
-  // UPDATE ORDER STATUS
-  const updateOrder = async () => {
-    try {
-      if (!data) {
-        return;
-      }
-
-      const res = await fetch(
-        `${API}/api/v1/order/updateOrder/${data.transaction_uuid}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            paymentStatus: data.status,
-          }),
-        },
-      );
-
-      const result = await res.json();
-      console.log(result.data);
-      if (res.ok) {
-        toast.success("Payment completed successfully");
-        toast.success("Order status updated successfully");
-
-        // 1️⃣ get course list from order
-        const orderCourses = result.data.course;
-
-        // 2️⃣ enroll each course
-        await Promise.all(
-          orderCourses.map(async (item) => {
-            await fetch(
-              `${API}/api/v1/course/enrolledCourse/${item.coursesId}`,
-              {
-                method: "POST",
-                credentials: "include",
-              },
-            );
-          }),
-        );
-        navigate("/access/order");
-      } else {
-        toast.error(result.message || "Failed to update order");
-      }
-    } catch (error) {
-      console.log("Error occured at SuccessPage", error);
-
-      toast.error("Error occured while updating payment");
-    }
-  };
+  const [processed, setProcessed] = useState(false);
 
   useEffect(() => {
+    const updateOrder = async () => {
+      try {
+        if (!data || processed) {
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(
+          `${API}/api/v1/order/updateOrder/${data.transaction_uuid}`,
+          {
+            method: "PUT",
+
+            credentials: "include",
+
+            headers: {
+              "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({
+              paymentStatus: "COMPLETE",
+            }),
+          }
+        );
+
+        const result = await res.json();
+
+        if (res.ok) {
+          const orderCourses = result?.data?.course || [];
+
+          await Promise.all(
+            orderCourses.map(async (item) => {
+              await fetch(
+                `${API}/api/v1/course/enrolledCourse/${item.coursesId}`,
+                {
+                  method: "POST",
+                  credentials: "include",
+                }
+              );
+            })
+          );
+
+          setProcessed(true);
+
+          toast.success("Payment completed successfully");
+        } else {
+          toast.warning(
+            result.message || "Failed to update order"
+          );
+        }
+      } catch (error) {
+        console.log("Error occured at SuccessPage", error);
+
+        toast.error(
+          "Error occured while updating payment"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     updateOrder();
   }, []);
 
-  // INVALID ACCESS
   if (!data) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-100 p-6">
         <div className="bg-white shadow-xl rounded-3xl p-10 text-center max-w-md">
-          <h1 className="text-3xl font-bold text-red-600">Invalid Payment</h1>
+          <h1 className="text-3xl font-bold text-red-600">
+            Invalid Payment
+          </h1>
 
-          <p className="text-gray-500 mt-4">No payment information found.</p>
+          <p className="text-gray-500 mt-4">
+            No payment information found.
+          </p>
 
           <button
             onClick={() => navigate("/access/course")}
@@ -96,27 +114,34 @@ const SuccessPage = () => {
     );
   }
 
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex justify-center items-center p-6">
       <div className="w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* TOP SUCCESS SECTION */}
         <div className="bg-green-600 text-white p-10 text-center">
           <div className="flex justify-center mb-5">
             <FaCheckCircle size={90} />
           </div>
 
-          <h1 className="text-4xl font-bold">Payment Successful</h1>
+          <h1 className="text-4xl font-bold">
+            Payment Successful
+          </h1>
 
           <p className="mt-3 text-green-100 text-lg">
-            Your course payment has been completed successfully.
+            Your course payment has been completed
+            successfully.
           </p>
         </div>
 
-        {/* PAYMENT DETAILS */}
         <div className="p-8 space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-gray-50 rounded-2xl p-5 border">
-              <h2 className="text-gray-500 text-sm mb-2">Transaction Code</h2>
+              <h2 className="text-gray-500 text-sm mb-2">
+                Transaction Code
+              </h2>
 
               <p className="text-lg font-semibold break-all">
                 {data.transaction_code}
@@ -124,15 +149,19 @@ const SuccessPage = () => {
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-5 border">
-              <h2 className="text-gray-500 text-sm mb-2">Payment Status</h2>
+              <h2 className="text-gray-500 text-sm mb-2">
+                Payment Status
+              </h2>
 
               <p className="text-lg font-semibold text-green-600">
-                {data.status}
+                COMPLETE
               </p>
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-5 border">
-              <h2 className="text-gray-500 text-sm mb-2">Total Paid</h2>
+              <h2 className="text-gray-500 text-sm mb-2">
+                Total Paid
+              </h2>
 
               <p className="text-2xl font-bold text-green-700">
                 Rs. {data.total_amount}
@@ -140,7 +169,9 @@ const SuccessPage = () => {
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-5 border">
-              <h2 className="text-gray-500 text-sm mb-2">Transaction UUID</h2>
+              <h2 className="text-gray-500 text-sm mb-2">
+                Transaction UUID
+              </h2>
 
               <p className="text-sm font-medium break-all">
                 {data.transaction_uuid}
@@ -148,24 +179,23 @@ const SuccessPage = () => {
             </div>
           </div>
 
-          {/* SUCCESS MESSAGE */}
           <div className="bg-green-50 border border-green-200 rounded-2xl p-5">
             <h3 className="text-lg font-semibold text-green-700 mb-2">
               Enrollment Activated ✅
             </h3>
 
             <p className="text-green-600">
-              You can now access your purchased course and start learning
-              immediately.
+              You can now access your purchased course
+              and start learning immediately.
             </p>
           </div>
 
-          {/* BUTTON */}
           <button
-            onClick={() => navigate("/access/course")}
+            onClick={() => navigate("/access/order")}
             className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 transition duration-300 text-white text-lg font-semibold py-4 rounded-2xl shadow-lg"
           >
-            Go To My Courses
+            Go To My Orders
+
             <FaArrowRight />
           </button>
         </div>

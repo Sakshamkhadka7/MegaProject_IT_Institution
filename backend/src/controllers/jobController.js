@@ -3,6 +3,7 @@ import Application from "../models/jobApplication.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 export const createJob = asyncHandler(async (req, res) => {
   const adminId = req.user?._id;
@@ -92,31 +93,56 @@ export const updateJob = asyncHandler(async (req, res) => {
 export const jobApply = asyncHandler(async (req, res) => {
   const { jobId } = req.params;
   const userId = req.user._id;
-  const {coverLetter} = req.body;
+  const { coverLetter } = req.body;
+
   const alreadyApplied = await Application.findOne({
     applicant: userId,
-    job: jobId, 
+    job: jobId,
   });
+
   if (alreadyApplied) {
-    throw new ApiError(403, "Already applied to this job by this user");
+    throw new ApiError(
+      403,
+      "Already applied to this job by this user"
+    );
   }
 
-  const resume = req.file.filename;
+
+  let resume = null;
+
+  if (req.file) {
+    const uploadResult = await uploadToCloudinary(
+      req.file.buffer,
+      "job-resumes",
+      "auto"
+    );
+
+    resume = uploadResult.secure_url;
+  }
 
   if (!resume) {
-    throw new ApiError(403, "Resume is mandatory to apply this job");
+    throw new ApiError(
+      403,
+      "Resume is mandatory to apply this job"
+    );
   }
 
   const application = await Application.create({
     applicant: userId,
     job: jobId,
-    coverLetter: coverLetter,
-    resume: resume,
+    coverLetter,
+    resume,
   });
 
   return res
     .status(201)
-    .json(new ApiResponse(201, "Job applied successfull",application));
+    .json(
+      new ApiResponse(
+        201,
+        "Job applied successfull",
+        application
+      )
+    );
 });
 
 export const getMyApplication=asyncHandler(async(req,res)=>{

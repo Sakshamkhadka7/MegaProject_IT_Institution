@@ -1,58 +1,83 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import Login from "../pages/Login";
-import ContentManagement from "../pages/ContentManagement";
-import AdminProtected from "../pages/AdminProtected";
-import AdminLayout from "../pages/AdminLayout";
-import FinancialManagement from "../pages/FinancialManagement";
-import UserManagement from "../pages/UserManagement";
-import Blog from "../pages/Blog";
-import ManageBlog from "../pages/ManageBlog";
-import EditBlog from "../pages/EditBlog";
-import EditCourse from "../pages/EditCourse";
-import AddJob from "../pages/AddJob";
-import ManageJob from "../pages/ManageJob";
-import EditJob from "../pages/EditJob";
-import CertificateManagement from "../pages/CertificateManagement";
-import CreateCertificate from "../pages/CreateCertificate";
-import CreateReview from "../pages/CreateReview";
-import AddInstructor from "../pages/AddInstructor";
-import ContactInformation from "../pages/ContactInformation";
+
+const Login = lazy(() => import("../pages/Login"));
+const ContentManagement = lazy(() => import("../pages/ContentManagement"));
+const AdminProtected = lazy(() => import("../pages/AdminProtected"));
+const AdminLayout = lazy(() => import("../pages/AdminLayout"));
+const FinancialManagement = lazy(() => import("../pages/FinancialManagement"));
+const UserManagement = lazy(() => import("../pages/UserManagement"));
+const Blog = lazy(() => import("../pages/Blog"));
+const ManageBlog = lazy(() => import("../pages/ManageBlog"));
+const EditBlog = lazy(() => import("../pages/EditBlog"));
+const EditCourse = lazy(() => import("../pages/EditCourse"));
+const AddJob = lazy(() => import("../pages/AddJob"));
+const ManageJob = lazy(() => import("../pages/ManageJob"));
+const EditJob = lazy(() => import("../pages/EditJob"));
+const CertificateManagement = lazy(
+  () => import("../pages/CertificateManagement"),
+);
+
+const CreateReview = lazy(() => import("../pages/CreateReview"));
+const AddInstructor = lazy(() => import("../pages/AddInstructor"));
+const ContactInformation = lazy(() => import("../pages/ContactInformation"));
+
+// Loading Component
+const Loading = () => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+};
 
 const AppRouter = () => {
   return (
     <div>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
+      <Suspense fallback={<Loading />}>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
 
-        <Route
-          path="/access"
-          element={
-            <AdminProtected>
-              <AdminLayout />
-            </AdminProtected>
-          }
-        >
-          <Route path="finance" element={<FinancialManagement />} />
-          <Route path="user" element={<UserManagement />} />
-          <Route path="content" element={<ContentManagement />} />
-          <Route path="blog" element={<Blog/>} />
-          <Route path="manageBlog" element={<ManageBlog/>} />
-          <Route path="editBlog/:id" element={<EditBlog/>} />
-          <Route path="editCourse/:id" element={<EditCourse/>} />
-          <Route path="job" element={<AddJob/>} />
-          <Route path="manageJob" element={<ManageJob/>} />
-          <Route path="editJob/:id" element={<EditJob/>} />
-          <Route path="certificate" element={<CertificateManagement/>} />
-          <Route path="createCertificate" element={<CreateCertificate/>} />
-          <Route path="review" element={<CreateReview/>} />
-          <Route path="instructor" element={<AddInstructor/>} />
-          <Route path="contact" element={<ContactInformation/>} />
+          <Route
+            path="/access"
+            element={
+              <AdminProtected>
+                <AdminLayout />
+              </AdminProtected>
+            }
+          >
+            <Route index element={<FinancialManagement />} />
+            <Route path="finance" element={<FinancialManagement />} />
 
+            <Route path="user" element={<UserManagement />} />
 
-        </Route>
-      </Routes>
+            <Route path="content" element={<ContentManagement />} />
+
+            <Route path="blog" element={<Blog />} />
+
+            <Route path="manageBlog" element={<ManageBlog />} />
+
+            <Route path="editBlog/:id" element={<EditBlog />} />
+
+            <Route path="editCourse/:id" element={<EditCourse />} />
+
+            <Route path="job" element={<AddJob />} />
+
+            <Route path="manageJob" element={<ManageJob />} />
+
+            <Route path="editJob/:id" element={<EditJob />} />
+
+            <Route path="certificate" element={<CertificateManagement />} />
+
+            <Route path="review" element={<CreateReview />} />
+
+            <Route path="instructor" element={<AddInstructor />} />
+
+            <Route path="contact" element={<ContactInformation />} />
+          </Route>
+        </Routes>
+      </Suspense>
     </div>
   );
 };

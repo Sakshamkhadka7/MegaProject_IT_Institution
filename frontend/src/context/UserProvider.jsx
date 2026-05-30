@@ -4,12 +4,12 @@ import { createContext } from "react";
 
 
 export const UserContext = createContext();
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 

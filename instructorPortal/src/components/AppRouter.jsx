@@ -2,6 +2,10 @@ import React, { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import Login from "../pages/Login";
 
+
+
+const AddVideo=lazy(()=>import("../pages/AddVideo") );
+
 const InstructorProtected = lazy(() => import("../pages/InstructorProtected"));
 const InstructorLayout = lazy(() => import("../pages/InstructorLayout"));
 const AddCourses = lazy(() => import("../pages/AddCourses"));
@@ -20,10 +24,14 @@ const EditCourseManagement = lazy(
 );
 const FeedBack = lazy(() => import("../pages/FeedBack"));
 
+const EditVideo=lazy(()=> import("../pages/EditVideo"))
+const ManageVideo=lazy(()=> import("../pages/VideoManagement"))
+const Loading=lazy(()=> import("../components/Loading"))
+
 const AppRouter = () => {
   return (
     <div>
-      <Suspense fallback={<div>Loading .....</div>}>
+      <Suspense fallback={<div> <Loading/></div>}>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
@@ -36,6 +44,7 @@ const AppRouter = () => {
               </InstructorProtected>
             }
           >
+             <Route index element={<AddCourses />} />
             <Route path="course" element={<AddCourses />} />
             <Route path="courseManagement" element={<CourseManagement />} />
             <Route path="assignment" element={<AddAssignment />} />
@@ -53,6 +62,9 @@ const AppRouter = () => {
             <Route path="studentProgress" element={<StudentProgress />} />
             <Route path="editCourse/:id" element={<EditCourseManagement />} />
             <Route path="feedback/:id" element={<FeedBack />} />
+            <Route path="addVideo" element={<AddVideo/>} />
+            <Route path="editVideo" element={<EditVideo/>} />
+            <Route path="getAllLecture" element={<ManageVideo/>} />
           </Route>
         </Routes>
       </Suspense>

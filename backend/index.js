@@ -1,5 +1,5 @@
+import "./src/config/env.js";
 import express from "express";
-import dotenv from "dotenv";
 import connectDb from "./src/config/db.js";
 import studentRoute from "./src/routes/studentRoute.js";
 import cookieParser from "cookie-parser";
@@ -18,7 +18,6 @@ import contactRouter from "./src/routes/contactRoute.js";
 import errorHandler from "./src/middleware/errorMiddleware.js";
 
 const app = express();
-dotenv.config();
 
 const PORT = process.env.PORT;
 app.use(express.json());
@@ -29,10 +28,10 @@ app.use(
       "http://localhost:5174",
       "http://localhost:5175",
       "http://localhost:5176",
-      "https://it-institution-frontend.vercel.app",
-       "https://it-admin-sepia.vercel.app",
-       "https://it-instructor.vercel.app",
-       "https://it-student-phi.vercel.app"
+      "https://it-institution-frontend-7g7s.vercel.app",
+      "https://it-admin-ukji.vercel.app",
+      "https://it-institution-instructor-ppox.vercel.app",
+      "https://it-institution-student-n8ak.vercel.app",
     ],
     credentials: true,
   }),
@@ -64,6 +63,5 @@ app.use("/api/v1/blog", blogRouter);
 app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/resources", resourcesRouter);
 app.use("/api/v1/contact", contactRouter);
-
 
 app.use(errorHandler);

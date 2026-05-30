@@ -2,18 +2,33 @@ import Resources from "../models/resources.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 export const createResources = asyncHandler(async (req, res) => {
   const instructorId = req.user._id;
-  const fileUrl = req.file.filename;
-  const instructor=req.user.role;
+  const instructor = req.user.role;
+
   console.log(req.body);
-  if(instructor!="Instructor"){
-    throw new ApiError(403,"Not authorized for this request");
+
+  if (instructor != "Instructor") {
+    throw new ApiError(403, "Not authorized for this request");
   }
+
   const { title, link, coursesId } = req.body;
+
   if (!title || !coursesId) {
     throw new ApiError(401, "All fields are mandatory");
+  }
+
+  let fileUrl = null;
+
+  if (req.file) {
+    const uploadedFile = await uploadToCloudinary(
+      req.file.buffer,
+      "resources"
+    );
+
+    fileUrl = uploadedFile.secure_url;
   }
 
   const resources = await Resources.create({

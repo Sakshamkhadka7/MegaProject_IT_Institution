@@ -10,8 +10,8 @@ import {
 } from "react-icons/fi";
 import { StudentContext } from "../context/StudentProvider";
 import { toast } from "react-toastify";
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 
 const navItems = [
@@ -130,7 +130,7 @@ const StudentLayout = () => {
 
           <div className="flex items-center gap-3">
             <div
-              className="border px-10 py-1 rounded-xl bg-blue-500 text-white"
+              className="border px-10 py-1 rounded-xl bg-blue-500 text-white hover:cursor-pointer"
               onClick={() => Logout()}
             >
               Logout
@@ -148,7 +148,7 @@ const StudentLayout = () => {
                 <div>
                   <img
                     className="rounded-full w-20 h-10"
-                    src={`${API}/image/${user.avatar}`}
+                    src={user.avatar}
                   />
                 </div>
               ) : (

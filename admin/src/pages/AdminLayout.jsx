@@ -1,4 +1,4 @@
-import  { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { FaMicroblog } from "react-icons/fa6";
 import { MdContentPaste } from "react-icons/md";
 import { SiCashapp } from "react-icons/si";
@@ -13,10 +13,8 @@ import { AdminContext } from "../context/AdminProvider";
 import { toast } from "react-toastify";
 import { IoIosContact } from "react-icons/io";
 
-// const API = import.meta.env.VITE_API_URL;
- const API ="http://localhost:3001";
-
-
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 const navItems = [
   {
@@ -40,55 +38,62 @@ const navItems = [
     icon: FaMicroblog,
   },
   {
-    to:"/access/manageBlog",
-    label:"Manage Blog",
-    icon:FaMicroblog
+    to: "/access/manageBlog",
+    label: "Manage Blog",
+    icon: FaMicroblog,
   },
   {
-    to:"/access/job",
-    label:"Add Job",
-    icon:HiOfficeBuilding
+    to: "/access/job",
+    label: "Add Job",
+    icon: HiOfficeBuilding,
   },
   {
-    to:"/access/manageJob",
-    label:"Manage Job",
-    icon:HiOfficeBuilding
-  }
-  ,{
-    to:"/access/certificate",
-    label:"Certificate Management",
-    icon:FaCertificate
-  },{
-    to:"/access/review",
-    label:"Create Review",
-    icon:MdOutlinePreview
-  },{
-    to:"/access/contact",
-    label:"Contact Information",
-    icon:IoIosContact
-  }
+    to: "/access/manageJob",
+    label: "Manage Job",
+    icon: HiOfficeBuilding,
+  },
+  {
+    to: "/access/certificate",
+    label: "Certificate Management",
+    icon: FaCertificate,
+  },
+  {
+    to: "/access/review",
+    label: "Create Review",
+    icon: MdOutlinePreview,
+  },
+  {
+    to: "/access/contact",
+    label: "Contact Information",
+    icon: IoIosContact,
+  },
 ];
 
 const AdminLayout = () => {
   const [sideBarOpen, setSideBarOpen] = useState(false);
-  const {admin}=useContext(AdminContext);
-   const navigate=useNavigate();
-   const Logout = async () => {
+  const { admin } = useContext(AdminContext);
+  const navigate = useNavigate();
+  const Logout = async () => {
     try {
-      let res = await fetch(`${API}/api/v1/student/logout`, {
+      const res = await fetch(`${API}/api/v1/student/logout`, {
         method: "GET",
         credentials: "include",
       });
 
-      if (res.ok) {
-        toast.success("Student logout successfully");
-        navigate("/login");
-      } else {
-        toast.error("Error at logout");
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.warning(data.message || "Logout failed");
+        return;
       }
+
+      toast.success(data.message || "Student logged out successfully");
+
+      navigate("/login");
     } catch (error) {
       console.log("Error occured at logout", error);
-      toast.error("Error occured at logout");
+
+      toast.warning("Network error or server not responding");
     }
   };
 
@@ -137,7 +142,10 @@ const AdminLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
-              <div className="border px-10 py-1 rounded-xl bg-blue-500 text-white" onClick={()=> Logout()}>
+            <div
+              className="border px-10 py-1 rounded-xl bg-blue-500 text-white hover:cursor-pointer"
+              onClick={() => Logout()}
+            >
               Logout
             </div>
 
@@ -150,9 +158,16 @@ const AdminLayout = () => {
             </div>
 
             <div className="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
-              {
-                admin ? <div><img  className="rounded-full w-20 h-10" src={`${API}/image/${admin.avatar}`} /></div> :<div></div>
-              }
+              {admin ? (
+                <div>
+                  <img
+                    className="rounded-full w-20 h-10"
+                    src={admin.avatar}
+                  />
+                </div>
+              ) : (
+                <div></div>
+              )}
             </div>
           </div>
         </header>

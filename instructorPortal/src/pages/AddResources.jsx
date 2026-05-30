@@ -1,11 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useState,
+} from "react";
+
 import { toast } from "react-toastify";
 
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
+const Loading = lazy(() =>
+  import("../components/Loading")
+);
 
-// Initial state
 const INITIAL_FORM_STATE = {
   courseId: "",
   title: "",
@@ -15,69 +23,110 @@ const INITIAL_FORM_STATE = {
 
 const AddResources = () => {
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
+  const [loading, setLoading] =
+    useState(true);
 
-  // 🔥 KEY for forcing form reset (important for file input)
-  const [formKey, setFormKey] = useState(Date.now());
+  const [submitting, setSubmitting] =
+    useState(false);
 
-  // Fetch courses
+  const [formData, setFormData] =
+    useState(INITIAL_FORM_STATE);
+
+
+  const [formKey, setFormKey] = useState(
+    Date.now()
+  );
+
   useEffect(() => {
     const controller = new AbortController();
 
-  const getCourses = async () => {
-  try {
-    setLoading(true);
+    const getCourses = async () => {
+      try {
+        setLoading(true);
 
-    const res = await fetch(`${API}/api/v1/course/getAllCourses`, {
-      method: "GET",
-      credentials: "include",
-      signal: controller.signal,
-    });
+        const res = await fetch(
+          `${API}/api/v1/course/getInstructorCourse`,
+          {
+            method: "GET",
+            credentials: "include",
+            signal: controller.signal,
+          }
+        );
 
-    const data = await res.json().catch(() => null);
+        const data = await res
+          .json()
+          .catch(() => null);
 
-    if (res.ok) {
-      setCourses(data?.data || []);
-    } else {
-      console.error("API Error:", data?.message);
-      toast.error(data?.message || "Failed to fetch courses");
-    }
-  } catch (error) {
-    if (error.name !== "AbortError") {
-      console.error("Error fetching courses:", error);
-      toast.error("Error occurred while fetching courses");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+        if (res.ok) {
+          setCourses(data?.data || []);
+        } else {
+          toast.error(
+            data?.message ||
+              "Failed to fetch courses"
+          );
+        }
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.log(
+            "Error fetching courses",
+            error
+          );
+
+          toast.error(
+            "Error occurred while fetching courses"
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
     getCourses();
 
     return () => controller.abort();
   }, []);
 
-  // Validation
+
   const validateForm = () => {
-    const { courseId, title, file, link } = formData;
+    const {
+      courseId,
+      title,
+      file,
+      link,
+    } = formData;
 
-    if (!courseId) return toast.error("Please select a course"), false;
-    if (!title.trim()) return toast.error("Title is required"), false;
-    if (title.trim().length < 3)
-      return toast.error("Title must be at least 3 characters"), false;
+    if (!courseId) {
+      toast.error("Please select a course");
+      return false;
+    }
 
-    if (!file && !link)
-      return toast.error("Please provide either a file or a link"), false;
+    if (!title.trim()) {
+      toast.error("Title is required");
+      return false;
+    }
+
+    if (title.trim().length < 3) {
+      toast.error(
+        "Title must be at least 3 characters"
+      );
+      return false;
+    }
+
+    if (!file && !link.trim()) {
+      toast.error(
+        "Please provide either a file or a link"
+      );
+      return false;
+    }
 
     return true;
   };
 
-  // Handle input change
+
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files } =
+      e.target;
 
     setFormData((prev) => ({
       ...prev,
@@ -85,22 +134,37 @@ const AddResources = () => {
     }));
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm() || submitting) return;
+    if (!validateForm() || submitting)
+      return;
 
     try {
       setSubmitting(true);
 
       const payload = new FormData();
-      payload.append("coursesId", formData.courseId);
-      payload.append("title", formData.title.trim());
-      payload.append("link", formData.link);
+
+      payload.append(
+        "coursesId",
+        formData.courseId
+      );
+
+      payload.append(
+        "title",
+        formData.title.trim()
+      );
+
+      payload.append(
+        "link",
+        formData.link.trim()
+      );
 
       if (formData.file) {
-        payload.append("fileUrl", formData.file);
+        payload.append(
+          "fileUrl",
+          formData.file
+        );
       }
 
       const response = await fetch(
@@ -115,107 +179,192 @@ const AddResources = () => {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success("Resource added successfully");
+        toast.success(
+          "Resource added successfully"
+        );
 
-       
+    
         setFormData(INITIAL_FORM_STATE);
 
-   
+      
         setFormKey(Date.now());
       } else {
-        toast.error(result.message || "Failed to add resource");
+        toast.error(
+          result.message ||
+            "Failed to add resource"
+        );
       }
     } catch (error) {
-      console.error("Error adding resource", error);
-      toast.error("An error occurred while adding resources");
+      console.log(
+        "Error adding resource",
+        error
+      );
+
+      toast.error(
+        "An error occurred while adding resource"
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
+  
   if (loading) {
-    return <p className="p-6 text-gray-500">Loading courses...</p>;
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100">
+        <Suspense
+          fallback={
+            <div className="text-lg text-gray-500">
+              Loading...
+            </div>
+          }
+        >
+          <Loading />
+        </Suspense>
+
+        <p className="mt-4 text-gray-500 text-lg">
+          Loading courses...
+        </p>
+      </div>
+    );
+  }
+
+  if (submitting) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100">
+        <Suspense
+          fallback={
+            <div className="text-lg text-gray-500">
+              Uploading...
+            </div>
+          }
+        >
+          <Loading />
+        </Suspense>
+
+        <h2 className="mt-6 text-2xl font-bold text-gray-800">
+          Uploading Resource...
+        </h2>
+
+        <p className="text-gray-500 mt-2">
+          Please wait while we upload your
+          learning resource
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          Add Learning Resource
-        </h2>
-
-        <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
-
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-3xl mx-auto bg-white shadow-2xl rounded-3xl p-8 border border-gray-100">
       
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Add Learning Resource
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Upload files or share useful
+            resource links for students
+          </p>
+        </div>
+
+       
+        <form
+          key={formKey}
+          onSubmit={handleSubmit}
+          className="space-y-6"
+        >
+        
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Select Course
             </label>
+
             <select
               name="courseId"
               value={formData.courseId}
               onChange={handleChange}
-              className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none"
             >
-              <option value="">-- Choose Course --</option>
+              <option value="">
+                -- Choose Course --
+              </option>
+
               {courses.map((course) => (
-                <option key={course._id} value={course._id}>
+                <option
+                  key={course._id}
+                  value={course._id}
+                >
                   {course.title}
                 </option>
               ))}
             </select>
           </div>
 
-      
+        
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Resource Title
             </label>
+
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter resource title"
+              className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
          
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Upload File (Optional)
             </label>
+
             <input
               type="file"
               name="file"
               onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
+              className="w-full border border-gray-300 rounded-xl p-3 bg-white"
             />
           </div>
 
-          <div className="text-center text-gray-400 text-sm">OR</div>
+     
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-[1px] bg-gray-300"></div>
 
-          
+            <span className="text-gray-400 text-sm">
+              OR
+            </span>
+
+            <div className="flex-1 h-[1px] bg-gray-300"></div>
+          </div>
+
+       
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Resource Link
             </label>
+
             <input
               type="url"
               name="link"
               value={formData.link}
               onChange={handleChange}
-              className="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="https://example.com"
+              className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
-         
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition duration-300 disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
-            {submitting ? "Uploading..." : "Add Resource"}
+            Add Resource
           </button>
         </form>
       </div>

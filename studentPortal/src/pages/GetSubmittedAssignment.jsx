@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { FaFileAlt, FaCheckCircle, FaClock } from "react-icons/fa";
 import { toast } from "react-toastify";
-// const API = import.meta.env.VITE_API_URL;
- const API ="http://localhost:3001";
+
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 
+const Loading = React.lazy(() =>
+  import("../components/Loading")
+);
 
 const GetSubmittedAssignment = () => {
   const [assignments, setAssignments] = useState([]);
@@ -19,13 +23,16 @@ const GetSubmittedAssignment = () => {
           credentials: "include",
         }
       );
-        const data = await res.json();
+
+      const data = await res.json();
+
       if (res.ok) {
-      
         setAssignments(data.data);
         console.log(data.data);
-      }else{
-        toast.warning (data?.message || "There is No Submitted Assignments");
+      } else {
+        toast.warning(
+          data?.message || "There is No Submitted Assignments"
+        );
       }
     } catch (error) {
       console.log("Error fetching assignments", error);
@@ -39,52 +46,57 @@ const GetSubmittedAssignment = () => {
     getAssignments();
   }, []);
 
-  // status color helper
   const getStatusStyle = (status) => {
     if (status === "Reviewed")
       return "bg-green-100 text-green-600";
     return "bg-yellow-100 text-yellow-600";
   };
 
+ 
+  if (loading) {
+    return (
+      <Suspense
+        fallback={
+          <div className="text-center text-gray-500 mt-10">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Header */}
+  
       <div className="max-w-6xl mx-auto mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Submitted Assignments
         </h1>
         <p className="text-sm text-gray-500">
-          Track your assignment submissions and per formance
+          Track your assignment submissions and performance
         </p>
       </div>
 
-      {/* Loading */}
-      {loading && (
-        <p className="text-center text-gray-500 mt-10">
-          Loading assignments...
-        </p>
-      )}
-
-      {/* Empty */}
       {!loading && assignments.length === 0 && (
         <p className="text-center text-gray-400 mt-10">
           No assignments submitted yet
         </p>
       )}
 
-      {/* Assignment Grid */}
+    
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {assignments.map((item) => (
           <div
             key={item._id}
             className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition p-5 border border-gray-100"
           >
-            {/* Title */}
+            
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
               {item.assignment?.title || "Assignment"}
             </h2>
 
-            {/* Status */}
             <div className="flex items-center justify-between mb-3">
               <span
                 className={`text-xs px-3 py-1 rounded-full ${getStatusStyle(
@@ -94,13 +106,14 @@ const GetSubmittedAssignment = () => {
                 {item.status || "Pending"}
               </span>
 
-              {/* Score */}
               <span className="text-sm font-medium text-blue-600">
-                {item.score !== null ? `${item.score}%` : "Not graded"}
+                {item.score !== null
+                  ? `${item.score}%`
+                  : "Not graded"}
               </span>
             </div>
 
-            {/* Submission Date */}
+           
             <p className="text-xs text-gray-400 mb-3">
               Submitted:{" "}
               {item.createdAt
@@ -108,9 +121,8 @@ const GetSubmittedAssignment = () => {
                 : "N/A"}
             </p>
 
-            {/* File */}
             <a
-              href={`${API}/image/${item.submittedFile}`}
+              href={item.submittedFile}
               target="_blank"
               className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
             >
@@ -118,7 +130,6 @@ const GetSubmittedAssignment = () => {
               View Submission
             </a>
 
-            {/* Footer Icons */}
             <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
               <span className="flex items-center gap-1">
                 {item.status === "Reviewed" ? (

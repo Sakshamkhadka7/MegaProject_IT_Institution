@@ -19,10 +19,11 @@ const GetSubmittedAssignment = lazy(() =>
 );
 const Payment=lazy(()=> import("../pages/Payment"));
 const Success=lazy(()=> import("../pages/SuccessPage"));
+const Loading=lazy(()=> import("../components/Loading"));
 
 const AppRouter = () => {
   return (
-    <Suspense fallback={<div className="p-4 text-gray-500">Loading...</div>}>
+    <Suspense fallback={<div className="p-4 text-gray-500"><Loading/></div>}>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
@@ -35,6 +36,7 @@ const AppRouter = () => {
             </StudentProtected>
           }
         >
+          <Route index element={<Course />} />
           <Route path="course" element={<Course />} />
           <Route path="certificate" element={<Certificate />} />
           <Route path="progress" element={<Progress />} />

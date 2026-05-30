@@ -1,189 +1,463 @@
-import React, { useState } from "react";
+import React, {
+  lazy,
+  Suspense,
+  useState,
+} from "react";
+
 import { useLocation, useNavigate } from "react-router-dom";
+
 import { toast } from "react-toastify";
 
 const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
+const Loading = lazy(() =>
+  import("../components/Loading")
+);
 
 const EditCourseManagement = () => {
   const { state } = useLocation();
+
   const navigate = useNavigate();
 
-  // Prefill form with existing data
   const [courses, setCourses] = useState({
     title: state?.title || "",
-    descriptions: state?.descriptions || "",
-    syllabus: state?.syllabus || "",
+
+    description: state?.description || "",
+
+    syllabus:
+      Array.isArray(state?.syllabus) &&
+      state?.syllabus.length > 0
+        ? state.syllabus
+        : [""],
+
     duration: state?.duration || "",
+
     fee: state?.fee || "",
-    level: state?.level || "",
-    enrollment: state?.enrollmentDeadline || "",
-    prerequisities: state?.prerequisities || "",
-    courseImage: null, // new file only
+
+    level: state?.level || "Beginner",
+
+    enrollment: state?.enrollmentDeadline
+      ? new Date(state.enrollmentDeadline)
+          .toISOString()
+          .split("T")[0]
+      : "",
+
+    prerequisites: state?.prerequisites || "",
+
+    courseImage: null,
   });
 
   const [loading, setLoading] = useState(false);
 
-  // Handle input change
+ 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
-    setCourses({
-      ...courses,
+    setCourses((prev) => ({
+      ...prev,
       [name]: files ? files[0] : value,
-    });
+    }));
   };
 
-  // Submit update
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+
+  const handleSyllabusChange = (index, value) => {
+    const updated = [...courses.syllabus];
+
+    updated[index] = value;
+
+    setCourses((prev) => ({
+      ...prev,
+      syllabus: updated,
+    }));
+  };
+
+  const addSyllabusField = () => {
+    setCourses((prev) => ({
+      ...prev,
+      syllabus: [...prev.syllabus, ""],
+    }));
+  };
+
+  const removeSyllabusField = (index) => {
+    const filtered = courses.syllabus.filter(
+      (_, i) => i !== index
+    );
+
+    setCourses((prev) => ({
+      ...prev,
+      syllabus: filtered,
+    }));
+  };
 
 
-    const data = new FormData();
-    data.append("title", courses.title);
-    data.append("descriptions", courses.descriptions);
-    data.append("syllabus", courses.syllabus);
-    data.append("duration", courses.duration);
-    data.append("fee", courses.fee);
-    data.append("level", courses.level);
-    data.append("enrollmentDeadline", courses.enrollment);
-    data.append("prerequisities", courses.prerequisities);
-
-    // only append image if user selects new one
-    if (courses.courseImage) {
-      data.append("courseImage", courses.courseImage);
+  const validateForm = () => {
+    if (!courses.title.trim()) {
+      toast.error("Course title is required");
+      return false;
     }
 
+    if (!courses.description.trim()) {
+      toast.error("Description is required");
+      return false;
+    }
+
+    const validSyllabus = courses.syllabus.filter(
+      (item) => item.trim() !== ""
+    );
+
+    if (validSyllabus.length === 0) {
+      toast.error(
+        "At least one syllabus topic is required"
+      );
+      return false;
+    }
+
+    if (!courses.duration.trim()) {
+      toast.error("Duration is required");
+      return false;
+    }
+
+    if (!courses.fee) {
+      toast.error("Fee is required");
+      return false;
+    }
+
+    if (!courses.enrollment) {
+      toast.error(
+        "Enrollment deadline is required"
+      );
+      return false;
+    }
+
+    if (!courses.prerequisites.trim()) {
+      toast.error("Prerequisites are required");
+      return false;
+    }
+
+    return true;
+  };
+
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm() || loading) return;
+
     try {
+      setLoading(true);
+
+      const data = new FormData();
+
+      data.append("title", courses.title);
+
+      data.append(
+        "description",
+        courses.description
+      );
+
+      data.append(
+        "syllabus",
+        JSON.stringify(
+          courses.syllabus.filter(
+            (item) => item.trim() !== ""
+          )
+        )
+      );
+
+      data.append("duration", courses.duration);
+
+      data.append("fee", courses.fee);
+
+      data.append("level", courses.level);
+
+      data.append(
+        "enrollmentDeadline",
+        courses.enrollment
+      );
+
+      data.append(
+        "prerequisites",
+        courses.prerequisites
+      );
+
+      if (courses.courseImage) {
+        data.append(
+          "courseImage",
+          courses.courseImage
+        );
+      }
+
       const res = await fetch(
         `${API}/api/v1/course/updateCourse/${state._id}`,
         {
           method: "PUT",
           body: data,
-          credentials:"include"
+          credentials: "include",
         }
       );
 
       const result = await res.json();
 
       if (res.ok) {
-        toast.success("Course updated successfully");
+        toast.success(
+          result.message ||
+            "Course updated successfully"
+        );
+
         navigate("/access/courseManagement");
       } else {
-        toast.error(result.message || "Update failed");
+        toast.error(
+          result.message || "Update failed"
+        );
       }
     } catch (error) {
       console.log("Update error:", error);
+
       toast.error("Update course error");
     } finally {
       setLoading(false);
     }
   };
 
+  
+  if (loading) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center text-gray-500">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
-        
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">
+      <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
+
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">
           Edit Course
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+        >
+          {/* TITLE */}
+          <div>
+            <label className="block mb-2 font-medium">
+              Course Title
+            </label>
 
-          <input
-            name="title"
-            value={courses.title}
-            onChange={handleChange}
-            placeholder="Title"
-            className="w-full border p-2 rounded"
-          />
+            <input
+              type="text"
+              name="title"
+              value={courses.title}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
 
-          <input
-            name="descriptions"
-            value={courses.descriptions}
-            onChange={handleChange}
-            placeholder="Description"
-            className="w-full border p-2 rounded"
-          />
+          
+          <div>
+            <label className="block mb-2 font-medium">
+              Description
+            </label>
 
-          <input
-            name="syllabus"
-            value={courses.syllabus}
-            onChange={handleChange}
-            placeholder="Syllabus"
-            className="w-full border p-2 rounded"
-          />
+            <textarea
+              name="description"
+              value={courses.description}
+              onChange={handleChange}
+              rows={5}
+              className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
 
-          <input
-            name="duration"
-            value={courses.duration}
-            onChange={handleChange}
-            placeholder="Duration"
-            className="w-full border p-2 rounded"
-          />
+      
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <label className="font-medium">
+                Course Syllabus
+              </label>
 
-          <input
-            name="fee"
-            value={courses.fee}
-            onChange={handleChange}
-            type="number"
-            placeholder="Fee"
-            className="w-full border p-2 rounded"
-          />
+              <button
+                type="button"
+                onClick={addSyllabusField}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition"
+              >
+                + Add Topic
+              </button>
+            </div>
 
-          <input
-            name="level"
-            value={courses.level}
-            onChange={handleChange}
-            placeholder="Level"
-            className="w-full border p-2 rounded"
-          />
+            <div className="space-y-3">
+              {courses.syllabus.map(
+                (topic, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-3"
+                  >
+                    <input
+                      type="text"
+                      value={topic}
+                      onChange={(e) =>
+                        handleSyllabusChange(
+                          index,
+                          e.target.value
+                        )
+                      }
+                      className="flex-1 border rounded-xl p-3"
+                      placeholder={`Topic ${
+                        index + 1
+                      }`}
+                    />
 
-          <input
-            name="enrollment"
-            value={courses.enrollment}
-            onChange={handleChange}
-            placeholder="Enrollment Deadline"
-            className="w-full border p-2 rounded"
-          />
+                    {courses.syllabus.length >
+                      1 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeSyllabusField(
+                            index
+                          )
+                        }
+                        className="bg-red-500 hover:bg-red-600 text-white px-4 rounded-lg transition"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
 
-          <input
-            name="prerequisities"
-            value={courses.prerequisities}
-            onChange={handleChange}
-            placeholder="Prerequisites"
-            className="w-full border p-2 rounded"
-          />
-
-          {/* Current Image Preview */}
-          {state?.courseImage && (
+          
+          <div className="grid md:grid-cols-2 gap-5">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Current Image</p>
-              <img
-                src={`${API}/image/${state.courseImage}`}
-                alt="course"
-                className="w-24 h-24 object-cover rounded border"
+              <label className="block mb-2 font-medium">
+                Duration
+              </label>
+
+              <input
+                type="text"
+                name="duration"
+                value={courses.duration}
+                onChange={handleChange}
+                className="w-full border rounded-xl p-3"
               />
             </div>
-          )} 
 
-          {/* Upload New Image */}
-          <input
-            name="courseImage"
-            type="file"
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          />
+            <div>
+              <label className="block mb-2 font-medium">
+                Fee
+              </label>
 
+              <input
+                type="number"
+                name="fee"
+                value={courses.fee}
+                onChange={handleChange}
+                className="w-full border rounded-xl p-3"
+              />
+            </div>
+          </div>
+
+        
+          <div>
+            <label className="block mb-2 font-medium">
+              Level
+            </label>
+
+            <select
+              name="level"
+              value={courses.level}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+            >
+              <option value="Beginner">
+                Beginner
+              </option>
+
+              <option value="Intermediate">
+                Intermediate
+              </option>
+
+              <option value="Advanced">
+                Advanced
+              </option>
+            </select>
+          </div>
+
+         
+          <div>
+            <label className="block mb-2 font-medium">
+              Enrollment Deadline
+            </label>
+
+            <input
+              type="date"
+              name="enrollment"
+              value={courses.enrollment}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+            />
+          </div>
+
+      
+          <div>
+            <label className="block mb-2 font-medium">
+              Prerequisites
+            </label>
+
+            <textarea
+              name="prerequisites"
+              value={courses.prerequisites}
+              onChange={handleChange}
+              rows={3}
+              className="w-full border rounded-xl p-3"
+            />
+          </div>
+
+        
+          {state?.thumbnail && (
+            <div>
+              <p className="text-sm text-gray-500 mb-2">
+                Current Image
+              </p>
+
+              <img
+                src={state.thumbnail}
+                alt="course"
+                className="w-32 h-32 object-cover rounded-xl border"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block mb-2 font-medium">
+              Update Course Image
+            </label>
+
+            <input
+              type="file"
+              name="courseImage"
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+            />
+          </div>
+
+        
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition"
           >
-            {loading ? "Updating..." : "Update Course"}
+            Update Course
           </button>
-
         </form>
       </div>
     </div>

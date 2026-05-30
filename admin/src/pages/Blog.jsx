@@ -1,7 +1,18 @@
-import React, { useState } from "react";
-import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
+import React, {
+  lazy,
+  Suspense,
+  useState,
+} from "react";
 
+import { toast } from "react-toastify";
+
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
+
+
+const Loading = lazy(() =>
+  import("../components/Loading")
+);
 
 const CreateBlog = () => {
   const [formData, setFormData] = useState({
@@ -11,12 +22,14 @@ const CreateBlog = () => {
   });
 
   const [image, setImage] = useState(null);
+
   const [preview, setPreview] = useState(null);
 
   const [loading, setLoading] = useState(false);
+
   const [success, setSuccess] = useState(false);
 
-  // handle text input
+  
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -45,9 +58,9 @@ const CreateBlog = () => {
     return true;
   };
 
-  // handle image
   const handleImage = (e) => {
     const file = e.target.files[0];
+
     setImage(file);
 
     if (file) {
@@ -55,56 +68,114 @@ const CreateBlog = () => {
     }
   };
 
-  // submit
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) return;
-   
-    if(!image){
-      toast.error("Image is required");
-      return
+
+    if (!image) {
+      toast.warning("Image is required");
+      return;
     }
 
     try {
+      
       setLoading(true);
 
       const data = new FormData();
+
       data.append("title", formData.title);
+
       data.append("content", formData.content);
+
       data.append("category", formData.category);
+
       data.append("image", image);
 
-      const res = await fetch(`${API}/api/v1/blog/createBlog`, {
-        method: "POST",
-        credentials: "include", // for auth
-        body: data,
+      const res = await fetch(
+        `${API}/api/v1/blog/createBlog`,
+        {
+          method: "POST",
+
+          credentials: "include",
+
+          body: data,
+        }
+      );
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        toast.warning(
+          result.message ||
+            "Failed to create blog"
+        );
+
+        return;
+      }
+
+      setSuccess(true);
+
+      setFormData({
+        title: "",
+        content: "",
+        category: "",
       });
 
-      if (res.ok) {
-        setSuccess(true);
-        setFormData({ title: "", content: "", category: "" });
-        setImage(null);
-        setPreview(null);
-        toast.success("Blog created successfully");
-      }
+      setImage(null);
+
+      setPreview(null);
+
+      toast.success(
+        result.message ||
+          "Blog created successfully"
+      );
     } catch (error) {
       console.log("Error creating blog", error);
+
+      toast.warning(
+        "Network error or server not responding"
+      );
     } finally {
+    
       setLoading(false);
     }
   };
 
+  
+  if (loading) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center items-center p-6">
       <div className="bg-white w-full max-w-2xl rounded-2xl shadow-md p-6">
-        <h2 className="text-2xl font-semibold mb-6">Create Blog</h2>
+        <h2 className="text-2xl font-semibold mb-6">
+          Create Blog
+        </h2>
 
         {success && (
-          <p className="text-green-600 mb-4">✅ Blog created successfully</p>
+          <p className="text-green-600 mb-4">
+            ✅ Blog created successfully
+          </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
+         
           <input
             type="text"
             name="title"
@@ -115,7 +186,7 @@ const CreateBlog = () => {
             required
           />
 
-          {/* Category */}
+ 
           <select
             name="category"
             value={formData.category}
@@ -123,14 +194,28 @@ const CreateBlog = () => {
             className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             required
           >
-            <option value="">Select Category</option>
-            <option value="Programming">Programming</option>
-            <option value="Design">Design</option>
-            <option value="Marketing">Marketing</option>
-            <option value="AI">Artificial Intelligence</option>
+            <option value="">
+              Select Category
+            </option>
+
+            <option value="Programming">
+              Programming
+            </option>
+
+            <option value="Design">
+              Design
+            </option>
+
+            <option value="Marketing">
+              Marketing
+            </option>
+
+            <option value="AI">
+              Artificial Intelligence
+            </option>
           </select>
 
-          {/* Content */}
+    
           <textarea
             name="content"
             rows="5"
@@ -141,7 +226,7 @@ const CreateBlog = () => {
             required
           />
 
-          {/* Image Upload */}
+       
           <div>
             <input
               type="file"
@@ -159,13 +244,13 @@ const CreateBlog = () => {
             )}
           </div>
 
-          {/* Button */}
+      
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Create Blog"}
+            Create Blog
           </button>
         </form>
       </div>

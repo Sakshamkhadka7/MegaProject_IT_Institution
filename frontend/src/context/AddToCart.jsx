@@ -18,21 +18,17 @@ const initialState = {
 const cardReducer = (state, action) => {
   switch (action.type) {
     case "addToCart": {
-      console.log(action.payload);
-
       const isExists = state.cartItems.find((item) => {
         return item._id == action.payload._id;
       });
 
       if (isExists) {
-       toast.warning("Course already exists ⚠️");
+        toast.warning("Course already exists ⚠️");
         return state;
       }
 
-      console.log(state);
-      
       const newObj = [...state.cartItems, action.payload];
-      toast.success("Course is successfully added to cart")
+      toast.success("Course is successfully added to cart");
       return {
         ...state,
         cartItems: newObj,
@@ -40,19 +36,21 @@ const cardReducer = (state, action) => {
     }
 
     case "delete": {
-      const newObject = state.cartItems.filter((item) => item._id !== action.payload._id);
+      const newObject = state.cartItems.filter(
+        (item) => item._id !== action.payload._id,
+      );
       toast.error("Cart is deleted");
 
       return {
         ...state,
-        cartItems:newObject
+        cartItems: newObject,
       };
     }
 
-    case "clear":{
+    case "clear": {
       return {
-        cartItems:[]
-      }
+        cartItems: [],
+      };
     }
 
     default:
@@ -65,7 +63,7 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(state.cartItems));
-  },[state.cartItems]);
+  }, [state.cartItems]);
 
   return (
     <CartContext.Provider value={{ state, dispatch }}>

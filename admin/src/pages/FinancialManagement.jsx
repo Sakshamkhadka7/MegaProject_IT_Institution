@@ -1,31 +1,27 @@
-import React, { useEffect, useState, useMemo } from "react";
-// const API = import.meta.env.VITE_API_URL;
- const API ="http://localhost:3001";
+import React, { useEffect, useState, useMemo, lazy, Suspense } from "react";
+// const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
 
 
+const Loading = lazy(() => import("../components/Loading"));
 
 const FinancialManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
-
   const [statusFilter, setStatusFilter] = useState("All");
 
-  //  Fetch Orders
+  
   const getOrders = async () => {
     try {
-      let res = await fetch(
-        `${API}/api/v1/order/getAllOrders`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`${API}/api/v1/order/getAllOrders`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await res.json();
 
       if (res.ok) {
-        res = await res.json();
-        setOrders(res.data);
-        console.log(res.data);
+        setOrders(data.data || []);
       }
     } catch (error) {
       console.log("Error fetching orders", error);
@@ -38,151 +34,205 @@ const FinancialManagement = () => {
     getOrders();
   }, []);
 
-  //  Filter Logic
+
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-
-      const matchStatus =
-        statusFilter === "All" || order.paymentStatus === statusFilter;
-
-      return  matchStatus;
+      return (
+        statusFilter === "All" ||
+        order.paymentStatus === statusFilter
+      );
     });
-  }, [orders,  statusFilter]);  
+  }, [orders, statusFilter]);
 
-  //  Revenue Calculation
-  const totalRevenue = orders.reduce(
-    (acc, item) => acc + (item.totalAmount || 0),
-    0
-  );
+  const totalRevenue = orders.reduce((acc, order) => {
+    const orderTotal =
+      order.course?.reduce((sum, item) => {
+        return (
+          sum +
+          (item.coursesId?.fee || 0) * (item.quantity || 1)
+        );
+      }, 0) || 0;
+
+    return acc + orderTotal;
+  }, 0);
 
   const totalOrders = orders.length;
 
-  const paidOrders = orders.filter((o) => o.paymentStatus === "COMPLETE").length;
+  const paidOrders = orders.filter(
+    (o) => o.paymentStatus === "COMPLETE"
+  ).length;
+
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Suspense
+          fallback={
+            <div className="text-gray-500">Loading...</div>
+          }
+        >
+          <Loading />
+        </Suspense>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      
-      {/* Header */}
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
           Financial Dashboard
         </h1>
         <p className="text-sm text-gray-500">
-          Track revenue and manage orders
+          Manage revenue, orders and payments
         </p>
       </div>
 
-      {/* 🔥 Summary Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mb-6">
-        
-        <div className="bg-white p-5 rounded-xl shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border">
           <p className="text-sm text-gray-500">Total Revenue</p>
-          <h2 className="text-xl font-semibold text-green-600">
+          <h2 className="text-xl font-bold text-green-600">
             Rs. {totalRevenue}
           </h2>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm">
+        <div className="bg-white p-5 rounded-xl shadow-sm border">
           <p className="text-sm text-gray-500">Total Orders</p>
-          <h2 className="text-xl font-semibold text-blue-600">
+          <h2 className="text-xl font-bold text-blue-600">
             {totalOrders}
           </h2>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm">
+        <div className="bg-white p-5 rounded-xl shadow-sm border">
           <p className="text-sm text-gray-500">Paid Orders</p>
-          <h2 className="text-xl font-semibold text-purple-600">
+          <h2 className="text-xl font-bold text-purple-600">
             {paidOrders}
           </h2>
         </div>
       </div>
 
-      {/* 🔍 Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm">
-     
+      <div className="bg-white p-4 rounded-xl shadow-sm mb-6 flex flex-col md:flex-row gap-4 items-center">
 
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="border px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="border px-4 py-2 rounded-lg w-full md:w-60 focus:ring-2 focus:ring-blue-500"
         >
           <option value="All">All Status</option>
           <option value="COMPLETE">COMPLETE</option>
           <option value="PENDING">PENDING</option>
+          <option value="CANCELLED">CANCELLED</option>
         </select>
+
       </div>
 
-      {/* Loading */}
-      {loading && (
-        <p className="text-center text-gray-500 mt-10">
-          Loading orders...
-        </p>
-      )}
+      <div className="bg-white rounded-2xl shadow-sm overflow-x-auto">
 
-      {/* Table */}
-      {!loading && (
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          
-          <table className="w-full text-sm text-left">
-            
-            {/* Header */}
-            <thead className="bg-gray-100 text-gray-600">
-              <tr>
-                <th className="p-4">Order ID</th>
-                <th className="p-4">User</th>
-                <th className="p-4">Amount</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Date</th>
-              </tr>
-            </thead>
+        <table className="w-full text-sm min-w-[800px]">
 
-            {/* Body */}
-            <tbody>
-              {filteredOrders.map((order) => (
+          {/* HEAD */}
+          <thead className="bg-gray-100 text-gray-600">
+            <tr>
+              <th className="p-4 text-left">Order ID</th>
+              <th className="p-4 text-left">User</th>
+              <th className="p-4 text-left">Courses</th>
+              <th className="p-4 text-left">Amount</th>
+              <th className="p-4 text-left">Status</th>
+              <th className="p-4 text-left">Date</th>
+            </tr>
+          </thead>
+
+       
+          <tbody>
+
+            {filteredOrders.map((order) => {
+
+              const orderTotal =
+                order.course?.reduce((sum, item) => {
+                  return (
+                    sum +
+                    (item.coursesId?.fee || 0) *
+                      (item.quantity || 1)
+                  );
+                }, 0) || 0;
+
+              return (
                 <tr
                   key={order._id}
                   className="border-t hover:bg-gray-50 transition"
                 >
+
                   <td className="p-4 text-xs text-gray-500">
-                    {order._id.slice(0, 8)}...
+                    {order._id?.slice(0, 8)}...
                   </td>
 
                   <td className="p-4">
-                    {order.user || "N/A"}
+                    <div className="font-medium text-gray-800">
+                      {order.user?.fullName || "N/A"}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {order.user?.email || ""}
+                    </div>
                   </td>
 
-                  <td className="p-4 font-medium text-blue-600">
-                    Rs. {order.totalAmount}
+                  <td className="p-4">
+                    <div className="space-y-1">
+                      {order.course?.map((c, i) => (
+                        <div key={i} className="text-sm">
+                          <p className="font-medium text-gray-700">
+                            {c.coursesId?.title ||
+                              "Deleted Course"}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Qty: {c.quantity}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </td>
 
+                  <td className="p-4 font-semibold text-blue-600">
+                    Rs. {orderTotal}
+                  </td>
+
+                 
                   <td className="p-4">
                     <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        order.status === "Paid"
+                      className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        order.paymentStatus === "COMPLETE"
                           ? "bg-green-100 text-green-600"
-                          : "bg-yellow-100 text-yellow-600"
+                          : order.paymentStatus === "PENDING"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-red-100 text-red-600"
                       }`}
                     >
                       {order.paymentStatus}
                     </span>
                   </td>
 
-                  <td className="p-4 text-gray-400 text-xs">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                  
+                  <td className="p-4 text-xs text-gray-500">
+                    {new Date(
+                      order.createdAt
+                    ).toLocaleDateString()}
                   </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
 
-          {/* Empty */}
-          {filteredOrders.length === 0 && (
-            <p className="text-center text-gray-400 py-6">
-              No orders found
-            </p>
-          )}
-        </div>
-      )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+       
+        {filteredOrders.length === 0 && (
+          <div className="text-center py-10 text-gray-400">
+            No orders found
+          </div>
+        )}
+
+      </div>
     </div>
   );
 };

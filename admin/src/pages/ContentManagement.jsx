@@ -1,54 +1,117 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useState,
+} from "react";
+
 import { MdEditSquare } from "react-icons/md";
+
 import { RiDeleteBin7Fill } from "react-icons/ri";
+
 import { useNavigate } from "react-router-dom";
+
 import { toast } from "react-toastify";
+
 const API = import.meta.env.VITE_API_URL;
 
 
+const Loading = lazy(() =>
+  import("../components/Loading")
+);
+
 const ContentManagement = () => {
   const [courses, setCourses] = useState([]);
+
   const [loading, setLoading] = useState(true);
-  const navigate=useNavigate();
+
+  const navigate = useNavigate();
 
   const deleteCourse = async (id) => {
     try {
-      let res = await fetch(
+    
+      setLoading(true);
+
+      const res = await fetch(
         `${API}/api/v1/course/deleteCourse/${id}`,
         {
           method: "DELETE",
           credentials: "include",
-        },
+        }
       );
 
-      if (res.ok) {
-        res = await res.json();
-        toast.error("Course has been deleted");
-        getAllCourses();
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.warning(
+          data.message ||
+            "Failed to delete course"
+        );
+
+        return;
       }
+
+      toast.success(
+        data.message ||
+          "Course has been deleted"
+      );
+
+      getAllCourses();
     } catch (error) {
-      console.log("Error has been occured at deleteCourses", error);
+      console.log(
+        "Error has been occured at deleteCourses",
+        error
+      );
+
+      toast.warning(
+        "Network error or server not responding"
+      );
+    } finally {
+     
+      setLoading(false);
     }
   };
 
   const getAllCourses = async () => {
     try {
+    
+      setLoading(true);
+
       const res = await fetch(
         `${API}/api/v1/course/getAllCourses`,
         {
           method: "GET",
           credentials: "include",
-        },
+        }
       );
 
       const data = await res.json();
 
-      if (res.ok) {
-        setCourses(data.data);
+      if (!res.ok) {
+        toast.warning(
+          data.message ||
+            "Failed to fetch courses"
+        );
+
+        setCourses([]);
+
+        return;
       }
+
+      setCourses(data.data || []);
     } catch (error) {
-      console.log("Error occurred at getAllCourses", error);
+      console.log(
+        "Error occurred at getAllCourses",
+        error
+      );
+
+      toast.warning(
+        "Network error or server not responding"
+      );
+
+      setCourses([]);
     } finally {
+    
       setLoading(false);
     }
   };
@@ -57,38 +120,74 @@ const ContentManagement = () => {
     getAllCourses();
   }, []);
 
+
+  if (loading) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      {/* Header */}
+   
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
         Course Management
       </h1>
 
-      {/* Card Container */}
       <div className="bg-white rounded-2xl shadow-lg p-6 overflow-hidden">
-        {/* Loading State */}
-        {loading ? (
-          <p className="text-center text-gray-500">Loading courses...</p>
-        ) : courses.length === 0 ? (
-          <p className="text-center text-gray-500">No courses available</p>
+        {courses.length === 0 ? (
+          <p className="text-center text-gray-500">
+            No courses available
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-200 rounded-lg">
-              {/* Table Head */}
+        
               <thead className="bg-gray-800 text-white">
                 <tr>
-                  <th className="px-4 py-3 text-left">Title</th>
-                  <th className="px-4 py-3">Image</th>
-                  <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3">Duration</th>
-                  <th className="px-4 py-3">Deadline</th>
-                  <th className="px-4 py-3">Fee</th>
-                  <th className="px-4 py-3">Level</th>
-                  <th className="px-4 py-3">Action</th>
+                  <th className="px-4 py-3 text-left">
+                    Title
+                  </th>
+
+                  <th className="px-4 py-3">
+                    Image
+                  </th>
+
+                  <th className="px-4 py-3">
+                    Description
+                  </th>
+
+                  <th className="px-4 py-3">
+                    Duration
+                  </th>
+
+                  <th className="px-4 py-3">
+                    Deadline
+                  </th>
+
+                  <th className="px-4 py-3">
+                    Fee
+                  </th>
+
+                  <th className="px-4 py-3">
+                    Level
+                  </th>
+
+                  <th className="px-4 py-3">
+                    Action
+                  </th>
                 </tr>
               </thead>
 
-              {/* Table Body */}
+             
               <tbody className="divide-y">
                 {courses.map((item) => (
                   <tr
@@ -101,20 +200,24 @@ const ContentManagement = () => {
 
                     <td className="px-4 py-3 flex justify-center">
                       <img
-                        src={`${API}/image/${item.courseImage}`}
+                        src={item.thumbnail}
                         alt="course"
                         className="w-14 h-14 object-cover rounded-lg border"
                       />
                     </td>
 
                     <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
-                      {item.descriptions}
+                      {item.description}
                     </td>
 
-                    <td className="px-4 py-3 text-center">{item.duration}</td>
+                    <td className="px-4 py-3 text-center">
+                      {item.duration}
+                    </td>
 
                     <td className="px-4 py-3 text-center">
-                      {item.enrollmentDeadline}
+                      {
+                        item.enrollmentDeadline
+                      }
                     </td>
 
                     <td className="px-4 py-3 text-center font-semibold text-indigo-600">
@@ -127,22 +230,30 @@ const ContentManagement = () => {
                       </span>
                     </td>
 
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-4 py-3 text-center flex justify-center gap-3">
                       <button>
                         <MdEditSquare
                           size={24}
                           className="hover:text-green-400 hover:cursor-pointer"
-                          onClick={()=>{
-                           navigate(`/access/editCourse/${item._id}`, { state: item });
+                          onClick={() => {
+                            navigate(
+                              `/access/editCourse/${item._id}`,
+                              {
+                                state: item,
+                              }
+                            );
                           }}
                         />
                       </button>
+
                       <button>
                         <RiDeleteBin7Fill
                           size={24}
                           className="hover:text-red-500 hover:cursor-pointer"
                           onClick={() => {
-                            deleteCourse(item._id);
+                            deleteCourse(
+                              item._id
+                            );
                           }}
                         />
                       </button>

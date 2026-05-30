@@ -1,96 +1,190 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-const API = import.meta.env.VITE_API_URL;
+import React, {
+  lazy,
+  Suspense,
+  useState,
+} from "react";
 
+import {
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
+import { toast } from "react-toastify";
+
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
+
+const Loading = lazy(() =>
+  import("../components/Loading")
+);
 
 const EditCourse = () => {
   const { state } = useLocation();
+
   const navigate = useNavigate();
 
-  // Prefill form with existing data
-  const [courses, setCourses] = useState({
-    title: state?.title || "",
-    descriptions: state?.descriptions || "",
-    syllabus: state?.syllabus || "",
-    duration: state?.duration || "",
-    fee: state?.fee || "",
-    level: state?.level || "",
-    enrollment: state?.enrollmentDeadline || "",
-    prerequisities: state?.prerequisities || "",
-    courseImage: null, // new file only
-  });
+  const [courses, setCourses] =
+    useState({
+      title: state?.title || "",
 
-  const [loading, setLoading] = useState(false);
+      description:
+        state?.description || "",
 
-  // Handle input change
+      syllabus:
+        state?.syllabus || "",
+
+      duration:
+        state?.duration || "",
+
+      fee: state?.fee || "",
+
+      level: state?.level || "",
+
+      enrollment:
+        state?.enrollmentDeadline || "",
+
+      prerequisites:
+        state?.prerequisites || "",
+
+      thumbnail: null,
+    });
+
+  const [loading, setLoading] =
+    useState(false);
+
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files } =
+      e.target;
 
     setCourses({
       ...courses,
-      [name]: files ? files[0] : value,
+      [name]: files
+        ? files[0]
+        : value,
     });
   };
 
-  // Submit update
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
-
-    const data = new FormData();
-    data.append("title", courses.title);
-    data.append("descriptions", courses.descriptions);
-    data.append("syllabus", courses.syllabus);
-    data.append("duration", courses.duration);
-    data.append("fee", courses.fee);
-    data.append("level", courses.level);
-    data.append("enrollmentDeadline", courses.enrollment);
-    data.append("prerequisities", courses.prerequisities);
-
-    // only append image if user selects new one
-    if (courses.courseImage) {
-      data.append("courseImage", courses.courseImage);
-    }
 
     try {
+      // START LOADING
+      setLoading(true);
+
+      const data = new FormData();
+
+      data.append(
+        "title",
+        courses.title
+      );
+
+      data.append(
+        "description",
+        courses.description
+      );
+
+      data.append(
+        "syllabus",
+        courses.syllabus
+      );
+
+      data.append(
+        "duration",
+        courses.duration
+      );
+
+      data.append("fee", courses.fee);
+
+      data.append(
+        "level",
+        courses.level
+      );
+
+      data.append(
+        "enrollmentDeadline",
+        courses.enrollment
+      );
+
+      data.append(
+        "prerequisities",
+        courses.prerequisities
+      );
+
+      if (courses.thumbnail) {
+        data.append(
+          "courseImage",
+          courses.thumbnail
+        );
+      }
+
       const res = await fetch(
         `${API}/api/v1/course/updateCourse/${state._id}`,
         {
           method: "PUT",
+
           body: data,
-          credentials:"include"
+
+          credentials: "include",
         }
       );
 
       const result = await res.json();
 
       if (res.ok) {
-        toast.success("Course updated successfully");
-        navigate("/access/content");
+        toast.success(
+          "Course updated successfully"
+        );
+
+        navigate(
+          "/access/content"
+        );
       } else {
         console.log(result);
-        toast.error(result.message || "Update failed");
+
+        toast.error(
+          result.message ||
+            "Update failed"
+        );
       }
     } catch (error) {
-      console.log("Update error:", error);
+      console.log(
+        "Update error:",
+        error
+      );
+
       toast.error("Error occured");
     } finally {
+
       setLoading(false);
     }
   };
 
+
+  if (loading) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
-        
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Edit Course
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
           <input
             name="title"
             value={courses.title}
@@ -100,8 +194,10 @@ const EditCourse = () => {
           />
 
           <input
-            name="descriptions"
-            value={courses.descriptions}
+            name="description"
+            value={
+              courses.description
+            }
             onChange={handleChange}
             placeholder="Description"
             className="w-full border p-2 rounded"
@@ -150,25 +246,28 @@ const EditCourse = () => {
 
           <input
             name="prerequisities"
-            value={courses.prerequisities}
+            value={
+              courses.prerequisities
+            }
             onChange={handleChange}
             placeholder="Prerequisites"
             className="w-full border p-2 rounded"
           />
 
-          {/* Current Image Preview */}
-          {state?.courseImage && (
+          {state?.thumbnail && (
             <div>
-              <p className="text-sm text-gray-500 mb-1">Current Image</p>
+              <p className="text-sm text-gray-500 mb-1">
+                Current Image
+              </p>
+
               <img
-                src={`${API}/image/${state.courseImage}`}
+                src={state.thumbnail}
                 alt="course"
                 className="w-24 h-24 object-cover rounded border"
               />
             </div>
           )}
 
-          {/* Upload New Image */}
           <input
             name="courseImage"
             type="file"
@@ -179,11 +278,10 @@ const EditCourse = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition disabled:opacity-50"
           >
-            {loading ? "Updating..." : "Update Course"}
+            Update Course
           </button>
-
         </form>
       </div>
     </div>

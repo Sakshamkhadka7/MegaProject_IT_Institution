@@ -9,6 +9,8 @@ import "swiper/css/pagination";
 import { toast } from "react-toastify";
 
 const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
+
 
 //  Memoized card to prevent unnecessary re-renders
 const ReviewCard = memo(({ rev }) => {
@@ -16,7 +18,7 @@ const ReviewCard = memo(({ rev }) => {
     <div className="relative w-full h-56 rounded-xl overflow-hidden shadow-md group">
 
       <img
-        src={`${API}/image/${rev.photo}`}
+        src={rev.photo}
         alt="review"
         loading="lazy"
         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"

@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
+
+const Loading = lazy(() => import("../components/Loading"));
 
 const AddInstructor = () => {
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -18,14 +23,8 @@ const AddInstructor = () => {
   });
 
   const validateForm = () => {
-    const {
-      fullName,
-      email,
-      password,
-      qualification,
-      phone,
-      avatar,
-    } = formData;
+    const { fullName, email, password, qualification, phone, avatar } =
+      formData;
 
     if (!fullName.trim()) {
       toast.error("Full name is required");
@@ -33,9 +32,7 @@ const AddInstructor = () => {
     }
 
     if (fullName.trim().length < 3) {
-      toast.error(
-        "Full name must be at least 3 characters"
-      );
+      toast.error("Full name must be at least 3 characters");
       return false;
     }
 
@@ -59,11 +56,8 @@ const AddInstructor = () => {
       return false;
     }
 
-    // EXACTLY 10 digits
     if (!/^\d{10}$/.test(phone)) {
-      toast.error(
-        "Phone number must contain exactly 10 digits"
-      );
+      toast.error("Phone number must contain exactly 10 digits");
       return false;
     }
 
@@ -90,72 +84,71 @@ const AddInstructor = () => {
     if (!validateForm()) return;
 
     try {
+      setLoading(true);
+
       const data = new FormData();
 
       data.append("fullName", formData.fullName);
       data.append("email", formData.email);
       data.append("password", formData.password);
       data.append("phone", formData.phone);
-      data.append(
-        "qualification",
-        formData.qualification
-      );
+      data.append("qualification", formData.qualification);
       data.append("avatar", formData.avatar);
 
-      const res = await fetch(
-        `${API}/api/v1/student/addInstructor`,
-        {
-          method: "POST",
-          body: data,
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`${API}/api/v1/student/addInstructor`, {
+        method: "POST",
+        body: data,
+        credentials: "include",
+      });
 
       const result = await res.json();
 
-      if (res.ok) {
-        toast.success(
-          result.message ||
-            "Instructor added successfully"
-        );
+      if (!res.ok) {
+        toast.warning(result.message || "Failed to add instructor");
 
-        // RESET FORM
-        setFormData({
-          fullName: "",
-          email: "",
-          password: "",
-          qualification: "",
-          phone: "",
-          avatar: null,
-        });
-
-        navigate("/access/user");
-      } else {
-        toast.error(
-          result.message || "Failed to add instructor"
-        );
+        return;
       }
-    } catch (error) {
-      console.log(
-        "Error occurred at AddInstructor frontend",
-        error
-      );
 
-      toast.error("Something went wrong");
+      toast.success(result.message || "Instructor added successfully");
+
+      setFormData({
+        fullName: "",
+        email: "",
+        password: "",
+        qualification: "",
+        phone: "",
+        avatar: null,
+      });
+
+      navigate("/access/user");
+    } catch (error) {
+      console.log("Error occurred at AddInstructor frontend", error);
+
+      toast.warning("Network error or server not responding");
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="flex flex-col justify-center items-center w-[480px] min-h-[650px] m-auto p-10 shadow-2xl mt-6 mb-10 rounded-2xl bg-white">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full space-y-4"
-      >
-        {/* FULL NAME */}
+      <form onSubmit={handleSubmit} className="w-full space-y-4">
         <div className="flex flex-col space-y-2">
-          <label className="text-lg font-semibold">
-            Full Name
-          </label>
+          <label className="text-lg font-semibold">Full Name</label>
 
           <input
             value={formData.fullName}
@@ -167,11 +160,8 @@ const AddInstructor = () => {
           />
         </div>
 
-        {/* EMAIL */}
         <div className="flex flex-col space-y-2">
-          <label className="text-lg font-semibold">
-            Email
-          </label>
+          <label className="text-lg font-semibold">Email</label>
 
           <input
             value={formData.email}
@@ -183,11 +173,8 @@ const AddInstructor = () => {
           />
         </div>
 
-        {/* PASSWORD */}
         <div className="flex flex-col space-y-2">
-          <label className="text-lg font-semibold">
-            Password
-          </label>
+          <label className="text-lg font-semibold">Password</label>
 
           <input
             value={formData.password}
@@ -199,11 +186,8 @@ const AddInstructor = () => {
           />
         </div>
 
-        {/* QUALIFICATION */}
         <div className="flex flex-col space-y-2">
-          <label className="text-lg font-semibold">
-            Qualification
-          </label>
+          <label className="text-lg font-semibold">Qualification</label>
 
           <input
             value={formData.qualification}
@@ -215,11 +199,8 @@ const AddInstructor = () => {
           />
         </div>
 
-        {/* PHONE */}
         <div className="flex flex-col space-y-2">
-          <label className="text-lg font-semibold">
-            Phone
-          </label>
+          <label className="text-lg font-semibold">Phone</label>
 
           <input
             value={formData.phone}
@@ -231,7 +212,6 @@ const AddInstructor = () => {
           />
         </div>
 
-        {/* AVATAR */}
         <div className="flex flex-col space-y-2">
           <label className="text-lg font-semibold">
             Upload Profile Picture
@@ -246,11 +226,11 @@ const AddInstructor = () => {
           />
         </div>
 
-        {/* BUTTON */}
         <div className="pt-2">
           <button
             type="submit"
-            className="w-full py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50"
           >
             Add Instructor
           </button>

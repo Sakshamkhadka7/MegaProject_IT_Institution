@@ -2,23 +2,33 @@ import Review from "../models/review.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 export const createReview = asyncHandler(async (req, res) => {
   const user = req.user._id;
   const { course, rating, comment } = req.body;
 
-  const photo = req.file.filename;
-
   if (!user || !course || !rating || !comment) {
     throw new ApiError(403, "All fields are madatory");
   }
 
+  let photo = null;
+
+  if (req.file) {
+    const uploadedImage = await uploadToCloudinary(
+      req.file.buffer,
+      "review-images",
+    );
+
+    photo = uploadedImage.secure_url;
+  }
+
   const review = await Review.create({
-    user: user,
-    course: course,
-    rating: rating,
-    comment: comment,
-    photo: photo,
+    user,
+    course,
+    rating,
+    comment,
+    photo,
   });
 
   return res

@@ -1,9 +1,23 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  Suspense,
+  lazy,
+} from "react";
+
 import { FaArrowCircleRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = "http://localhost:3001";
+// const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+
+
+
+const Loading = lazy(() =>
+  import("../components/Loading")
+);
 
 const CourseCard = ({ course }) => {
   const navigate = useNavigate();
@@ -13,10 +27,10 @@ const CourseCard = ({ course }) => {
   return (
     <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
 
-      {/* IMAGE */}
+   
       <div className="relative overflow-hidden">
         <img
-          src={`${API}/image/${course.courseImage}`}
+          src={course.thumbnail}
           alt={course.title}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -26,7 +40,6 @@ const CourseCard = ({ course }) => {
         </span>
       </div>
 
-      {/* CONTENT */}
       <div className="p-5 space-y-3">
 
         <h2 className="font-bold text-lg text-gray-800 line-clamp-1">
@@ -37,13 +50,13 @@ const CourseCard = ({ course }) => {
           {course.descriptions}
         </p>
 
-        {/* INFO GRID */}
+       
         <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
           <p>⏳ {course.duration}</p>
           <p>💰 Rs {course.fee}</p>
         </div>
 
-        {/* BUTTON */}
+   
         <button
           onClick={() =>
             navigate(`/access/submission/${course._id}`, {
@@ -92,15 +105,22 @@ const Course = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh] text-gray-500">
-        Loading your courses...
-      </div>
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center min-h-[60vh] text-gray-500">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
     );
   }
 
   return (
     <div className="w-full">
-      {/* HEADER */}
+
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">
           My Learning Courses
@@ -110,7 +130,7 @@ const Course = () => {
         </p>
       </div>
 
-      {/* EMPTY STATE */}
+    
       {courses.length === 0 ? (
         <div className="bg-white p-10 rounded-2xl text-center shadow">
           <h2 className="text-xl font-semibold text-gray-700">
@@ -118,7 +138,6 @@ const Course = () => {
           </h2>
         </div>
       ) : (
-        /* GRID FIXED */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {courses.map((course) => (
             <CourseCard key={course._id} course={course} />

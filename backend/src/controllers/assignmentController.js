@@ -4,19 +4,38 @@ import Course from "../models/course.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiSuccess.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 export const createAssignment = asyncHandler(async (req, res) => {
   const courseId = req.params.id;
   const role = req.user.role;
   const instructorId = req.user._id;
+
   if (role != "Instructor") {
     throw new ApiError(401, "Not authorized to access this");
   }
 
   const { title, description, deadline } = req.body;
-  const fileUrl = req.file.filename;
-  if (!title || !description || !deadline || !fileUrl) {
+
+  if (!title || !description || !deadline) {
     throw new ApiError(401, "All fields are mandatory");
+  }
+
+  let fileUrl = null;
+
+  // ---------------- CLOUDINARY UPLOAD ----------------
+  if (req.file) {
+    const uploadResult = await uploadToCloudinary(
+      req.file.buffer,
+      "assignment-files",
+      "auto"
+    );
+
+    fileUrl = uploadResult.secure_url;
+  }
+
+  if (!fileUrl) {
+    throw new ApiError(401, "File is required");
   }
 
   const assignment = await Assignment.create({
@@ -40,26 +59,38 @@ export const getAssignmentByCourse = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Id couldnot found");
   }
 
-  const assignmentCourse = await Assignment.find({ course: courseId });
+  const course = await Course.findOne({
+    _id: courseId,
+    isDeleted: false,
+  });
 
-  if (!assignmentCourse) {
-    throw new ApiError(401, "Couldnot found a assignment by course");
+  if (!course) {
+    throw new ApiError(404, "Course not found or deleted");
   }
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, "AssignnmentByCourse fetched", assignmentCourse),
-    );
+  const assignmentCourse = await Assignment.find({
+    course: courseId,
+  });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      "AssignmentByCourse fetched",
+      assignmentCourse
+    )
+  );
 });
 
 export const getInstructorAssignment = asyncHandler(async (req, res) => {
-
   const instructorId = req.user._id;
 
-  const courses = await Course.find({ instructor: instructorId });
+  // ONLY ACTIVE COURSES
+  const courses = await Course.find({
+    instructor: instructorId,
+    isDeleted: false,
+  });
 
-  const courseIds = courses.map(c => c._id);
+  const courseIds = courses.map((c) => c._id);
 
   if (!courseIds.length) {
     return res
@@ -68,34 +99,57 @@ export const getInstructorAssignment = asyncHandler(async (req, res) => {
   }
 
   const assignments = await Assignment.find({
-    course: { $in: courseIds }
-  }).populate("course", "title");
+    course: { $in: courseIds },
+  }).populate({
+    path: "course",
+    match: { isDeleted: false },
+    select: "title",
+  });
+
+  // REMOVE NULL COURSES
+  const filteredAssignments = assignments.filter(
+    (assignment) => assignment.course
+  );
 
   return res.status(200).json(
-    new ApiResponse(200, "Assignments fetched", assignments)
+    new ApiResponse(
+      200,
+      "Assignments fetched",
+      filteredAssignments
+    )
   );
 });
 
 export const assignmentSubmission = asyncHandler(async (req, res) => {
   const assignmentId = req.params.id;
-  console.log(req.body);
+
   if (!assignmentId) {
     throw new ApiError(401, "Id couldnot found");
   }
 
-  const { courseId } = req.body;
-  if (!courseId) {
-    throw new ApiError(401, "Id couldnot found");
-  }
-
+  const { courseId, comment } = req.body;
   const studentId = req.user._id;
 
-  if (!studentId) {
+  if (!courseId || !studentId) {
     throw new ApiError(401, "Id couldnot found");
   }
 
-  const { comment } = req.body;
-  const submittedFile = req.file.filename;
+  if (!comment) {
+    throw new ApiError(401, "Comment is required");
+  }
+
+  let submittedFile = null;
+
+  if (req.file) {
+    const uploadResult = await uploadToCloudinary(
+      req.file.buffer,
+      "assignment-submissions",
+      "auto"
+    );
+
+    submittedFile = uploadResult.secure_url;
+  }
+
   if (!submittedFile) {
     throw new ApiError(401, "File is required");
   }
@@ -114,8 +168,8 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
     assignment: assignmentId,
     courses: courseId,
     student: studentId,
-    submittedFile: submittedFile,
-    comment: comment,
+    submittedFile,
+    comment,
   });
 
   return res
@@ -124,23 +178,37 @@ export const assignmentSubmission = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         "Assignment submitted successfully",
-        assignmentSubmission,
-      ),
+        assignmentSubmission
+      )
     );
 });
 
 export const getSubmittedAssignments = asyncHandler(async (req, res) => {
   const studentId = req.user._id;
+
   const assignment = await AssignmentSubmission.find({
     student: studentId,
-  }).populate("assignment");
-  if (assignment.length == 0) {
-    throw new ApiError(401, "No assignment has been submitted");
-  }
+  })
+    .populate({
+      path: "courses",
+      match: {
+        isDeleted: false,
+      },
+    })
+    .populate("assignment");
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Submitted assignment fetched", assignment));
+  // REMOVE NULL COURSES
+  const filteredAssignments = assignment.filter(
+    (item) => item.courses
+  );
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      "Submitted assignment fetched",
+      filteredAssignments
+    )
+  );
 });
 
 export const deleteAssignment = asyncHandler(async (req, res) => {
@@ -194,46 +262,54 @@ export const deleteAssignment = asyncHandler(async (req, res) => {
 //   },
 // );
 
-export const SubmittedAssignmentForInstructor = asyncHandler(async (req, res) => {
-  const instructorId = req.user._id;
+export const SubmittedAssignmentForInstructor = asyncHandler(
+  async (req, res) => {
+    const instructorId = req.user._id;
 
-  // 1. Get instructor courses (only active ones if needed)
-  const courses = await Course.find({
-    instructor: instructorId,
-  });
-  
-  const courseIds = courses.map((course) => course._id);
+    // ONLY ACTIVE COURSES
+    const courses = await Course.find({
+      instructor: instructorId,
+      isDeleted: false,
+    });
 
-  if (!courseIds.length) {
+    const courseIds = courses.map((course) => course._id);
+
+    if (!courseIds.length) {
+      return res.status(200).json(
+        new ApiResponse(200, "No courses found", [])
+      );
+    }
+
+    const submission = await AssignmentSubmission.find({
+      courses: { $in: courseIds },
+    })
+      .populate({
+        path: "student",
+        match: { isActive: true },
+      })
+      .populate({
+        path: "courses",
+        match: { isDeleted: false },
+      })
+      .populate("assignment");
+
+    // REMOVE INVALID DATA
+    const filteredSubmission = submission.filter(
+      (item) =>
+        item.student &&
+        item.courses &&
+        item.assignment
+    );
+
     return res.status(200).json(
-      new ApiResponse(200, "No courses found", [])
+      new ApiResponse(
+        200,
+        "Assignment fetched",
+        filteredSubmission
+      )
     );
   }
-
-  // 2. Fetch submissions
-  const submission = await AssignmentSubmission.find({
-    courses: { $in: courseIds },
-  })
-    .populate({
-      path: "student",
-      match: { isActive: true }, // soft delete filter
-    })
-    .populate("courses")
-    .populate("assignment");
-
-  // 3. IMPORTANT: remove invalid records safely
-  const filteredSubmission = submission.filter(
-    (item) =>
-      item.student && // removes soft-deleted users
-      item.assignment &&
-      item.courses
-  );
-
-  return res.status(200).json(
-    new ApiResponse(200, "Assignment fetched", filteredSubmission)
-  );
-});
-
+);
 export const instructorFeedBack = asyncHandler(async (req, res) => {
   const submissionId = req.params.id;
   const { feedback, score } = req.body;

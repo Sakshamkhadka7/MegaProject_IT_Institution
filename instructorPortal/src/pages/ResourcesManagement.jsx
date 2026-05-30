@@ -1,9 +1,19 @@
-import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  memo,
+  useCallback,
+  useMemo,
+  lazy,
+} from "react";
 import { MdDeleteSweep } from "react-icons/md";
 import { toast } from "react-toastify";
+const Loading = lazy(() =>
+  import("../components/Loading")
+);
 
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
+// const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
 
 
 const ResourceCard = memo(({ resource, onDelete }) => {
@@ -18,7 +28,7 @@ const ResourceCard = memo(({ resource, onDelete }) => {
       <div className="mt-4 flex flex-col gap-2">
         {resource.fileUrl && (
           <a
-            href={`${API}/image/${resource.fileUrl}`}
+            href={resource.fileUrl}
             target="_blank"
             rel="noreferrer"
             className="text-blue-600 text-sm hover:underline"
@@ -56,88 +66,91 @@ const ResourcesManagement = () => {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(false);
 
-const getCourses = useCallback(async () => {
-  try {
-    setLoading(true);
+  const getCourses = useCallback(async () => {
+    try {
+      setLoading(true);
 
-    const res = await fetch(`${API}/api/v1/course/getAllCourses`, {
-      method: "GET",
-      credentials: "include",
-    });
-
-    const data = await res.json().catch(() => null);
-
-    if (res.ok) {
-      setCourses(data?.data || []);
-    } else {
-      toast.error(data?.message || "Failed to fetch courses");
-    }
-  } catch (error) {
-    console.log("Error fetching courses:", error);
-    toast.error("Network error while fetching courses");
-  } finally {
-    setLoading(false);
-  }
-}, []);
-
- const getResources = useCallback(async (courseId) => { 
-  if (!courseId) return;
-
-  try {
-    setLoading(true);
-
-    const res = await fetch(
-      `${API}/api/v1/resources/getResources/${courseId}`,
-      {
+      const res = await fetch(`${API}/api/v1/course/getInstructorCourse`, {
         method: "GET",
         credentials: "include",
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok) {
+        setCourses(data?.data || []);
+      } else {
+        toast.error(data?.message || "Failed to fetch courses");
       }
-    );
-
-    const data = await res.json()
-
-    if (res.ok) {
-      setResources(data?.data || []);
-    } else {
-      console.log("API Error:", data?.message);
-      toast.error(data?.message || "Failed to fetch resources");
-      setResources([]);
+    } catch (error) {
+      console.log("Error fetching courses:", error);
+      toast.error("Network error while fetching courses");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.log("Error fetching resources:", error);
-    toast.error("Network error while fetching resources");
-    setResources([]);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  }, []);
 
- const deleteResources = useCallback(async (id) => {
-  try {
-    const res = await fetch(
-      `${API}/api/v1/resources/deleteResources/${id}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-      }
-    );
+  const getResources = useCallback(async (courseId) => {
+    if (!courseId) return;
 
-    const data = await res.json()
+    try {
+      setLoading(true);
 
-    if (res.ok) {
-      toast.success(data?.message || "Resource deleted successfully");
-
-      setResources((prev) =>
-        prev.filter((r) => r._id !== id)
+      const res = await fetch(
+        `${API}/api/v1/resources/getResources/${courseId}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
       );
-    } else {
-      toast.error(data?.message || "Failed to delete resource");
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setResources(data?.data || []);
+      } else {
+        toast.error(data?.message || "Failed to fetch resources");
+        setResources([]);
+      }
+    } catch (error) {
+      console.log("Error fetching resources:", error);
+      toast.error("Network error while fetching resources");
+      setResources([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.log("Delete resource error:", error);
-    toast.error("Network error while deleting resource");
-  }
-}, []);
+  }, []);
+
+  const deleteResources = useCallback(async (id) => {
+    try {
+      const res = await fetch(
+        `${API}/api/v1/resources/deleteResources/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(
+          data?.message || "Resource deleted successfully"
+        );
+
+        setResources((prev) =>
+          prev.filter((r) => r._id !== id)
+        );
+      } else {
+        toast.error(
+          data?.message || "Failed to delete resource"
+        );
+      }
+    } catch (error) {
+      console.log("Delete resource error:", error);
+      toast.error("Network error while deleting resource");
+    }
+  }, []);
 
   useEffect(() => {
     getCourses();
@@ -148,13 +161,13 @@ const getCourses = useCallback(async () => {
       const courseId = e.target.value;
       setSelectedCourse(courseId);
 
-      setResources([]); // reset UI immediately
+      setResources([]);
 
       if (courseId) {
         getResources(courseId);
       }
     },
-    [getResources],
+    [getResources]
   );
 
   const resourceList = useMemo(() => {
@@ -166,6 +179,15 @@ const getCourses = useCallback(async () => {
       />
     ));
   }, [resources, deleteResources]);
+
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loading />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -190,8 +212,6 @@ const getCourses = useCallback(async () => {
         <p className="font-bold text-xl mt-10">
           Select a course to view resources
         </p>
-
-        {loading && <p className="text-gray-500">Loading resources...</p>}
 
         {!loading && selectedCourse && resources.length === 0 && (
           <div className="bg-white p-6 rounded-xl shadow text-center text-gray-500">

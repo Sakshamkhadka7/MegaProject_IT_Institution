@@ -11,13 +11,18 @@ import {
   SubmittedAssignmentForInstructor,
 } from "../controllers/assignmentController.js";
 import upload from "../middleware/upload.js";
+import uploadCloudinary from "../middleware/uploadMiddleware.js";
+
+
+
+
 
 const assigmentRouter = express.Router();
 
 assigmentRouter.post(
   "/createAssignment/:id",
   userMiddleware,
-  upload.single("fileUrl"),
+  uploadCloudinary.single("fileUrl"),
   createAssignment,
 );
 assigmentRouter.get("/getCourse/:id", getAssignmentByCourse);
@@ -25,7 +30,7 @@ assigmentRouter.get("/getInstructorAssignment",userMiddleware,getInstructorAssig
 assigmentRouter.post(
   "/assignmentSubmission/:id",
   userMiddleware,
-  upload.single("submittedFile"),
+  uploadCloudinary.single("submittedFile"),
   assignmentSubmission,
 );
 assigmentRouter.get("/getSubmittedAssigment", userMiddleware, getSubmittedAssignments);

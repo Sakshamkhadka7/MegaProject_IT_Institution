@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { FaFilePdf, FaBriefcase, FaBuilding } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-// const API = import.meta.env.VITE_API_URL;
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+// const API = "http://localhost:3001";
 
 
 

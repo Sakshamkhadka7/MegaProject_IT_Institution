@@ -1,15 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = "http://localhost:3001";
+// const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL;
+
+
+const Loading = React.lazy(() =>
+  import("../components/Loading")
+);
 
 const Order = () => {
   const [order, setOrder] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
   const getOrder = async () => {
     try {
+      setLoading(true);
+
       const res = await fetch(`${API}/api/v1/order/getMyOrder`, {
         method: "GET",
         credentials: "include",
@@ -20,22 +30,43 @@ const Order = () => {
       if (res.ok) {
         setOrder(data.data || []);
       } else {
-        toast.warning(data.message || "Failed to fetch orders");
+        toast.warning(
+          data.message || "Failed to fetch orders"
+        );
       }
     } catch (error) {
       console.log("Error fetching orders:", error);
-
       toast.error("Server error while fetching orders");
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     getOrder();
   }, []);
 
+ 
+  if (loading) {
+    return (
+      <Suspense
+        fallback={
+          <div className="text-center text-gray-500 mt-10">
+            Loading...
+          </div>
+        }
+      >
+        <Loading />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">My Orders</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">
+          My Orders
+        </h1>
 
         {order.length > 0 ? (
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -44,7 +75,7 @@ const Order = () => {
                 key={item._id}
                 className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden"
               >
-                {/* HEADER */}
+        
                 <div className="p-5 border-b">
                   <div className="flex justify-between items-center">
                     <h2 className="font-semibold text-gray-800">
@@ -56,8 +87,8 @@ const Order = () => {
                         item.paymentStatus === "COMPLETE"
                           ? "bg-green-100 text-green-700"
                           : item.paymentStatus === "PENDING"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-red-100 text-red-700"
                       }`}
                     >
                       {item.paymentStatus}
@@ -67,30 +98,30 @@ const Order = () => {
                   <div className="mt-3 text-sm text-gray-500 space-y-1">
                     <p>Payment: {item.paymentMethod}</p>
                     <p>
-                      Ordered: {new Date(item.createdAt).toLocaleDateString()}
+                      Ordered:{" "}
+                      {new Date(
+                        item.createdAt
+                      ).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
 
-                {/* COURSES */}
+         
                 <div className="p-5 space-y-4">
                   {item.course?.map((cour) => (
                     <div
                       key={cour._id}
                       className="flex gap-4 bg-gray-50 rounded-xl p-3"
                     >
-                      {/* IMAGE */}
                       <img
                         src={
-                          cour.coursesId?.courseImage
-                            ? `${API}/image/${cour.coursesId.courseImage}`
-                            : "https://via.placeholder.com/100"
+                          cour.coursesId?.thumbnail ||
+                          "https://via.placeholder.com/100"
                         }
                         alt=""
                         className="w-20 h-20 rounded-lg object-cover"
                       />
 
-                      {/* INFO */}
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-800">
                           {cour.coursesId?.title}
@@ -100,18 +131,16 @@ const Order = () => {
                           Quantity: {cour.quantity}
                         </p>
 
-                        {/* BUTTON */}
                         <button
-                          disabled={item.paymentStatus !== "COMPLETE"}
+                          disabled={
+                            item.paymentStatus !== "COMPLETE"
+                          }
                           onClick={() =>
                             navigate(
                               `/access/getOrderCourse/${cour.coursesId._id}`,
                               {
-                                state: {
-                                  cour,
-                                  item,
-                                },
-                              },
+                                state: { cour, item },
+                              }
                             )
                           }
                           className={`mt-4 px-4 py-2 rounded-lg text-sm font-medium transition ${
@@ -127,17 +156,22 @@ const Order = () => {
                       </div>
                     </div>
                   ))}
+
                   <button
-                    disabled={item.paymentStatus === "COMPLETE"}
+                    disabled={
+                      item.paymentStatus === "COMPLETE"
+                    }
                     onClick={() => {
                       if (item.paymentStatus === "COMPLETE") {
-                        toast.info("This order is already paid");
+                        toast.info(
+                          "This order is already paid"
+                        );
                         return;
                       }
 
                       navigate("/access/payment", {
                         state: {
-                          orderId: item._id,
+                          order: item,
                           course: item.course,
                         },
                       });
@@ -148,7 +182,9 @@ const Order = () => {
                         : "bg-green-600 hover:bg-green-700"
                     }`}
                   >
-                    {item.paymentStatus === "COMPLETE" ? "Paid" : "Payment"}
+                    {item.paymentStatus === "COMPLETE"
+                      ? "Paid"
+                      : "Payment"}
                   </button>
                 </div>
               </div>
